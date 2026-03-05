@@ -1,0 +1,75 @@
+{
+    "name": "legacycommunitylauncher",
+    "version": "0.1.0",
+    "description": "Multi-platform launcher for Minecraft Legacy Console Edition forks.",
+    "keywords": [
+        "Minecraft",
+        "LCE",
+        "Minecraft",
+        "Launcher",
+        "Legacy",
+        "Legacy",
+        "Launcher"
+    ],
+    "homepage": "https://git.huckle.dev/TheHuckle/LegacyCommunityLauncher",
+    "repository": {
+        "type": "git",
+        "url": "https://git.huckle.dev/TheHuckle/LegacyCommunityLauncher.git"
+    },
+    "license": "GPL-3.0-only",
+    "author": "TheHuckle",
+    "contributors": [
+        {
+            "name": "TheHuckle",
+            "email": "crazyh.dev@gmail.com",
+            "url": "https://huckle.dev/"
+        }
+    ],
+    "type": "commonjs",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "electron .",
+        "dist": "electron-builder --linux AppImage",
+        "dist:win": "electron-builder --win nsis"
+    },
+    "devDependencies": {
+        "electron": "^40.7.0",
+        "electron-builder": "^26.8.1"
+    },
+    "build": {
+        "appId": "dev.huckle.legacycommunitylauncher",
+        "productName": "LC Launcher",
+        "files": [
+            "src/**/*",
+            "package.json"
+        ],
+        "directories": {
+            "buildResources": "assets"
+        },
+        "mac": {
+            "target": [
+                "dmg"
+            ],
+            "icon": "assets/icon.icns",
+            "minimumSystemVersion": "10.13.0"
+        },
+        "win": {
+            "target": [
+                {
+                    "target": "portable",
+                    "arch": [
+                        "x64"
+                    ]
+                }
+            ],
+            "icon": "assets/icon.png"
+        },
+        "linux": {
+            "target": [
+                "AppImage"
+            ],
+            "icon": "assets/icon.png"
+        }
+    }
+}
