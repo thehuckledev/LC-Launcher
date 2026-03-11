@@ -50,3 +50,7 @@ async function setupSurround() {
 
 await setupSurround();
 audioElement.play();
+
+setTimeout(() => {
+    document.querySelector("#main").classList.remove("open-anim");
+}, 2000);

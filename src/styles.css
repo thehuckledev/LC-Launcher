@@ -1,3 +1,7 @@
+* {
+	user-select: none;
+}
+
 :root {
     --btn-size: 30pt;
 }
@@ -9,6 +13,7 @@
 
 #window-background.animated>div {
 	filter: blur(20px) brightness(0%);
+	background-color: black;
 }
 
 #window-background.animated>div {
@@ -57,19 +62,25 @@
     }
 }
 
-#launch-options-bar, #launch-options-bar > * {
+.open-anim #top-bar > #main-actions > *, .open-anim #top-bar > #accounts, .open-anim #bottom-bar > #launch-options-bar > *:not(#main-actions) {
+	opacity: 0;
+	animation: fade-expand-extras .3s linear 1.6s forwards;
+}
+
+#launch-options-bar, #launch-options-bar > *, #top-bar, #top-bar > * {
 	display: flex;
 	flex-direction: row;
+	align-items: center;
 	gap: 5px;
 	width: 220px;
 }
 
-#launch-options-bar {
-	width: calc(100% - 120px);
+#launch-options-bar, #top-bar {
+	width: calc(100vw - 80px);
 	justify-content: space-between;
 }
 
-#main-actions {
+#launch-options-bar #main-actions {
 	width: 340px;
 }
 
@@ -129,14 +140,95 @@
 	}
 }
 
-#instance-icon {
-
+#instances, #accounts, #stats {
+	gap: 20px;
+	padding: 8px;
+	border-radius: 10px;
+	border: transparent 1px solid;
+	transition: border .2s ease-in-out, background .2s ease-in-out, transform .2s ease-in-out;
 }
 
-#instance-details {
+#instances:hover, #accounts:hover {
+	background: #ffffff20 !important;
+	transform: scale(1.01) !important;
+}
+
+#instances:active, #accounts:active {
+	background: #ffffff34 !important;
+	border: #ffffff32 1px solid !important;
+	transform: scale(0.98) !important;
+}
+
+#instances::after, #accounts::after {
+  content: "";
+  position: relative;
+  right: 6px;
+  top: -6px;
+
+  width: 11px;
+  height: 8px;
+
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+
+  transform: translateY(-50%) rotate(45deg);
+  filter: drop-shadow(1px 0px #000A)
+  			drop-shadow(2px 0px #000A);
+}
+
+#instance-icon, #account-icon {
+	height: 35px;
+	width: 35px;
+}
+
+#instance-details, #account-details, #stats {
+	font: 12px 'Minecraftia', sans-serif;
+	text-shadow: 2px 2px #000A;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
+	justify-content: center;
+	gap: 3px;
+	max-width: 100%;
+	width: 100%;
+	min-width: 0;
+}
+
+#stats {
+	max-width: unset;
+	width: 220px;
+	min-width: unset;
+	align-items: flex-end;
+}
+
+#instance-details h1, #account-details h1, #instance-details h2, #account-details h2, #stats h1, #stats h2 {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#instance-details h2, #account-details h2, #stats h2 {
+	font-size: 10px;
+	color: #e3e3e3;
+}
+
+#top-bar > #main-actions {
+	justify-content: flex-end;
+}
+
+#top-bar > #main-actions > * {
+	width: 40px;
+}
+
+@keyframes fade-expand-extras {
+	0% {
+		transform: scale(0.93);
+		opacity: 0;
+	}
+
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
 }
 
 /* Taken from https://codepen.io/joexmdq/pen/EOMLzg. All credit given. Modified slightly */
