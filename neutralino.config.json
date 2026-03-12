@@ -1,0 +1,94 @@
+{
+    "$schema": "https://raw.githubusercontent.com/neutralinojs/neutralinojs/main/schemas/neutralino.config.schema.json",
+    
+    "applicationId": "dev.huckle.legacycommunitylauncher",
+    "applicationName": "LC Launcher",
+    "applicationIcon": "./assets/icon.png",
+    "version": "0.1.0",
+    "author": "TheHuckle",
+    "description": "Multi-platform launcher for Minecraft Legacy Console Edition forks.",
+    "copyright": "© 2026 TheHuckle. All rights reserved.",
+
+    "defaultMode": "window",
+    "port": 0,
+    "documentRoot": "/src/",
+    "url": "/",
+
+    "enableServer": true,
+    "enableNativeAPI": true,
+    "enableExtensions": true,
+    "tokenSecurity": "one-time",
+    "logging": {
+        "enabled": false,
+        "writeToLogFile": false
+    },
+    "permissions": [
+        "filesystem",
+        "os",
+        "window",
+        "resources",
+        "updater"
+    ],
+    "modes": {
+        "window": {
+            "title": "LC Launcher",
+            "icon": "/src/assets/icon.png",
+            "width": 1000,
+            "height": 600,
+            "minWidth": 500,
+            "minHeight": 800,
+            "center": true,
+            "fullScreen": false,
+            "alwaysOnTop": false,
+            "enableInspector": true,
+            "openInspectorOnStartup": true,
+            "transparent": true,
+            "borderless": true,
+            "maximize": false,
+            "hidden": true,
+            "resizable": false,
+            "exitProcessOnClose": true,
+            "injectGlobals": true
+        }
+    },
+
+    "cli": {
+        "binaryName": "LC Launcher",
+        "binaryVersion": "6.4.0",
+        "resourcesPath": "/src/",
+        "clientLibrary": "/src/vendor/neutralino/neutralino.mjs",
+        "clientVersion": "6.4.0"
+    },
+    "buildScript": {
+        "mac": {
+            "architecture": [
+                "x64",
+                "arm64"
+            ],
+            "minimumOS": "10.13.0",
+            "appName": "LC Launcher",
+            "appBundleName": "LC Launcher",
+            "appIdentifier": "dev.huckle.legacycommunitylauncher",
+            "appIcon": "../assets/icon_padding_512x512_512x512.icns",
+            "appCredits": "© 2026 TheHuckle. All rights reserved."
+        },
+        "win": {
+            "architecture": [
+                "x64"
+            ],
+            "appName": "LC Launcher",
+            "appIcon": "../assets/icon.png"
+        },
+        "linux": {
+            "architecture": [
+                "x64",
+                "arm64"
+            ],
+            "appName": "LC Launcher",
+            "appIcon": "../assets/icon.png",
+            "appPath": "/usr/share/lc_launcher",
+            "appIconPath": "/usr/share/lc_launcher/icon.png",
+            "appIconLocation": "/usr/share/lc_launcher/icon.png"
+        }
+    }
+}

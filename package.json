@@ -25,17 +25,13 @@
             "url": "https://huckle.dev/"
         }
     ],
-    "type": "commonjs",
-    "main": "index.js",
+    "private": true,
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "electron .",
-        "dist": "electron-builder --linux AppImage",
-        "dist:win": "electron-builder --win nsis"
-    },
-    "devDependencies": {
-        "electron": "^40.7.0",
-        "electron-builder": "^26.8.1"
+        "dev": "WEBKIT_DISABLE_COMPOSITING_MODE=1 neu run",
+        "build-mac": "sh ./build-scripts/build-mac.sh",
+        "build-linux": "sh ./build-scripts/build-linux.sh",
+        "build-win": "sh ./build-scripts/build-win.sh",
+        "setup": "npm i && neu update"
     },
     "build": {
         "appId": "dev.huckle.legacycommunitylauncher",
@@ -71,6 +67,6 @@
         }
     },
     "dependencies": {
-        "@electron/remote": "^2.1.3"
+        "@neutralinojs/neu": "^11.6.0"
     }
 }

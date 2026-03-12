@@ -1,3 +1,29 @@
+import * as Neutralino from "./vendor/neutralino/neutralino.mjs";
+
+Neutralino.init();
+
+await Neutralino.window.setDraggableRegion('window-title');
+
+(async() => {
+    if (NL_OS !== 'Darwin') return;
+
+    const menu = [
+        {
+            id: 'app', text: 'LC Launcher',
+            menuItems: [
+                { id: 'about', text: 'About LC Launcher' },
+                { id: 'quit', text: 'Quit LC Launcher', shortcut: 'Q' },
+            ]
+        }
+    ];
+
+    await Neutralino.window.setMainMenu(menu);
+    await Neutralino.events.on('mainMenuItemClicked', async (evt) => {
+        if (evt.detail.id == "quit") await Neutralino.app.exit();
+    });
+    console.log("Set Main Menu");
+})();
+
 const audioCtx = new AudioContext();
 const audioElement = new Audio('./assets/music/Snapdragon_-_Therm.m4a'); 
 audioElement.volume = 1;
