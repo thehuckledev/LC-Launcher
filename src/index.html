@@ -8,7 +8,7 @@
 
     <link rel="stylesheet" href="./window/window.css">
     <link rel="stylesheet" href="./styles.css">
-    <script src="http://localhost:53527/__neutralino_globals.js"></script>
+    <script src="http://localhost:50911/__neutralino_globals.js"></script>
 </head>
 
 <body>
@@ -17,7 +17,9 @@
 
     <div id="container">
 
-        <div id="window-background" class="fade animated"><div></div></div>
+        <div id="window-background" class="fade animated">
+            <div></div>
+        </div>
 
         <header id="titlebar">
             <div id="drag-region">
@@ -46,47 +48,65 @@
         </header>
 
         <div id="main" class="open-anim">
-            <div id="top-bar">
-                <div id="accounts">
-                    <img id="account-icon" src="./assets/icons/account.png" draggable="false">
-                    <div id="account-details">
-                        <h1>TheHuckle</h1>
-                        <h2>Offline Account</h2>
+            <div id="options-menu" class="menu">
+                <div id="top-bar">
+                    <div></div>
+                    <div id="main-actions">
+                        <div id="back-button" class="mc-button" onclick="renderMenu('main-menu')">
+                            <div class="title"><img id="back-icon" src="./assets/buttons/close.svg"
+                                    draggable="false"></div>
+                        </div>
                     </div>
                 </div>
-                <div id="main-actions">
-                    <div id="news-button" class="mc-button">
-                        <div class="title"><img id="discover-icon" src="./assets/buttons/news.svg" draggable="false"></div>
-                    </div>
-                    <div id="options-button" class="mc-button">
-                        <div class="title"><img id="servers-icon" src="./assets/buttons/options.svg" draggable="false"></div>
-                    </div>
-                </div>
+                
             </div>
-            <div id="bottom-bar">
-                <img id="main-logo" src="./assets/minecraftlogo.png" draggable="false">
-                <div id="launch-options-bar">
-                    <div id="instances">
-                        <img id="instance-icon" src="./assets/icons/instance.png" draggable="false">
-                        <div id="instance-details">
-                            <h1>Nightly</h1>
-                            <h2>1.10.7</h2>
+            <div id="main-menu" class="show menu">
+                <div id="top-bar">
+                    <div id="accounts">
+                        <img id="account-icon" src="./assets/icons/account.png" draggable="false">
+                        <div id="account-details">
+                            <h1>TheHuckle</h1>
+                            <h2>Offline Account</h2>
                         </div>
                     </div>
                     <div id="main-actions">
-                        <div id="discover-button" class="mc-button">
-                            <div class="title"><img id="discover-icon" src="./assets/buttons/discover.svg" draggable="false"></div>
+                        <div id="news-button" class="mc-button">
+                            <div class="title"><img id="discover-icon" src="./assets/buttons/news.svg"
+                                    draggable="false"></div>
                         </div>
-                        <div id="play-button" class="mc-button">
-                            <div class="title">Play</div>
-                        </div>
-                        <div id="servers-button" class="mc-button">
-                            <div class="title"><img id="servers-icon" src="./assets/buttons/servers.svg" draggable="false"></div>
+                        <div id="options-button" class="mc-button" onclick="renderMenu('options-menu')">
+                            <div class="title"><img id="servers-icon" src="./assets/buttons/options.svg"
+                                    draggable="false"></div>
                         </div>
                     </div>
-                    <div id="stats">
-                        <h1>Playtime</h1>
-                        <h2>32d 1h 30m</h2>
+                </div>
+                <div id="bottom-bar">
+                    <img id="main-logo" src="./assets/minecraftlogo.png" draggable="false">
+                    <div id="launch-options-bar">
+                        <div id="instances">
+                            <img id="instance-icon" src="./assets/icons/instance.png" draggable="false">
+                            <div id="instance-details">
+                                <h1>Nightly</h1>
+                                <h2>1.10.7</h2>
+                            </div>
+                        </div>
+                        <div id="main-actions">
+                            <div id="discover-button" class="mc-button">
+                                <div class="title"><img id="discover-icon" src="./assets/buttons/discover.svg"
+                                        draggable="false"></div>
+                            </div>
+                            <div id="play-button" class="mc-button">
+                                <div class="title">Play</div>
+                            </div>
+                            <div id="servers-button" class="mc-button">
+                                <div class="title"><img id="servers-icon" src="./assets/buttons/servers.svg"
+                                        draggable="false"></div>
+                            </div>
+                        </div>
+                        <div id="stats">
+                            <h1>Playtime</h1>
+                            <h2>32d 1h 30m</h2>
+                        </div>
                     </div>
                 </div>
             </div>
