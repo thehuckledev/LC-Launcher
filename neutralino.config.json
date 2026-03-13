@@ -45,7 +45,7 @@
             "borderless": true,
             "maximize": false,
             "hidden": false,
-            "resizable": false,
+            "resizable": true,
             "useSavedState": false,
             "exitProcessOnClose": true,
             "injectGlobals": true
