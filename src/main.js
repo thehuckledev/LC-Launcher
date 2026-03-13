@@ -63,7 +63,16 @@ await Neutralino.window.setDraggableRegion('window-title');
 })();
 
 const audioCtx = new AudioContext();
-const audioElement = new Audio('./assets/music/Snapdragon_-_Therm.m4a'); 
+const audioFiles = [
+    'Snapdragon_-_Therm.mp3',
+    'Aria_Math_-_C418.mp3',
+    'Far_-_C418.mp3',
+    'Kyoto_-_C418.mp3',
+    'Mutation_-_C418.mp3',
+    'Taswell_-_C418.mp3'
+]; 
+const audioPath = audioFiles[(Math.random()*audioFiles.length)|0];
+const audioElement = new Audio(`./assets/music/${audioPath}`); 
 audioElement.volume = 1;
 audioElement.loop = true;
 
