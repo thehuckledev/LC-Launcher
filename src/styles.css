@@ -1,5 +1,7 @@
 * {
 	user-select: none;
+	-webkit-user-select: none;
+	cursor: default;
 }
 
 :root {
@@ -243,6 +245,7 @@
 	overflow: hidden;
 	white-space: nowrap;
 	user-select: none;
+	-webkit-user-select: none;
 
     font: 12pt 'Minecraftia', sans-serif;
 

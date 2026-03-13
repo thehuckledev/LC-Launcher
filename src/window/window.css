@@ -201,6 +201,7 @@ p {
 
 #window-controls .button {
     user-select: none;
+    -webkit-user-select: none;
 }
 
 #window-controls .button:hover {

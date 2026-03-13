@@ -24,6 +24,44 @@ await Neutralino.window.setDraggableRegion('window-title');
     console.log("Set Main Menu");
 })();
 
+(async() => {
+    // Debug Mode right click for inspect element
+    // Shift + 1 to allow right click
+    let isDebugOn = false;
+    let debugKey = "Digit1";
+    window.addEventListener("keydown", function(e) {
+        if (e.shiftKey && e.code === debugKey && isDebugOn === false) {
+            (async () => {
+                await Neutralino.os.showNotification('Debug Mode', 'You have enabled debug mode until you restart LC Launcher', 'WARNING');
+                isDebugOn = true;
+            })();
+        };
+    });
+    window.addEventListener("contextmenu", function(e) {
+        if (!isDebugOn) e.preventDefault();
+    }, false);
+    console.log("Listening for Debug Keybind");
+
+    // stop annoying scroll bounce
+    function hasScrollableParent(e) {
+        return e.composedPath().some(el => {
+            if (!(el instanceof HTMLElement)) return false;
+
+            const style = getComputedStyle(el);
+            const overflowY = style.overflowY;
+
+            return (
+                (overflowY === 'auto' || overflowY === 'scroll') &&
+                el.scrollHeight > el.clientHeight
+            );
+        });
+    };
+
+    window.addEventListener('wheel', (e) => {
+        if (!hasScrollableParent(e)) e.preventDefault();
+    }, { passive: false });
+})();
+
 const audioCtx = new AudioContext();
 const audioElement = new Audio('./assets/music/Snapdragon_-_Therm.m4a'); 
 audioElement.volume = 1;
@@ -47,15 +85,16 @@ async function setupSurround() {
         orientationZ: -1
     });
 
-    let delayNode = audioCtx.createDelay();
-    delayNode.delayTime.value = 0.2;
+    /*let delayNode = audioCtx.createDelay();
+    delayNode.delayTime.value = 0.2;*/
 
     let feedbackNode = audioCtx.createGain();
     feedbackNode.gain.value = 0.5;
 
-    source.connect(delayNode);
-    delayNode.connect(feedbackNode);
-    feedbackNode.connect(delayNode);
+    //source.connect(delayNode);
+    //delayNode.connect(feedbackNode);
+    source.connect(feedbackNode)
+    //feedbackNode.connect(delayNode);
     
     feedbackNode.connect(panner);
     panner.connect(audioCtx.destination);

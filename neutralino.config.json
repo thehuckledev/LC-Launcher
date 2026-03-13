@@ -16,7 +16,6 @@
 
     "enableServer": true,
     "enableNativeAPI": true,
-    "enableExtensions": true,
     "tokenSecurity": "one-time",
     "logging": {
         "enabled": false,
@@ -35,18 +34,19 @@
             "icon": "/src/assets/icon.png",
             "width": 1000,
             "height": 600,
-            "minWidth": 500,
-            "minHeight": 800,
+            "minWidth": 800,
+            "minHeight": 500,
             "center": true,
             "fullScreen": false,
             "alwaysOnTop": false,
             "enableInspector": true,
-            "openInspectorOnStartup": true,
+            "openInspectorOnStartup": false,
             "transparent": true,
             "borderless": true,
             "maximize": false,
             "hidden": false,
             "resizable": false,
+            "useSavedState": false,
             "exitProcessOnClose": true,
             "injectGlobals": true
         }
