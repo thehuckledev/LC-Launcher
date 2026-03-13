@@ -21,6 +21,12 @@ echo -e "\033[1mNeutralino BuildScript for Linux platform, version ${VERSION}\03
 
 CONF=./neutralino.config.json
 
+if ! command -v jq >/dev/null 2>&1
+then
+    echo -e "\033[31m\033[1mWARNING: JQ not found. Installing..\033[0m"
+    brew install jq || pacman -S jq || sudo apt-get install jq || true
+fi
+
 if [ ! -e "./${CONF}" ]; then
     echo
     echo -e "\033[31m\033[1mERROR: ${CONF} not found.\033[0m"
@@ -177,6 +183,18 @@ for APP_ARCH in "${APP_ARCH_LIST[@]}"; do
         echo "  Running post-processor ..."
         . postproc-linux.sh
     fi
+
+    echo "  Compressing bundle for ${APP_ARCH} ..."
+
+    PUSHED_DIR=$(pwd)
+    cd "./dist/linux_${APP_ARCH}" || exit
+
+    TAR_NAME="${APP_NAME}-linux-${APP_ARCH}.tar.gz"
+    
+    tar -cJf "../${TAR_NAME}" "${APP_NAME}"
+    
+    cd "${PUSHED_DIR}" || exit
+    echo "  Package created: ./dist/${TAR_NAME}"
 
     echo
     echo -e "\033[1mBuild finished.\033[0m"

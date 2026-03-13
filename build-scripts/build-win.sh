@@ -21,6 +21,12 @@ echo -e "\033[1mNeutralino BuildScript for Windows platform, version ${VERSION}\
 
 CONF=./neutralino.config.json
 
+if ! command -v jq >/dev/null 2>&1
+then
+    echo -e "\033[31m\033[1mWARNING: JQ not found. Installing..\033[0m"
+    brew install jq || pacman -S jq || sudo apt-get install jq || true
+fi
+
 if [ ! -e "./${CONF}" ]; then
     echo
     echo -e "\033[31m\033[1mERROR: ${CONF} not found.\033[0m"
@@ -126,6 +132,18 @@ for APP_ARCH in "${APP_ARCH_LIST[@]}"; do
         echo "  Running post-processor ..."
         . postproc-win.sh
     fi
+
+    echo "  Compressing Windows bundle for ${APP_ARCH} ..."
+    
+    PUSHED_DIR=$(pwd)
+    cd "./dist" || exit
+    
+    ZIP_NAME="${APP_NAME%.exe}-win-${APP_ARCH}.zip"
+    
+    zip -9 -rq "${ZIP_NAME}" "win_${APP_ARCH}"
+    
+    cd "${PUSHED_DIR}" || exit
+    echo "  Package created: ./dist/${ZIP_NAME}"
 
     echo
     echo -e "\033[1mBuild finished.\033[0m"

@@ -21,6 +21,12 @@ echo -e "\033[1mNeutralino BuildScript for macOS platform, version ${VERSION}\03
 
 CONF=./neutralino.config.json
 
+if ! command -v jq >/dev/null 2>&1
+then
+    echo -e "\033[31m\033[1mWARNING: JQ not found. Installing..\033[0m"
+    brew install jq || pacman -S jq || sudo apt-get install jq || true
+fi
+
 if [ ! -e "./${CONF}" ]; then
     echo
     echo -e "\033[31m\033[1mERROR: ${CONF} not found.\033[0m"
@@ -149,6 +155,18 @@ for APP_ARCH in "${APP_ARCH_LIST[@]}"; do
       echo "  Clearing Extended Attributes ..."
       find "${APP_DST}" -type f -exec xattr -c {} \;
     fi
+
+    echo "  Compressing bundle for ${APP_ARCH} ..."
+        
+    PUSHED_DIR=$(pwd)
+    cd "./dist/mac_${APP_ARCH}" || exit
+    
+    ZIP_NAME="${APP_NAME}-mac-${APP_ARCH}.zip"
+    
+    zip -9 -ryX "../${ZIP_NAME}" "${APP_NAME}.app"
+    
+    cd "${PUSHED_DIR}" || exit
+    echo "  Package created: ./dist/${ZIP_NAME}"
 
     echo
     echo -e "\033[1mBuild finished, ready to sign and notarize.\033[0m"
