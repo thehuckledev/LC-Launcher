@@ -1,9 +1,12 @@
-import { useState, useEffect } from "preact/hooks";
+import { createContext } from "preact";
+import { useContext, useState, useEffect } from "preact/hooks";
 import Neutralino from "@neutralinojs/lib";
 
 import { defaultSettings } from "../data/defaultSettings.js";
 
-export function useSettings() {
+const SettingsContext = createContext();
+
+export function SettingsProvider({ children }) {
     const [settings, setSettings] = useState({});
 
     async function updateSetting(name, value) {
@@ -17,39 +20,47 @@ export function useSettings() {
         }));
     };
 
-    useEffect(async () => {
-        // load existing setting from neutralino store
-        let keys = [];
+    useEffect(() => {
+        async function load() {
+            let keys = [];
 
-        // why does neutralino not just return empty array bruh
-        try { keys = await Neutralino.storage.getKeys() } // gotta have this at end or imma tweak. jk but i want it ;
-        catch { keys = [] };
+            try { keys = await Neutralino.storage.getKeys(); }
+            catch { keys = []; }
 
-        const loaded = { ...defaultSettings };
+            const loaded = { ...defaultSettings };
 
-        for (const name in defaultSettings) {
-            const key = `settings-${name}`;
+            for (const name in defaultSettings) {
+                const key = `settings-${name}`;
 
-            if (keys.includes(key)) {
-                const value = await Neutralino.storage.getData(key);
-                loaded[name] = value;
-            } else {
-                // use function resolve check
-                let defaultSetting = defaultSettings[name];
-                if (typeof defaultSetting == "function") {
-                    defaultSetting = defaultSetting();
+                if (keys.includes(key)) {
+                    const value = await Neutralino.storage.getData(key);
+                    loaded[name] = value;
+                } else {
+                    let defaultSetting = defaultSettings[name];
+
+                    if (typeof defaultSetting === "function") defaultSetting = defaultSetting();
                     loaded[name] = defaultSetting;
+
+                    await Neutralino.storage.setData(
+                        key,
+                        String(defaultSetting)
+                    );
                 };
-                // write default to storage
-                await Neutralino.storage.setData(
-                    key,
-                    String(defaultSetting)
-                );
             };
+
+            setSettings(loaded);
         };
 
-        setSettings(loaded);
+        load();
     }, []);
 
-    return { settings, updateSetting };
+    return (
+        <SettingsContext.Provider value={{ settings, updateSetting }}>
+            {children}
+        </SettingsContext.Provider>
+    );
+};
+
+export function useSettings() {
+    return useContext(SettingsContext);
 };

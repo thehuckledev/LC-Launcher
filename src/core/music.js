@@ -63,6 +63,7 @@ async function setupSurround() {
     };
     moveSound();
 };
+setupSurround();
 
 let lastIndex = -1;
 function playSong() {
@@ -78,12 +79,13 @@ function playSong() {
 
     showToast(`Now playing: ${audioPath.replace(".mp3", "").replaceAll("_", " ")}`);
 };
+audioElement.addEventListener("ended", () => playSong());
 
 export async function startMusic() {
-    await setupSurround();
     playSong();
+};
 
-    audioElement.addEventListener("ended", () => {
-        playSong();
-    });
+export async function stopMusic() {
+    audioElement.pause();
+    audioElement.currentTime = 0;
 };
