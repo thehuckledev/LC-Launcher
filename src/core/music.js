@@ -18,6 +18,7 @@ const audioFiles = [
 const audioElement = new Audio(); 
 audioElement.volume = 1;
 
+let feedbackNode;
 async function setupSurround() {
     if (audioCtx.state === 'suspended') {
         await audioCtx.resume();
@@ -39,7 +40,7 @@ async function setupSurround() {
     /*let delayNode = audioCtx.createDelay();
     delayNode.delayTime.value = 0.2;*/
 
-    let feedbackNode = audioCtx.createGain();
+    feedbackNode = audioCtx.createGain();
     feedbackNode.gain.value = 0.5;
 
     //source.connect(delayNode);
@@ -88,4 +89,8 @@ export async function startMusic() {
 export async function stopMusic() {
     audioElement.pause();
     audioElement.currentTime = 0;
+};
+
+export function setVolume(vol) {
+    if(feedbackNode) feedbackNode.gain.value = vol;
 };

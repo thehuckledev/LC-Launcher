@@ -1,5 +1,5 @@
 export const defaultSettings = {
-    volume: 50,
+    volume: 80,
     menuMusic: true,
     fullscreen: false,
     instancesDirectory: () => {

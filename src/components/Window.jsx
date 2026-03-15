@@ -3,6 +3,11 @@ import "./Window.css";
 import { useEffect, useState } from "preact/hooks";
 import Neutralino from "@neutralinojs/lib";
 
+import minIcon from "../assets/window/min.png";
+import maxIcon from "../assets/window/max.png";
+import restoreIcon from "../assets/window/restore.png";
+import closeIcon from "../assets/window/close.png";
+
 export default function Window({ title, showClose = true, showMinimize = true, showMaximize = true, backgroundFade = true, backgroundAnimated = true, setMenu, children }) {
     const [openAnim, setOpenAnim] = useState(true);
 
@@ -12,6 +17,30 @@ export default function Window({ title, showClose = true, showMinimize = true, s
     }, []);
     
     useEffect(() => {
+        async function WINDOWS_resizeRatio() {
+            if (NL_OS !== "Windows") return; // fix windows scaling issues. windows is soo odd man
+
+            const displays = await Neutralino.computer.getDisplays();
+            if (displays.length < 1) return; // u dont need this bud!
+            const display = displays[0];
+
+            const screenWidth = display.resolution.width;
+            const screenHeight = display.resolution.height;
+
+            const ratio = 600 / 1000; // 4:3
+
+            const width = Math.round(screenWidth * 0.6);
+            const height = Math.round(width * ratio);
+
+            await Neutralino.window.setSize({
+                width,
+                height,
+                minWidth: width,
+                minHeight: height
+            });
+            await Neutralino.window.center(); // for some reason it only works one time
+        };
+
         async function createMenuBar() {
             if (NL_OS !== 'Darwin') return;
         
@@ -78,6 +107,7 @@ export default function Window({ title, showClose = true, showMinimize = true, s
             createMenuBar();
             preventInspect();
             preventScrollBounce();
+            WINDOWS_resizeRatio();
 
             await Neutralino.window.setDraggableRegion("window-title");
 
@@ -113,22 +143,22 @@ export default function Window({ title, showClose = true, showMinimize = true, s
 
                         {showMinimize &&
                             <div class="button" id="min-button" onClick={() => Neutralino.window.minimize()}>
-                                <img class="icon" src="../assets/window/min.png" draggable={false} />
+                                <img class="icon" src={minIcon} draggable={false} />
                             </div>
                         }
                         {showMaximize &&
                             <div class="button" id="max-button" onClick={() => Neutralino.window.maximize()}>
-                                <img class="icon" src="../assets/window/max.png" draggable={false} />
+                                <img class="icon" src={maxIcon} draggable={false} />
                             </div>
                         }
                         {showMaximize &&
                             <div class="button" id="restore-button" onClick={() => Neutralino.window.unmaximize()}>
-                                <img class="icon" src="../assets/window/restore.png" draggable={false} />
+                                <img class="icon" src={restoreIcon} draggable={false} />
                             </div>
                         }
                         {showClose &&
                             <div class="button" id="close-button" onClick={() => Neutralino.app.exit()}>
-                                <img class="icon" src="../assets/window/close.png" draggable={false} />
+                                <img class="icon" src={closeIcon} draggable={false} />
                             </div>
                         }
 

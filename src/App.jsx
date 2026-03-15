@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "preact/hooks";
+import Neutralino from "@neutralinojs/lib";
 
-import { startMusic, stopMusic } from "./core/music.js";
+import { startMusic, stopMusic, setVolume } from "./core/music.js";
 import { useSettings } from "./utils/SettingsStore.jsx";
 
 import Window from "./components/Window.jsx";
@@ -35,7 +36,18 @@ export default function App() {
 
         if (settings.menuMusic == "true") startMusic();
         else stopMusic();
-    }, [settings]);
+    }, [settings.menuMusic]);
+
+    useEffect(() => {
+        const value = parseInt(settings.volume);
+        if (!Number.isInteger(value)) return;
+        setVolume(value / 100);
+    }, [settings.volume]);
+
+    useEffect(() => {
+        if (settings.fullscreen == "true") Neutralino.window.maximize();
+        else Neutralino.window.unmaximize();
+    }, [settings.fullscreen]);
 
     return (
         <>

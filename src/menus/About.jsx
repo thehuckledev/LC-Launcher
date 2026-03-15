@@ -5,6 +5,9 @@ import Neutralino from "@neutralinojs/lib";
 
 import Button from "../components/Button.jsx";
 
+import closeIcon from "../assets/buttons/close.svg";
+import logo from "../assets/logo.png";
+
 export default function AboutMenu({ setMenu }) {
     return (
         <>
@@ -12,12 +15,12 @@ export default function AboutMenu({ setMenu }) {
                 <div></div>
                 <div id="main-actions">
                     <Button id="back-button" onclick={() => setMenu('main')}>
-                        <img id="back-icon" src="./assets/buttons/close.svg" draggable={false} />
+                        <img id="back-icon" src={closeIcon} draggable={false} />
                     </Button>
                 </div>
             </div>
             <div id="info">
-                <img id="logo" src="../assets/logo.png" draggable="false" />
+                <img id="logo" src={logo} draggable="false" />
 
                 <div id="infobar">
                     <a class="link" onclick={() => Neutralino.os.open("https://git.huckle.dev/TheHuckle/LegacyCommunityLauncher/releases/")} tabindex="-1">Releases</a>
