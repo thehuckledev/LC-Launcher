@@ -9,6 +9,23 @@ const SettingsContext = createContext();
 export function SettingsProvider({ children }) {
     const [settings, setSettings] = useState({});
 
+    async function defaultSetting(name) {
+        const key = `settings-${name}`;
+
+        let defaultSetting = defaultSettings[name];
+        if (typeof defaultSetting === "function") defaultSetting = await defaultSetting();
+
+        await Neutralino.storage.setData(
+            key,
+            JSON.stringify(defaultSetting)
+        );
+
+        setSettings(prev => ({
+            ...prev,
+            [name]: defaultSetting
+        }));
+    };
+
     async function updateSetting(name, value) {
         const key = `settings-${name}`;
 
@@ -38,7 +55,7 @@ export function SettingsProvider({ children }) {
                 } else {
                     let defaultSetting = defaultSettings[name];
 
-                    if (typeof defaultSetting === "function") defaultSetting = defaultSetting();
+                    if (typeof defaultSetting === "function") defaultSetting = await defaultSetting();
                     loaded[name] = defaultSetting;
 
                     await Neutralino.storage.setData(
@@ -55,7 +72,7 @@ export function SettingsProvider({ children }) {
     }, []);
 
     return (
-        <SettingsContext.Provider value={{ settings, updateSetting }}>
+        <SettingsContext.Provider value={{ settings, updateSetting, defaultSetting }}>
             {children}
         </SettingsContext.Provider>
     );
