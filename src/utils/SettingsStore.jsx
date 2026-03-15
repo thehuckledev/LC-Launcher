@@ -12,7 +12,7 @@ export function SettingsProvider({ children }) {
     async function updateSetting(name, value) {
         const key = `settings-${name}`;
 
-        await Neutralino.storage.setData(key, String(value));
+        await Neutralino.storage.setData(key, JSON.stringify(value));
 
         setSettings(prev => ({
             ...prev,
@@ -34,7 +34,7 @@ export function SettingsProvider({ children }) {
 
                 if (keys.includes(key)) {
                     const value = await Neutralino.storage.getData(key);
-                    loaded[name] = value;
+                    loaded[name] = JSON.parse(value);
                 } else {
                     let defaultSetting = defaultSettings[name];
 
@@ -43,7 +43,7 @@ export function SettingsProvider({ children }) {
 
                     await Neutralino.storage.setData(
                         key,
-                        String(defaultSetting)
+                        JSON.stringify(defaultSetting)
                     );
                 };
             };

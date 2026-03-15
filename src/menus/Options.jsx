@@ -10,11 +10,11 @@ export default function OptionsMenu({ setMenu }) {
     const { settings, updateSetting } = useSettings();
 
     function incrementVolume() {
-        if (!settings.volume || !Number.isInteger(parseInt(settings.volume))) return updateSetting('volume', '100');
-        let val = parseInt(settings.volume);
+        if (typeof settings.volume !== 'number') return updateSetting('volume', 100);
+        let val = settings.volume;
         val += 20;
         if (val > 100) val = 0;
-        updateSetting('volume', String(val))
+        updateSetting('volume', val)
     };
 
     return (
@@ -28,11 +28,11 @@ export default function OptionsMenu({ setMenu }) {
                 </div>
             </div>
             <div id="options">
-                <Button onclick={() => updateSetting('fullscreen', String(!(settings.fullscreen == 'true')))}>
-                    {settings.fullscreen == "false" ? 'Fullscreen: Disabled' : 'Fullscreen: Enabled'}
+                <Button onclick={() => updateSetting('fullscreen', !settings.fullscreen)}>
+                    {settings.fullscreen == false ? 'Fullscreen: Disabled' : 'Fullscreen: Enabled'}
                 </Button>
-                <Button onclick={() => updateSetting('menuMusic', String(!(settings.menuMusic == 'true')))}>
-                    {settings.menuMusic == "false" ? 'Menu Music: Disabled' : 'Menu Music: Enabled'}
+                <Button onclick={() => updateSetting('menuMusic', !settings.menuMusic)}>
+                    {settings.menuMusic == false ? 'Menu Music: Disabled' : 'Menu Music: Enabled'}
                 </Button>
                 <Button onclick={() => incrementVolume()}>
                     Volume: {settings.volume}%

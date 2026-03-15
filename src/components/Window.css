@@ -197,6 +197,12 @@ p {
     height: 100%;
 }
 
+/* some low res screens will actually hide the buttons */
+#window-controls .icon {
+    width: 14px;
+    height: 14px;
+}
+
 @media (-webkit-device-pixel-ratio: 1.5),
 (device-pixel-ratio: 1.5),
 (-webkit-device-pixel-ratio: 2),

@@ -27,14 +27,14 @@ export default function App() {
     useEffect(() => {
         if (openAnimPlaying.current == true) {
             const timer = setTimeout(() => {
-                if (settings.menuMusic == "true") startMusic();
+                if (settings.menuMusic == true) startMusic();
                 else stopMusic();
             }, 1600);
 
             return () => clearTimeout(timer);
         };
 
-        if (settings.menuMusic == "true") startMusic();
+        if (settings.menuMusic == true) startMusic();
         else stopMusic();
     }, [settings.menuMusic]);
 
@@ -45,7 +45,7 @@ export default function App() {
     }, [settings.volume]);
 
     useEffect(() => {
-        if (settings.fullscreen == "true") Neutralino.window.maximize();
+        if (settings.fullscreen == true) Neutralino.window.maximize();
         else Neutralino.window.unmaximize();
     }, [settings.fullscreen]);
 
