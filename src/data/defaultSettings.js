@@ -4,7 +4,7 @@ export const defaultSettings = {
     volume: 80,
     menuMusic: true,
     fullscreen: false,
-    instancesDirectory: async () => {
+    dataDirectory: async () => {
         const homeDir =
             (await Neutralino.os.getEnv("HOME")) ||
             (await Neutralino.os.getEnv("USERPROFILE"));
@@ -15,8 +15,7 @@ export const defaultSettings = {
                     homeDir,
                     "AppData",
                     "Roaming",
-                    "LegacyCommunityLauncher",
-                    "instances"
+                    "LegacyCommunityLauncher"
                 );
 
             case "Linux":
@@ -24,8 +23,7 @@ export const defaultSettings = {
                     homeDir,
                     ".local",
                     "share",
-                    "LegacyCommunityLauncher",
-                    "instances"
+                    "LegacyCommunityLauncher"
                 );
 
             case "Darwin":
@@ -33,12 +31,11 @@ export const defaultSettings = {
                     homeDir,
                     "Library",
                     "Application Support",
-                    "LegacyCommunityLauncher",
-                    "instances"
+                    "LegacyCommunityLauncher"
                 );
 
             default:
-                return await Neutralino.filesystem.getJoinedPath(homeDir, "LegacyCommunityLauncher", "instances");
+                return await Neutralino.filesystem.getJoinedPath(homeDir, "LegacyCommunityLauncher");
         }
     }
 };

@@ -37,42 +37,38 @@ export function SettingsProvider({ children }) {
         }));
     };
 
-    useEffect(() => {
-        async function load() {
-            let keys = [];
+    async function loadSettings() {
+        let keys = [];
 
-            try { keys = await Neutralino.storage.getKeys(); }
-            catch { keys = []; }
+        try { keys = await Neutralino.storage.getKeys(); }
+        catch { keys = []; }
 
-            const loaded = { ...defaultSettings };
+        const loaded = { ...defaultSettings };
 
-            for (const name in defaultSettings) {
-                const key = `settings-${name}`;
+        for (const name in defaultSettings) {
+            const key = `settings-${name}`;
 
-                if (keys.includes(key)) {
-                    const value = await Neutralino.storage.getData(key);
-                    loaded[name] = JSON.parse(value);
-                } else {
-                    let defaultSetting = defaultSettings[name];
+            if (keys.includes(key)) {
+                const value = await Neutralino.storage.getData(key);
+                loaded[name] = JSON.parse(value);
+            } else {
+                let defaultSetting = defaultSettings[name];
 
-                    if (typeof defaultSetting === "function") defaultSetting = await defaultSetting();
-                    loaded[name] = defaultSetting;
+                if (typeof defaultSetting === "function") defaultSetting = await defaultSetting();
+                loaded[name] = defaultSetting;
 
-                    await Neutralino.storage.setData(
-                        key,
-                        JSON.stringify(defaultSetting)
-                    );
-                };
+                await Neutralino.storage.setData(
+                    key,
+                    JSON.stringify(defaultSetting)
+                );
             };
-
-            setSettings(loaded);
         };
 
-        load();
-    }, []);
+        setSettings(loaded);
+    };
 
     return (
-        <SettingsContext.Provider value={{ settings, updateSetting, defaultSetting }}>
+        <SettingsContext.Provider value={{ settings, updateSetting, loadSettings, defaultSetting }}>
             {children}
         </SettingsContext.Provider>
     );

@@ -50,17 +50,25 @@ export default function OptionsMenu({ setMenu }) {
                     Volume: {settings.volume}%
                 </Button>
                 <Textbox
-                    id="instance-path"
+                    id="data-path"
                     onchange={async (txt) => {
-                        if (txt.trim() == "") return defaultSetting('instancesDirectory');
+                        if (txt.trim() == "") {
+                            defaultSetting('dataDirectory');
+                            return Neutralino.app.restartProcess();
+                        };
 
                         const possible = await dirPossible(txt);
-                        if (!possible) return defaultSetting('instancesDirectory');
-                        updateSetting('instancesDirectory', txt)
+                        if (!possible) {
+                            defaultSetting('dataDirectory');
+                            return Neutralino.app.restartProcess();
+                        };
+
+                        updateSetting('dataDirectory', txt)
+                        Neutralino.app.restartProcess();
                     }}
-                    value={settings.instancesDirectory}
-                    placeholder="Instances directory..."
-                    label="Instances Directory (Must Be Absolute)"
+                    value={settings.dataDirectory}
+                    placeholder="Data directory..."
+                    label="Data Directory (Must Be Absolute)"
                     minlength={0}
                     maxlength={200}
                 />

@@ -3,6 +3,7 @@ import Neutralino from "@neutralinojs/lib";
 
 import { startMusic, stopMusic, setVolume } from "./core/music.js";
 import { useSettings } from "./utils/SettingsStore.jsx";
+import { useManager } from "./utils/ManagerProvider.jsx";
 
 import Window from "./components/Window.jsx";
 import Toast from "./components/Toast.jsx";
@@ -12,8 +13,21 @@ import OptionsMenu from "./menus/Options.jsx";
 import AboutMenu from "./menus/About.jsx";
 
 export default function App() {
+    const [loaded, setLoaded] = useState(false);
     const [menu, setMenu] = useState("main");
-    const { settings, updateSetting } = useSettings();
+    const { settings, loadSettings } = useSettings();
+    const Manager = useManager();
+
+    useEffect(() => {
+        async function load() {
+            await loadSettings();
+            await Manager.init();
+            console.log("Loaded!");
+            setLoaded(true);
+        };
+
+        load();
+    }, []);
 
     const openAnimPlaying = useRef(true);
     useEffect(() => {
@@ -51,11 +65,13 @@ export default function App() {
 
     return (
         <>
-            <Window title="" setMenu={setMenu}>
-                {menu === "main" &&     <MainMenu setMenu={setMenu} />}
-                {menu === "options" &&  <OptionsMenu setMenu={setMenu} />}
-                {menu === "about" &&    <AboutMenu setMenu={setMenu} />}
-            </Window>
+            {loaded &&
+                <Window title="" setMenu={setMenu}>
+                    {menu === "main" &&     <MainMenu setMenu={setMenu} />}
+                    {menu === "options" &&  <OptionsMenu setMenu={setMenu} />}
+                    {menu === "about" &&    <AboutMenu setMenu={setMenu} />}
+                </Window>
+            }
 
             <Toast />
         </>
