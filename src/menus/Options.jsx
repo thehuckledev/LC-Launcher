@@ -2,6 +2,7 @@ import "./Options.css";
 
 import { useSettings } from "../utils/SettingsStore.jsx";
 
+import Textbox from "../components/Textbox.jsx";
 import Button from "../components/Button.jsx";
 
 import closeIcon from "../assets/buttons/close.svg";
@@ -37,6 +38,15 @@ export default function OptionsMenu({ setMenu }) {
                 <Button onclick={() => incrementVolume()}>
                     Volume: {settings.volume}%
                 </Button>
+                <Textbox
+                    id="instance-path"
+                    onchange={(txt) => updateSetting('instancesDirectory', txt)}
+                    value={settings.instancesDirectory}
+                    placeholder="Instances directory..."
+                    label="Instances Directory"
+                    minlength={0}
+                    maxlength={200}
+                />
             </div>
         </>
     );

@@ -1,0 +1,48 @@
+.mc-textbox {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+    font-family: sans-serif;
+}
+
+.mc-textbox label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #e0e0e0;
+    font: 10pt 'Minecraftia', sans-serif;
+}
+
+.mc-textbox input[type="text"] {
+    height: var(--textbox-size);
+	width: calc(var(--textbox-size) * 10);
+	cursor: pointer;
+	overflow: hidden;
+	white-space: nowrap;
+	user-select: none;
+	-webkit-user-select: none;
+
+    font: 12pt 'Minecraftia', sans-serif;
+
+	background: #999 url('./assets/textbox.png') center / cover;
+    backdrop-filter: brightness(50%);
+	image-rendering: pixelated;
+	border: 2px solid #000;
+
+    padding: 8px 10px;
+    outline: none;
+    color: white;
+}
+
+.mc-textbox input[type="text"]:focus {
+    border-color: #d0d0d0;
+}
+
+.mc-textbox input[type="text"]::selection {
+    color: white;
+    background-color: #0080ff6d;
+}
+
+.mc-textbox input::placeholder {
+    color: #888;
+}
