@@ -16,13 +16,17 @@
 	border: 2px solid #000;
 }
 
+.mc-button[disabled="true"] {
+	background: #1D1D1D url('./assets/button_disabled.png') center / cover;
+}
+
 /* Mouse over */
-.mc-button:hover .title {
+.mc-button:not([disabled="true"]):hover .title {
 	background-color: rgba(100, 100, 255, .45);
 	text-shadow: 2px 2px #202013CC;
 	color: #FFFFA0;
 }
-.mc-button:active .title {
+.mc-button:not([disabled="true"]):active .title {
 	box-shadow: inset -2px -4px #0004, inset 2px 2px #FFF5;
 }
 /* Button title */
@@ -37,6 +41,13 @@
 	color: #DDD;
 	text-shadow: 2px 2px #000A;
 	box-shadow: inset -2px -4px #0006, inset 2px 2px #FFF7;
+}
+.mc-button[disabled="true"] .title {
+	color: #b2b2b2;
+	box-shadow: none;
+}
+.mc-button[disabled="true"] img {
+	filter: brightness(70%);
 }
 /* Others */
 .mc-button.full { width: 100%; height: 100%; }

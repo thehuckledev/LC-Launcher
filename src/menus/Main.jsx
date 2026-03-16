@@ -21,12 +21,12 @@ export default function MainMenu({ setMenu }) {
 
     useEffect(() => {
         async function loadData() {
-            const profiles = await Manager.getProfiles();
-            const instances = await Manager.getInstances();
+            const profiles = await Manager.profiles.list();
+            const instances = await Manager.instances.list();
 
             if (profiles.length > 0) setProfile(profiles[0]);
             if (instances.length > 0) {
-                const inst = await Manager.getInstance(instances[0]);
+                const inst = await Manager.instances.get(instances[0]);
                 setInstance(inst);
             };
         };
@@ -82,15 +82,13 @@ export default function MainMenu({ setMenu }) {
                         </div>
                     </div>
                     <div id="main-actions">
-                        <Button id="discover-button">
+                        <Button id="discover-button" disabled={!instance?.id}>
                             <img src={discoverIcon} draggable={false} />
                         </Button>
-                        <Button id="play-button" onclick={() => {
-                            if (instance && profile) Manager.launchInstance(instance.id, profile.id);
-                        }}>
+                        <Button id="play-button" disabled={!instance?.id} onclick={() => Manager.exec.launch(instance?.id, profile?.id)}>
                             Play
                         </Button>
-                        <Button id="servers-button">
+                        <Button id="servers-button" disabled={!instance?.id}>
                             <img src={serversIcon} draggable={false} />
                         </Button>
                     </div>
