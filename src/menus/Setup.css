@@ -1,0 +1,144 @@
+#setup-logo {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    display: block;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    opacity: 0;
+    animation: logo-back-down-setup 1.6s ease-in-out forwards;
+}
+
+@keyframes logo-back-down-setup {
+    0% {
+        opacity: 0;
+        transform: perspective(1000px) translate(-50%, -300px) rotateX(-15deg);
+    }
+
+    50% {
+        opacity: 1;
+        transform: perspective(1000px) translate(-50%, -50%) rotateX(-15deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform: perspective(1000px) translate(-50%, 300px) rotateX(0deg);
+    }
+}
+
+#setup,
+#action-bar {
+    opacity: 0;
+    animation: fade-expand .3s linear 1.6s forwards;
+}
+
+@keyframes fade-expand {
+    0% {
+        transform: scale(0.93);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+#setup {
+    height: 100%;
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#action-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    justify-content: space-between;
+    width: 100%;
+}
+
+#action-bar>.mc-button {
+    width: 130px;
+}
+
+#setup > h2 {
+    font: 14px 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+
+    color: #b6b6b6;
+}
+
+/* taken and modified from https://codepen.io/codesbyk/pen/QeQYbx. all credit given. */
+.moto {
+    margin-top: 10px;
+    font: 18px 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+
+    color: #d5d5d5;
+    font-weight: 300;
+    width: 100%;
+}
+
+.slidingVertical {
+    display: inline;
+    text-indent: 15px;
+}
+
+.slidingVertical span {
+    -webkit-animation: bottomToTop 9s cubic-bezier(0.6, 0.05, 0.4, 1) infinite 0s;
+    animation: bottomToTop 5.5s cubic-bezier(0.6, 0.05, 0.4, 1) infinite 0.5s;
+    color: #ffffff;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+}
+
+
+.slidingVertical span:nth-child(2) {
+    animation-delay: 2s;
+
+}
+
+.slidingVertical span:nth-child(3) {
+    animation-delay: 4s;
+}
+
+/*topToBottom Animation*/
+
+@-webkit-keyframes bottomToTop {
+    0% {
+        opacity: 0;
+    }
+
+    5% {
+        opacity: 0;
+        -webkit-transform: translateY(20px);
+    }
+
+    10% {
+        opacity: 1;
+        -webkit-transform: translateY(0px);
+    }
+
+    25% {
+        opacity: 1;
+        -webkit-transform: translateY(0px);
+    }
+
+    30% {
+        opacity: 0;
+        -webkit-transform: translateY(-20px);
+    }
+
+    80% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}

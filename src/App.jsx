@@ -8,15 +8,35 @@ import { useManager } from "./utils/ManagerProvider.jsx";
 import Window from "./components/Window.jsx";
 import Toast from "./components/Toast.jsx";
 
+import SetupMenu from "./menus/Setup.jsx";
 import MainMenu from "./menus/Main.jsx";
 import OptionsMenu from "./menus/Options.jsx";
 import AboutMenu from "./menus/About.jsx";
 
 export default function App() {
+    const [isFirstRun, setIsFirstRun] = useState(false);
     const [loaded, setLoaded] = useState(false);
     const [menu, setMenu] = useState("main");
     const { settings, loadSettings } = useSettings();
     const Manager = useManager();
+
+    useEffect(() => {
+        async function checkFirstRun() {
+            try {
+                let data = await Neutralino.storage.getData('hasSetup');
+                let val = JSON.parse(data);
+                
+                if (val === true) setIsFirstRun(false);
+            } catch (err) {
+                setIsFirstRun(true);
+                await Neutralino.storage.setData('hasSetup', JSON.stringify(true));
+
+                // is first time
+                setMenu("setup");
+            };
+        };
+        checkFirstRun();
+    }, []);
 
     useEffect(() => {
         async function load() {
@@ -67,6 +87,7 @@ export default function App() {
         <>
             {loaded &&
                 <Window title="" setMenu={setMenu}>
+                    {menu === "setup" &&     <SetupMenu setMenu={setMenu} />}
                     {menu === "main" &&     <MainMenu setMenu={setMenu} />}
                     {menu === "options" &&  <OptionsMenu setMenu={setMenu} />}
                     {menu === "about" &&    <AboutMenu setMenu={setMenu} />}

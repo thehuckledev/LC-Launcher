@@ -85,7 +85,7 @@ export default function MainMenu({ setMenu }) {
                         <Button id="discover-button" disabled={!instance?.id}>
                             <img src={discoverIcon} draggable={false} />
                         </Button>
-                        <Button id="play-button" disabled={!instance?.id} onclick={() => Manager.exec.launch(instance?.id, profile?.id)}>
+                        <Button id="play-button" disabled={!instance?.id || !profile?.id} onclick={() => Manager.exec.launch(instance?.id, profile?.id)}>
                             Play
                         </Button>
                         <Button id="servers-button" disabled={!instance?.id}>
