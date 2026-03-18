@@ -5,11 +5,11 @@ import { useManager } from "../utils/ManagerProvider.jsx";
 
 import Button from "../components/Button.jsx";
 
-import accountIcon from "../assets/icons/account.jpg";
+import accountIcon from "../assets/icons/account.png";
 import instanceIcon from "../assets/icons/instance.png";
 import newsIcon from "../assets/buttons/news.svg";
 import optionsIcon from "../assets/buttons/options.svg";
-import minecraftLogo from "../assets/minecraftlogo.png";
+import minecraftLogo from "../assets/ui/minecraftlogo.png";
 import discoverIcon from "../assets/buttons/discover.svg";
 import serversIcon from "../assets/buttons/servers.svg";
 
@@ -56,7 +56,7 @@ export default function MainMenu({ setMenu }) {
         <>
             <div id="top-bar">
                 <div id="accounts">
-                    <img id="account-icon" src={profile?.render || accountIcon} draggable={false} />
+                    <img id="account-icon" src={profile?.skinRender || accountIcon} draggable={false} />
                     <div id="account-details">
                         <h1>{profile?.username || "No Profile"}</h1>
                         <h2>{parseAccountType(profile?.type) || "N/A"}</h2>

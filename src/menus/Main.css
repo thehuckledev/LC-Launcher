@@ -162,6 +162,7 @@
 #instance-icon, #account-icon {
 	height: 35px;
 	width: 35px;
+	image-rendering: pixelated;
 }
 
 #instance-details, #account-details, #stats {

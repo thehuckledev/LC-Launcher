@@ -111,14 +111,18 @@ export class Exec {
     };
 
     async writeSkin(instanceId, dataURI) {
-        if (!dataURI) return;
-
         try {
-            const response = await fetch(dataURI);
-            const arrayBuffer = await response.arrayBuffer();
-
             const baseDir = `${this.manager.instancesDir}/${instanceId}/content`;
             const filePath = `${baseDir}/Common/res/mob/char.png`;
+
+            if (!dataURI) {
+                await this.ensureDir(`${baseDir}/Common/res/mob`);
+                await Neutralino.resources.extractFile('/src/assets/misc/char.png', filePath);
+                return console.log("Skin written to:", filePath);
+            };
+            
+            const response = await fetch(dataURI);
+            const arrayBuffer = await response.arrayBuffer();
 
             await this.ensureDir(`${baseDir}/Common/res/mob`);
             await Neutralino.filesystem.writeBinaryFile(filePath, arrayBuffer);

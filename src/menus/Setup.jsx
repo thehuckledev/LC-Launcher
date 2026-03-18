@@ -7,7 +7,7 @@ import { showToast } from "../components/Toast.jsx";
 import Button from "../components/Button.jsx";
 import Textbox from "../components/Textbox.jsx";
 
-import minecraftLogo from "../assets/minecraftlogo.png";
+import minecraftLogo from "../assets/ui/minecraftlogo.png";
 
 export default function SetupMenu({ setMenu }) {
     const [ready, setReady] = useState(false);
@@ -47,8 +47,8 @@ export default function SetupMenu({ setMenu }) {
                     Skip Setup
                 </Button>
                 <Button id="done-button" disabled={!ready} onclick={() => {
-                    if(ready) setMenu('main');
-                    else showToast("You need to enter a username or skip");
+                    if(!ready) return showToast("You need to enter a username or skip");
+                    setMenu('main');
                 }}>
                     Done
                 </Button>

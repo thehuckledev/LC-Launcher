@@ -12,8 +12,18 @@ export class Profiles {
         return profiles.find(p => p.id === id);
     };
 
-    async create(username, skinDataURI, skinRenderDataURI) {
+    async create(username, rawSkinDataURI) {
         const profiles = await this.list();
+
+        let skinDataURI, skinRenderDataURI;
+
+        if(rawSkinDataURI) {
+
+        };
+
+        //TODO make it detect 64x64 skin and turn into 64x32
+        //TODO make it render skin head
+        //TODO make it fall back to steve
 
         const profile = {
             id: crypto.randomUUID(),

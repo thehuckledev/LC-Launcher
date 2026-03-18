@@ -11,13 +11,13 @@
 
     font: 12pt 'Minecraftia', sans-serif;
 
-	background: #999 url('./assets/button.png') center / cover;
+	background: #999 url('./assets/ui/button.png') center / cover;
 	image-rendering: pixelated;
 	border: 2px solid #000;
 }
 
 .mc-button[disabled="true"] {
-	background: #1D1D1D url('./assets/button_disabled.png') center / cover;
+	background: #1D1D1D url('./assets/ui/button_disabled.png') center / cover;
 }
 
 /* Mouse over */

@@ -27,7 +27,7 @@
     ],
     "private": true,
     "scripts": {
-        "dev": "sh ./build-scripts/dev.sh",
+        "dev": "node ./build-scripts/dev.js",
         "build-mac": "sh ./build-scripts/build-mac.sh",
         "build-linux": "sh ./build-scripts/build-linux.sh",
         "build-win": "sh ./build-scripts/build-win.sh",
