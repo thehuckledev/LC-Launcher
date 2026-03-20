@@ -75,7 +75,7 @@ export default function MainMenu({ setMenu }) {
                     <div id="instances">
                         <img id="instance-icon" src={instanceIcon} draggable={false} />
                         <div id="instance-details">
-                            <h1>{instance?.id || "No Instance"}</h1>
+                            <h1>{instance?.name || "No Instance"}</h1>
                             <h2>{instance?.tag || "N/A"}</h2>
                         </div>
                     </div>

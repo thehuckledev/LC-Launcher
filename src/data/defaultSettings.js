@@ -15,7 +15,8 @@ export const defaultSettings = {
                     homeDir,
                     "AppData",
                     "Roaming",
-                    "LegacyCommunityLauncher"
+                    "LegacyCommunityLauncher",
+                    "data"
                 );
 
             case "Linux":
@@ -23,7 +24,8 @@ export const defaultSettings = {
                     homeDir,
                     ".local",
                     "share",
-                    "LegacyCommunityLauncher"
+                    "LegacyCommunityLauncher",
+                    "data"
                 );
 
             case "Darwin":
@@ -31,7 +33,8 @@ export const defaultSettings = {
                     homeDir,
                     "Library",
                     "Application Support",
-                    "LegacyCommunityLauncher"
+                    "LegacyCommunityLauncher",
+                    "data"
                 );
 
             default:

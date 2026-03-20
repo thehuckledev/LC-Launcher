@@ -17,7 +17,7 @@ export default function SetupMenu({ setMenu }) {
 
     const [ready, setReady] = useState(true);
     const [processing, setProcessing] = useState(false);
-    const [username, setUsername] = useState("test");
+    const [username, setUsername] = useState("");
     const [skin, setSkin] = useState(undefined);
 
     const makeDefaultInstance = async () => {

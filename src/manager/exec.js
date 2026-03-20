@@ -67,7 +67,7 @@ export class Exec {
             if (!asset) return showToast("Error: Required asset not found in release");
 
             const instancePath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instance.id);
-            const zipPath = await Neutralino.filesystem.getJoinedPath(instancePath, `${instance.target}.zip`);
+            const zipPath = await Neutralino.filesystem.getJoinedPath(instancePath, instance.target);
 
             await this.manager.utils.ensureDir(instancePath);
             await this.manager.utils.ensureDir(await Neutralino.filesystem.getJoinedPath(instancePath, 'content'));
@@ -93,9 +93,9 @@ export class Exec {
         } catch (err) {
             console.error(err);
             showToast(`Error: ${err.message}`);
-
-            try {
-                await Neutralino.filesystem.remove(`${this.manager.instancesDir}/${instance.id}/${instance.target}.zip`);
+        } finally {
+            try { // remove zip
+                await Neutralino.filesystem.remove(`${this.manager.instancesDir}/${instance.id}/${instance.target}`);
             } catch { }
         };
     };
@@ -116,7 +116,7 @@ export class Exec {
             const filePath = `${baseDir}/Common/res/mob/char.png`;
 
             if (!dataURI) {
-                await this.ensureDir(`${baseDir}/Common/res/mob`);
+                await this.manager.utils.ensureDir(`${baseDir}/Common/res/mob`);
                 await Neutralino.resources.extractFile('/src/assets/misc/char.png', filePath);
                 return console.log("Skin written to:", filePath);
             };
@@ -124,7 +124,7 @@ export class Exec {
             const response = await fetch(dataURI);
             const arrayBuffer = await response.arrayBuffer();
 
-            await this.ensureDir(`${baseDir}/Common/res/mob`);
+            await this.manager.utils.ensureDir(`${baseDir}/Common/res/mob`);
             await Neutralino.filesystem.writeBinaryFile(filePath, arrayBuffer);
             console.log("Skin written to:", filePath);
         } catch (err) {
@@ -158,7 +158,9 @@ export class Exec {
         const execPath = await Neutralino.filesystem.getJoinedPath(cwd, instance.exec);
 
         // write uid
-        await Neutralino.filesystem.writeFile(await Neutralino.filesystem.getJoinedPath(cwd, "uid.dat"), `${profile.uid}\n`);
+        const uidPath = await Neutralino.filesystem.getJoinedPath(cwd, "uid.dat");
+        await Neutralino.filesystem.writeFile(uidPath, `${profile.uid}\n`);
+        console.log("UID written to:", uidPath, profile.uid);
 
         // write servers.txt
         const servers = await this.manager.servers.list(instanceId);
@@ -166,14 +168,15 @@ export class Exec {
         const content = servers
             .map(s => `${s.ip}\n${s.port}\n${s.name}`)
             .join("\n") + (servers.length ? "\n" : "");
-        const path = await Neutralino.filesystem.getJoinedPath(
+        const serversPath = await Neutralino.filesystem.getJoinedPath(
             this.manager.instancesDir,
             instanceId,
             "content",
             "servers.txt"
         );
 
-        await Neutralino.filesystem.writeFile(path, content);
+        await Neutralino.filesystem.writeFile(serversPath, content);
+        console.log("Servers written to:", serversPath, content);
 
 
         try {
@@ -222,10 +225,12 @@ export class Exec {
                     `proton run "${execPath}" ${joinedArgs}`;
             };
 
-            if (compat === "DIRECT") showToast("You should have a compatibility layer on linux and macOS");
+            if (compat === "DIRECT" &&
+                execPath.endsWith(".exe")
+            ) showToast("You should have a compatibility layer on linux and macOS", 1000);
         };
 
-        showToast("Launching instance...");
+        showToast("Launching instance...", 1000);
         console.log("Launching:", cmd);
 
         const startTime = Date.now();

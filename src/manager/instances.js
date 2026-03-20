@@ -29,6 +29,7 @@ export class Instances {
         await this.manager.utils.ensureDir(await Neutralino.filesystem.getJoinedPath(path, "content"));
 
         const instance = {
+            name: repo,
             id,
             repo,
             tag,
