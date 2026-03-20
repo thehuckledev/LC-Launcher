@@ -191,7 +191,6 @@ export class Exec {
         const args = [];
 
         if (profile.username) args.push("-name", profile.username);
-        if (instance.serverMode) args.push("-server");
         if (instance.fullscreen) args.push("-fullscreen");
 
         if (instance.ip) args.push("-ip", instance.ip);

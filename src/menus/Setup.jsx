@@ -10,6 +10,8 @@ import Textbox from "../components/Textbox.jsx";
 
 import minecraftLogo from "../assets/ui/minecraftlogo.png";
 
+import { defaultInstance } from "../data/defaultInstance.js";
+
 export default function SetupMenu({ setMenu }) {
     const Manager = useManager();
 
@@ -17,6 +19,15 @@ export default function SetupMenu({ setMenu }) {
     const [processing, setProcessing] = useState(false);
     const [username, setUsername] = useState("test");
     const [skin, setSkin] = useState(undefined);
+
+    const makeDefaultInstance = async () => {
+        await Manager.instances.create(
+            defaultInstance.repo,
+            defaultInstance.tag,
+            defaultInstance.exec,
+            defaultInstance.target
+        );
+    };
 
     const handleNext = async () => {
         if (!ready) return showToast("You need to enter a valid username");
@@ -35,6 +46,9 @@ export default function SetupMenu({ setMenu }) {
             
             const skinDataURI = `data:${mimeType};base64,${base64String}`;
             await Manager.profiles.create(username, skinDataURI);
+
+            // make inst
+            makeDefaultInstance();
 
             await Neutralino.storage.setData('hasSetup', JSON.stringify(true));
 
