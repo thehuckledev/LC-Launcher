@@ -29,7 +29,7 @@ export default function App() {
                 if (val === true) setIsFirstRun(false);
             } catch (err) {
                 setIsFirstRun(true);
-                await Neutralino.storage.setData('hasSetup', JSON.stringify(true));
+                // hasSetup var is made when skip or next clicked in setup.jsx
 
                 // is first time
                 setMenu("setup");

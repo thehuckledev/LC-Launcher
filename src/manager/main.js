@@ -8,6 +8,7 @@ import { Instances } from "./instances.js";
 import { Remotes } from "./remotes.js";
 import { Servers } from "./servers.js";
 import { Worlds } from "./worlds.js";
+import { Skins } from "./skins.js";
 import { Exec } from "./exec.js";
 import { Utils } from "./utils.js";
 
@@ -23,6 +24,7 @@ export class Manager {
         this.remotes = new Remotes(this);
         this.servers = new Servers(this);
         this.worlds = new Worlds(this);
+        this.skins = new Skins(this);
         this.exec = new Exec(this);
     };
 

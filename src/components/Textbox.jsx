@@ -9,10 +9,13 @@ export default function Textbox({ id, onchange = (txt) => { }, value = "", place
                 id={id}
                 value={value}
                 placeholder={placeholder}
-                minlength={minlength}
-                maxlength={maxlength}
+                minLength={minlength}
+                maxLength={maxlength}
                 onKeyDown={(e) => {
-                    if (e.key === 'Enter') onchange(e.target.value);
+                    if (e.key === 'Enter' &&
+                        e.target.value.trim().length >= minlength &&
+                        e.target.value.trim().length <= maxlength
+                    ) onchange(e.target.value);
                 }}
             />
         </div>

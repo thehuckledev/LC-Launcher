@@ -17,6 +17,7 @@ export class Worlds {
 
                 const worldPath = await Neutralino.filesystem.getJoinedPath(dir, e.entry);
                 
+                // TODO make it get world name using that guys repo
                 // cant figure out how to get world name yet
                 worlds.push({
                     id: e.entry,
@@ -35,10 +36,7 @@ export class Worlds {
         const worldsDir = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instanceId, "content", "Windows64", "GameHDD");
         await this.manager.utils.ensureDir(worldsDir);
 
-        const res = await Neutralino.os.showOpenDialog(
-            "Import world",
-            { multiSelections: false }
-        );
+        const res = await Neutralino.os.showFolderDialog("Import world");
         if (!res || res.length === 0) return;
 
         const src = res[0];
@@ -60,10 +58,7 @@ export class Worlds {
         const worldsDir = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instanceId, "content", "Windows64", "GameHDD");
         const worldPath = await Neutralino.filesystem.getJoinedPath(worldsDir, worldId);
 
-        const res = await Neutralino.os.showSaveDialog(
-            "Export world",
-            { defaultPath: `${worldId}` }
-        );
+        const res = await Neutralino.os.showFolderDialog("Export world");
         if (!res) return;
 
         try {

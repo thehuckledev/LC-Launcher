@@ -72,6 +72,17 @@
     color: #b6b6b6;
 }
 
+#skin-box {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+#skin-box > *:nth-child(2) {
+    margin-top: 23px;
+    width: 160px;
+}
+
 /* taken and modified from https://codepen.io/codesbyk/pen/QeQYbx. all credit given. */
 .moto {
     margin-top: 10px;
