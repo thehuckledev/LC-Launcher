@@ -43,8 +43,6 @@ export default function MainMenu({ setMenu }) {
     };
 
     function formatPlaytime(seconds) {
-        if (!seconds) return "N/A";
-
         const d = Math.floor(seconds / 86400);
         const h = Math.floor((seconds % 86400) / 3600);
         const m = Math.floor((seconds % 3600) / 60);
@@ -94,7 +92,7 @@ export default function MainMenu({ setMenu }) {
                     </div>
                     <div id="stats">
                         <h1>Playtime</h1>
-                        <h2>{formatPlaytime(instance?.playtime)}</h2>
+                        <h2>{typeof instance?.playtime === 'number' ? formatPlaytime(instance?.playtime) : "N/A"}</h2>
                     </div>
                 </div>
             </div>

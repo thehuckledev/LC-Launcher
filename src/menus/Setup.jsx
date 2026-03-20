@@ -48,7 +48,7 @@ export default function SetupMenu({ setMenu }) {
             await Manager.profiles.create(username, skinDataURI);
 
             // make inst
-            makeDefaultInstance();
+            await makeDefaultInstance();
 
             await Neutralino.storage.setData('hasSetup', JSON.stringify(true));
 
