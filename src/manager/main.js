@@ -2,6 +2,7 @@
 // reading through it helped me understand how to change skins etc.
 
 import Neutralino from "@neutralinojs/lib";
+import { getSetting } from "../utils/settingsManager.js";
 
 import { Profiles } from "./profiles.js";
 import { Instances } from "./instances.js";
@@ -29,7 +30,7 @@ export class Manager {
     };
 
     async init() {
-        this.dataDir = JSON.parse(await Neutralino.storage.getData("settings-dataDirectory"));
+        this.dataDir = await getSetting("dataDirectory");
         this.profilesFile = await Neutralino.filesystem.getJoinedPath(this.dataDir, "profiles.json");
         this.instancesDir = await Neutralino.filesystem.getJoinedPath(this.dataDir, "instances");
 

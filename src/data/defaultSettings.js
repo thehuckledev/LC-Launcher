@@ -1,6 +1,7 @@
 import Neutralino from "@neutralinojs/lib";
 
 export const defaultSettings = {
+    hasSetup: false,
     volume: 80,
     menuMusic: true,
     fullscreen: false,

@@ -39,7 +39,7 @@ export class Worlds {
         const res = await Neutralino.os.showFolderDialog("Import world");
         if (!res || res.length === 0) return;
 
-        const src = res[0];
+        const src = res;
         const name = src.split(/[\\/]/).pop();
         const dst = await Neutralino.filesystem.getJoinedPath(worldsDir, name);
 

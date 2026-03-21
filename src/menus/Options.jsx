@@ -14,9 +14,18 @@ export default function OptionsMenu({ setMenu }) {
 
     async function dirPossible(path) {
         try {
-            await Neutralino.filesystem.createDirectory(path);
+            const stats = await Neutralino.filesystem.getStats(path);
+            if (!stats.isDirectory) return false;
             return true;
-        } catch {
+        } catch(e) {
+            if (e.code === "NE_FS_NOPATHE") {
+                try {
+                    await Neutralino.filesystem.createDirectory(path);
+                    return true;
+                } catch {
+                    return false;
+                };
+            };
             return false;
         };
     };
@@ -64,17 +73,17 @@ export default function OptionsMenu({ setMenu }) {
                     onchange={async (txt) => {
                         if (txt.trim() == "") {
                             await defaultSetting('dataDirectory');
-                            return Neutralino.app.restartProcess();
+                            return setTimeout(async() => await Neutralino.app.restartProcess(), 200);
                         };
 
                         const possible = await dirPossible(txt);
                         if (!possible) {
                             await defaultSetting('dataDirectory');
-                            return Neutralino.app.restartProcess();
+                            return setTimeout(async() => await Neutralino.app.restartProcess(), 200);
                         };
 
                         await updateSetting('dataDirectory', txt);
-                        Neutralino.app.restartProcess();
+                        setTimeout(async() => await Neutralino.app.restartProcess(), 200);
                     }}
                     value={settings.dataDirectory}
                     placeholder="Data directory..."
@@ -84,19 +93,21 @@ export default function OptionsMenu({ setMenu }) {
                 />
                 <Button id="data-select" onclick={async () => {
                     const res = await Neutralino.os.showFolderDialog("Select data path");
-                    if (!res || res.length === 0) return;
-                    const src = res[0].trim();
-                    if (!(await testPath(src))) 
-                        return showToast("Data path isn't a valid folder");
+                    if (!res) return;
+                    const src = res;
+                    if (!(await testPath(src))) {
+                        showToast("Data path isn't a valid folder");
+                        return setTimeout(async() => await Neutralino.app.restartProcess(), 200);
+                    };
                     
                     const possible = await dirPossible(src);
                     if (!possible) {
                         await defaultSetting('dataDirectory');
-                        return Neutralino.app.restartProcess();
+                        return setTimeout(async() => await Neutralino.app.restartProcess(), 200);
                     };
 
                     await updateSetting('dataDirectory', src);
-                    Neutralino.app.restartProcess();
+                    setTimeout(async() => await Neutralino.app.restartProcess(), 200);
                 }}>
                     Select data path
                 </Button>

@@ -21,12 +21,23 @@ export default function App() {
     const Manager = useManager();
 
     useEffect(() => {
+        async function load() {
+            await loadSettings();
+            await Manager.init();
+            console.log("Loaded!");
+            setLoaded(true);
+        };
+
+        load();
+    }, []);
+
+    useEffect(() => {
         async function checkFirstRun() {
             try {
-                let data = await Neutralino.storage.getData('hasSetup');
-                let val = JSON.parse(data);
-                
-                if (val === true) setIsFirstRun(false);
+                if (settings.hasSetup === true) {
+                    setIsFirstRun(false);
+                    setMenu("main");
+                };
             } catch (err) {
                 setIsFirstRun(true);
                 // hasSetup var is made when skip or next clicked in setup.jsx
@@ -36,17 +47,6 @@ export default function App() {
             };
         };
         checkFirstRun();
-    }, []);
-
-    useEffect(() => {
-        async function load() {
-            await loadSettings();
-            await Manager.init();
-            console.log("Loaded!");
-            setLoaded(true);
-        };
-
-        load();
     }, []);
 
     const openAnimPlaying = useRef(true);

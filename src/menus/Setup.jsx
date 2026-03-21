@@ -3,6 +3,7 @@ import "./Setup.css";
 import { useState } from "preact/hooks";
 import Neutralino from "@neutralinojs/lib";
 import { useManager } from "../utils/ManagerProvider.jsx";
+import { useSettings } from "../utils/SettingsStore.jsx";
 import { showToast } from "../components/Toast.jsx";
 
 import Button from "../components/Button.jsx";
@@ -14,8 +15,9 @@ import { defaultInstance } from "../data/defaultInstance.js";
 
 export default function SetupMenu({ setMenu }) {
     const Manager = useManager();
+    const { updateSetting } = useSettings();
 
-    const [ready, setReady] = useState(true);
+    const [ready, setReady] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [username, setUsername] = useState("");
     const [skin, setSkin] = useState(undefined);
@@ -50,7 +52,7 @@ export default function SetupMenu({ setMenu }) {
             // make inst
             await makeDefaultInstance();
 
-            await Neutralino.storage.setData('hasSetup', JSON.stringify(true));
+            await updateSetting('hasSetup', true);
 
             showToast("Setup saved and completed");
             setMenu('main');
@@ -174,7 +176,7 @@ export default function SetupMenu({ setMenu }) {
             </div>
             <div id="action-bar">
                 <Button id="skip-button" disabled={processing} onclick={async() => {
-                    await Neutralino.storage.setData('hasSetup', JSON.stringify(true));
+                    await updateSetting('hasSetup', true);
                     setMenu('main');
                 }}>
                     Skip Setup
