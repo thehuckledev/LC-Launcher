@@ -13,6 +13,12 @@ const getDataDirectory = async () => {
     } catch {
         const path = await resolveDefault("dataDirectory");
         localStorage.setItem("dataDirectory", path);
+        try {
+            const stats = await Neutralino.filesystem.getStats(path);
+            if (!stats.isDirectory) throw new Error("Default data dir does not exist");
+        } catch {
+            await Neutralino.filesystem.createDirectory(path);
+        };
         return path;
     };
 };
@@ -27,7 +33,12 @@ async function readConfig() {
         cache = JSON.parse(data);
     } catch {
         console.warn(`Config not found at: ${path}. Fallback to defaults`);
-        cache = {};
+        
+        const initialConfig = { ...defaultSettings };
+        delete initialConfig.dataDirectory;
+
+        await writeConfig(initialConfig);
+        cache = initialConfig;
     };
 
     return cache;
@@ -37,6 +48,7 @@ async function writeConfig(config) {
     cache = config;
 
     const path = await getConfigPath();
+    await getDataDirectory();
     await Neutralino.filesystem.writeFile(path, JSON.stringify(config, null, 2));
 };
 

@@ -2,7 +2,6 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    margin-bottom: 12px;
     font-family: sans-serif;
 }
 
@@ -13,7 +12,7 @@
     font: 10pt 'Minecraftia', sans-serif;
 }
 
-.mc-textbox input[type="text"] {
+.mc-textbox input {
     height: var(--textbox-size);
 	width: calc(var(--textbox-size) * 10);
 	cursor: pointer;
@@ -34,11 +33,11 @@
     color: white;
 }
 
-.mc-textbox input[type="text"]:focus {
+.mc-textbox input:focus {
     border-color: #d0d0d0;
 }
 
-.mc-textbox input[type="text"]::selection {
+.mc-textbox input::selection {
     color: white;
     background-color: #0080ff6d;
 }

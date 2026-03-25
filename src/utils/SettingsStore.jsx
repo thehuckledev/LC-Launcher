@@ -10,6 +10,7 @@ export function SettingsProvider({ children }) {
     async function loadSettings() {
         const loaded = await setttingsManager.loadSettings();
         setSettings(loaded);
+        return loaded;
     };
 
     async function updateSetting(name, value) {

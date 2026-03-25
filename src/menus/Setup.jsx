@@ -1,6 +1,6 @@
 import "./Setup.css";
 
-import { useState } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 import Neutralino from "@neutralinojs/lib";
 import { useManager } from "../utils/ManagerProvider.jsx";
 import { useSettings } from "../utils/SettingsStore.jsx";
@@ -8,6 +8,7 @@ import { showToast } from "../components/Toast.jsx";
 
 import Button from "../components/Button.jsx";
 import Textbox from "../components/Textbox.jsx";
+import Checkbox from "../components/Checkbox.jsx";
 
 import minecraftLogo from "../assets/ui/minecraftlogo.png";
 
@@ -15,19 +16,131 @@ import { defaultInstance } from "../data/defaultInstance.js";
 
 export default function SetupMenu({ setMenu }) {
     const Manager = useManager();
-    const { updateSetting } = useSettings();
+    const { settings, updateSetting } = useSettings();
 
+    const [canInstallWine, setCanInstallWine] = useState(false);
+    const [installWine, setInstallWine] = useState(true);
     const [ready, setReady] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [username, setUsername] = useState("");
     const [skin, setSkin] = useState(undefined);
+
+    useEffect(() => {
+        async function checkWine() {
+            try {
+                if (NL_OS !== "Linux" &&
+                    NL_OS !== "Darwin" &&
+                    NL_ARCH !== "x64" &&
+                    NL_ARCH !== "arm"
+                ) return setCanInstallWine(false);
+
+                const res = await Neutralino.os.execCommand("wine --version");
+
+                if (res.exitCode === 0) setCanInstallWine(false);
+                else setCanInstallWine(true);
+            } catch (err) {
+                console.error(err);
+                setCanInstallWine(false);
+                setInstallWine(false);
+            };
+        };
+
+        checkWine();
+    }, []);
+
+    async function installWineHelper() {
+        try {
+            const wineDir = `${settings.dataDirectory}/libraries/wine-crossover`;
+            const dxvkDir = `${settings.dataDirectory}/libraries/dxvk`;
+            const wineTempDir = `${settings.dataDirectory}/libraries/_wine`;
+            let downloadUrl = "";
+            let expectedHash = "";
+            let archiveName = "";
+
+            const dxvkArchive = `dxvk-macOS-async-v1.10.3-20230507-repack.tar.gz`;
+            const dxvkUrl = `https://github.com/Gcenx/DXVK-macOS/releases/download/v1.10.3-20230507-repack/${dxvkArchive}`;
+            const dxvkHash = "acd1520ad105d8ef124a09c8e11a259a5dc8bdc565ad18e0e52693f9807b2477";
+            const dxvkPath = `${settings.dataDirectory}/libraries/${dxvkArchive}`;
+            
+            if (NL_OS === "Linux") {
+                if (NL_ARCH === "x64") {
+                    archiveName = "wine-11.5-staging-x86.tar.xz";
+                    downloadUrl = `https://github.com/Kron4ek/Wine-Builds/releases/download/11.5/${archiveName}`;
+                    expectedHash = "c72cfadce331b8af3cb0c2a767a7b75d5b96eabf2d26baf0797d57f0b6625c6f";
+                } else if (NL_ARCH === "arm") {
+                    archiveName = "wine-11.5-staging-amd64-wow64.tar.xz";
+                    downloadUrl = `https://github.com/Kron4ek/Wine-Builds/releases/download/11.5/${archiveName}`;
+                    expectedHash = "33a3bd827e2252a169e87487255441f9ad2e84f1e8382a67b5734066ea908f96";
+                };
+            } else if (NL_OS === "Darwin") {
+                archiveName = "wine-crossover-23.7.1-1-osx64.tar.xz"; 
+                downloadUrl = `https://github.com/Gcenx/winecx/releases/download/crossover-wine-23.7.1-1/${archiveName}`;
+                expectedHash = "e24ba084737c8823e8439f7cb75d436a917fd92fc34b832bcaa0c0037eb33d03"; 
+            };
+
+            try {
+                await Neutralino.filesystem.createDirectory(wineDir);
+            } catch {};
+            try {
+                await Neutralino.filesystem.createDirectory(wineTempDir);
+            } catch {};
+
+            const archivePath = `${settings.dataDirectory}/libraries/${archiveName}`;
+
+            showToast(`Installing Wine...`, 3000);
+
+            await Neutralino.os.execCommand(`curl -L -o "${archivePath}" "${downloadUrl}"`);
+
+            const hasher = (NL_OS === "Linux") ? "sha256sum" : "shasum -a 256";
+            let check = await Neutralino.os.execCommand(`${hasher} "${archivePath}" | cut -d ' ' -f 1`);
+            if (check.stdOut.trim() !== expectedHash) throw new Error("WINE Checksum failed, try manual install");
+
+            await Neutralino.os.execCommand(`tar -xf "${archivePath}" -C "${wineTempDir}" --strip-components=1`);
+
+            if (NL_OS === "Darwin") {
+                const internalWineSource = `${wineTempDir}/Contents/Resources/wine`;
+                await Neutralino.os.execCommand(`cp -R "${internalWineSource}/." "${wineDir}"`);
+                await Neutralino.os.execCommand(`xattr -rd com.apple.quarantine "${wineDir}"`);
+            } else {
+                await Neutralino.os.execCommand(`cp -R "${wineTempDir}/." "${wineDir}"`);
+            };
+
+            await Neutralino.filesystem.remove(wineTempDir);
+            await Neutralino.filesystem.remove(archivePath);
+
+            if (NL_OS === "Darwin") {
+                showToast("Wine installed. Installing DXVK...", 3000);
+
+                // DXVK
+                await Neutralino.os.execCommand(`curl -L -o "${dxvkPath}" "${dxvkUrl}"`);
+
+                let dxvkCheck = await Neutralino.os.execCommand(`shasum -a 256 "${dxvkPath}" | cut -d ' ' -f 1`);
+                if (dxvkCheck.stdOut.trim() !== dxvkHash) throw new Error("DXVK Checksum failed, try manual install");
+
+                try {
+                    await Neutralino.filesystem.createDirectory(dxvkDir);
+                } catch {};
+                await Neutralino.os.execCommand(`tar -xf "${dxvkPath}" -C "${dxvkDir}" --strip-components=1`);
+
+                await Neutralino.filesystem.remove(dxvkPath).catch(() => {});
+                showToast("Wine & DXVK installed successfully", 2000);
+            } else {
+                showToast("Wine installed successfully", 2000);
+            };
+        } catch (err) {
+            console.error("Wine download failed:", err);
+            showToast("Wine install failed, try manual install");
+        };
+    };
 
     const makeDefaultInstance = async () => {
         await Manager.instances.create(
             defaultInstance.repo,
             defaultInstance.tag,
             defaultInstance.exec,
-            defaultInstance.target
+            defaultInstance.target,
+            defaultInstance.compatibilityLayer,
+            defaultInstance.customArgs
         );
     };
 
@@ -36,21 +149,28 @@ export default function SetupMenu({ setMenu }) {
 
         setProcessing(true);
         try {
-            const file = await Neutralino.filesystem.readBinaryFile(skin);
-            const base64String = btoa(
-                new Uint8Array(file)
-                    .reduce((data, byte) => data + String.fromCharCode(byte), '')
-            );
+            if (skin) {
+                const file = await Neutralino.filesystem.readBinaryFile(skin);
+                const base64String = btoa(
+                    new Uint8Array(file)
+                        .reduce((data, byte) => data + String.fromCharCode(byte), '')
+                );
 
-            let mimeType = 'image/png';
-            if (skin.endsWith('.jpg') || skin.endsWith('.jpeg'))
-                mimeType = 'image/jpeg';
-            
-            const skinDataURI = `data:${mimeType};base64,${base64String}`;
-            await Manager.profiles.create(username, skinDataURI);
+                let mimeType = 'image/png';
+                if (skin.endsWith('.jpg') || skin.endsWith('.jpeg'))
+                    mimeType = 'image/jpeg';
+                
+                const skinDataURI = `data:${mimeType};base64,${base64String}`;
+                await Manager.profiles.create(username, skinDataURI);
+            } else {
+                await Manager.profiles.create(username);
+            };
 
             // make inst
             await makeDefaultInstance();
+
+            // install wine
+            if (canInstallWine === true && installWine === true) await installWineHelper();
 
             await updateSetting('hasSetup', true);
 
@@ -168,7 +288,18 @@ export default function SetupMenu({ setMenu }) {
                                 Choose a Skin
                             </Button>
                         </div>
-                        <br /><br />
+                        <br />
+                        {canInstallWine &&
+                            <Checkbox
+                                id="install-wine-checkbox"
+                                value={installWine}
+                                onchange={(state) => {
+                                    setInstallWine(state);
+                                }}
+                                label="Install wine for me (Recommended)"
+                            />
+                        }
+                        <br />
                         <h2>A community made fork will be automatically added as an instance.</h2>
                         <h2>If you don't want it, you can simply remove it.</h2>
                     </>

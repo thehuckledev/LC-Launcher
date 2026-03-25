@@ -21,7 +21,7 @@ export class Instances {
         };
     };
 
-    async create(repo, tag, exec, target) {
+    async create(repo, tag, exec, target, compatibilityLayer = "DIRECT", customArgs = "") {
         const id = crypto.randomUUID();
         const path = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id);
 
@@ -38,10 +38,11 @@ export class Instances {
             playtime: 0,
             ip: "",
             port: "",
-            compatibilityLayer: "DIRECT",
+            compatibilityLayer,
             fullscreen: false,
             assetId: null,
-            installed: false
+            installed: false,
+            customArgs
         };
 
         await this.manager.utils.writeJSON(await Neutralino.filesystem.getJoinedPath(path, "instance.json"), instance);

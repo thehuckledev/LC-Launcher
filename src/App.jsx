@@ -14,7 +14,6 @@ import OptionsMenu from "./menus/Options.jsx";
 import AboutMenu from "./menus/About.jsx";
 
 export default function App() {
-    const [isFirstRun, setIsFirstRun] = useState(false);
     const [loaded, setLoaded] = useState(false);
     const [menu, setMenu] = useState("main");
     const { settings, loadSettings } = useSettings();
@@ -22,31 +21,20 @@ export default function App() {
 
     useEffect(() => {
         async function load() {
-            await loadSettings();
+            const loadedSettings = await loadSettings();
             await Manager.init();
+
+            if (loadedSettings.hasSetup === true) {
+                setMenu("main");
+            } else {
+                setMenu("setup");
+            };
+
             console.log("Loaded!");
             setLoaded(true);
         };
 
         load();
-    }, []);
-
-    useEffect(() => {
-        async function checkFirstRun() {
-            try {
-                if (settings.hasSetup === true) {
-                    setIsFirstRun(false);
-                    setMenu("main");
-                };
-            } catch (err) {
-                setIsFirstRun(true);
-                // hasSetup var is made when skip or next clicked in setup.jsx
-
-                // is first time
-                setMenu("setup");
-            };
-        };
-        checkFirstRun();
     }, []);
 
     const openAnimPlaying = useRef(true);

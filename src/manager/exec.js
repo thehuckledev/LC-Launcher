@@ -1,5 +1,6 @@
 import Neutralino from "@neutralinojs/lib";
 import { showToast } from "../components/Toast";
+import { getSetting } from "../utils/settingsManager.js";
 
 export class Exec {
     constructor(manager) {
@@ -11,8 +12,27 @@ export class Exec {
         this.preserveList = [
             "options.txt",
             "settings.dat",
+            "pfx",
             await Neutralino.filesystem.getJoinedPath("Windows64", "GameHDD")
         ];
+    };
+
+    async setupDXVK(instancePath) {
+        const dxvkLibDir = `${await getSetting("dataDirectory")}/libraries/dxvk`;
+        const winePrefix = `${instancePath}/pfx`;
+
+        const system32 = `${winePrefix}/drive_c/windows/system32`;
+        const syswow64 = `${winePrefix}/drive_c/windows/syswow64`;
+
+        try {
+            await Neutralino.os.execCommand(`cp -f "${dxvkLibDir}/x64/"*.dll "${system32}"`);
+            await Neutralino.os.execCommand(`cp -f "${dxvkLibDir}/x32/"*.dll "${syswow64}"`);
+
+            showToast("DXVK Applied to Wine", 2000);
+        } catch (err) {
+            console.error("DXVK setup failed:", err);
+            showToast("Failed to apply DXVK");
+        };
     };
 
     async backupPreserved(instancePath) {
@@ -51,7 +71,7 @@ export class Exec {
         await Neutralino.filesystem.remove(backupDir);
     };
 
-    async installInstance(instance) {
+    async installInstance(instance, isUpdate = false) {
         try {
             if (!navigator.onLine) return showToast("Error: You must be online to install an instance");
 
@@ -72,12 +92,12 @@ export class Exec {
             await this.manager.utils.ensureDir(instancePath);
             await this.manager.utils.ensureDir(await Neutralino.filesystem.getJoinedPath(instancePath, 'content'));
 
-            showToast("Downloading instance update...");
+            showToast(`Downloading instance${isUpdate ?? ' update'}...`); //DONE TODO make it say downloading without update keyword if its not ACTUALLING FUCKING UPDATING!
             console.log("Downloading build...");
             const download = await Neutralino.os.execCommand(`curl -L "${asset.browser_download_url}" -o "${zipPath}"`);
             if (download.exitCode !== 0) return showToast("Error: Asset download failed");
 
-            showToast("Extracting instance update...");
+            showToast(`Extracting instance${isUpdate ?? ' update'}...`);
             console.log("Extracting build...");
             await this.backupPreserved(instancePath);
             const unzip = await Neutralino.os.execCommand(`unzip -o "${zipPath}" -d "${instancePath}/content"`);
@@ -89,7 +109,7 @@ export class Exec {
 
             await this.manager.utils.writeJSON(`${instancePath}/instance.json`, instance);
             console.log("Instance installed");
-            showToast("Instance update completed");
+            showToast(`Instance${isUpdate ?? ' update'} completed`);
         } catch (err) {
             console.error(err);
             showToast(`Error: ${err.message}`);
@@ -148,7 +168,7 @@ export class Exec {
 
         if (await this.needsUpdate(instance)) {
             console.log("Updating instance...");
-            await this.installInstance(instance);
+            await this.installInstance(instance, true);
         };
 
         // save skin from datauri
@@ -207,17 +227,66 @@ export class Exec {
             const compat = instance.compatibilityLayer;
 
             if (compat === "WINE" || compat === "WINE64") {
-                const bin = compat.toLowerCase();
-                if (!(await this.manager.utils.cmdExists(bin))) return showToast(`Error: ${bin} is not installed`);
+                let bin;
+                const prefix = `${cwd}/pfx`;
 
-                cmd = `${bin} "${execPath}" ${joinedArgs}`;
+                //DONE TODO make the cmd a fallback for the built in binaries and add a popup which prompts if they want to install using prebuilt binaries
+                try {
+                    const dataDir = await getSetting("dataDirectory");
+                    await Neutralino.filesystem.getStats(`${dataDir}/libraries/wine-crossover/bin/`);
+                    // check if prebuilt installed above
+
+                    const internalWinePath = `${dataDir}/libraries/wine-crossover/bin/wine`;
+                    const internalWine64Path = `${dataDir}/libraries/wine-crossover/bin/wine64`;
+                    if(compat === "WINE") {
+                        try {
+                            await Neutralino.filesystem.getStats(internalWinePath);
+                            bin = `WINEDLLOVERRIDES="d3d11=n,b;dxgi=n,b" "${internalWinePath}"`;
+
+                            try {
+                                await Neutralino.filesystem.getStats(prefix);
+                            } catch {
+                                showToast('Setting up C Drive...');
+                                try { await Neutralino.filesystem.createDirectory(prefix); } catch {};
+
+                                await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" WINEDEBUG=-all ${bin} wineboot --init`);
+                                if(NL_OS === 'Darwin') await this.setupDXVK(cwd);
+                            };
+                        } catch {
+                            return showToast(`Error: ${compat} is not installed`);
+                        };
+                    } else if(compat === "WINE64") {
+                        try {
+                            await Neutralino.filesystem.getStats(internalWine64Path);
+                            bin = `WINEDLLOVERRIDES="d3d11=n,b;dxgi=n,b" "${internalWine64Path}"`;
+
+                            try {
+                                await Neutralino.filesystem.getStats(prefix);
+                            } catch {
+                                showToast('Setting up C Drive...');
+                                try { await Neutralino.filesystem.createDirectory(prefix); } catch {};
+
+                                await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" WINEDEBUG=-all ${bin} wineboot --init`);
+                                if(NL_OS === 'Darwin') await this.setupDXVK(cwd);
+                            };
+                        } catch {
+                            return showToast(`Error: ${compat} is not installed`);
+                        };
+                    };
+                } catch(e) {
+                    bin = compat.toLowerCase();
+                    if (!(await this.manager.utils.cmdExists(bin)))
+                        return showToast(`Error: ${compat} is not installed`);
+                };
+                
+                cmd = `${instance.customArgs ? `${instance.customArgs} ` : ""}WINEPREFIX="${prefix}" WINEDEBUG=-all ${bin} "${execPath}" ${joinedArgs}`;
             };
 
             if (compat === "PROTON") {
                 if (!(await this.manager.utils.cmdExists("proton"))) return showToast(`Error: proton is not installed`);
 
                 const prefix = `${cwd}/pfx`;
-                try { await Neutralino.filesystem.createDirectory(prefix); } catch { }
+                try { await Neutralino.filesystem.createDirectory(prefix); } catch {};
 
                 cmd =
                     `STEAM_COMPAT_CLIENT_INSTALL_PATH="" ` +

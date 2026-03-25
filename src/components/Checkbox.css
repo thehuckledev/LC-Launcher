@@ -1,0 +1,60 @@
+.mc-checkbox {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    font-family: sans-serif;
+}
+
+.mc-checkbox label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #e0e0e0;
+    font: 10pt 'Minecraftia', sans-serif;
+}
+
+.mc-checkbox input {
+    appearance: none;
+    height: calc(var(--textbox-size) / 1.5);
+    width: calc(var(--textbox-size) / 1.5);
+    cursor: pointer;
+    overflow: visible;
+
+    font: 12pt 'Minecraftia', sans-serif;
+
+    background: #999 url('./assets/ui/textbox.png') center / cover;
+    backdrop-filter: brightness(50%);
+    image-rendering: pixelated;
+    border: 2px solid #000;
+
+    padding: 8px 10px;
+    outline: none;
+    color: white;
+}
+
+.mc-checkbox input:active {
+    border-color: #1c1c1c;
+}
+
+.mc-checkbox input:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.mc-checkbox input:checked:after {
+    display: block;
+}
+
+.mc-checkbox input::after {
+    position: relative;
+    left: 50%;
+    top: 50%;
+    width: 10px;
+    height: 16px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: translate(-50%,-65%) rotate(45deg);
+    -ms-transform: translate(-50%,-65%) rotate(45deg);
+    transform: translate(-50%,-65%) rotate(45deg);
+}
