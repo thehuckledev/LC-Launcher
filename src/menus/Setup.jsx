@@ -12,7 +12,7 @@ import Checkbox from "../components/Checkbox.jsx";
 
 import minecraftLogo from "../assets/ui/minecraftlogo.png";
 
-import { defaultInstance } from "../data/defaultInstance.js";
+import { defaultInstances } from "../data/defaultInstances.js";
 
 export default function SetupMenu({ setMenu }) {
     const Manager = useManager();
@@ -133,15 +133,17 @@ export default function SetupMenu({ setMenu }) {
         };
     };
 
-    const makeDefaultInstance = async () => {
-        await Manager.instances.create(
-            defaultInstance.repo,
-            defaultInstance.tag,
-            defaultInstance.exec,
-            defaultInstance.target,
-            defaultInstance.compatibilityLayer,
-            defaultInstance.customArgs
-        );
+    const makeDefaultInstances = async () => {
+        for (const inst of defaultInstances) {
+            await Manager.instances.create(
+                inst.repo,
+                inst.tag,
+                inst.exec,
+                inst.target,
+                inst.compatibilityLayer,
+                inst.customArgs
+            );
+        };
     };
 
     const handleNext = async () => {
@@ -166,8 +168,8 @@ export default function SetupMenu({ setMenu }) {
                 await Manager.profiles.create(username);
             };
 
-            // make inst
-            await makeDefaultInstance();
+            // make insts
+            await makeDefaultInstances();
 
             // install wine
             if (canInstallWine === true && installWine === true) await installWineHelper();
