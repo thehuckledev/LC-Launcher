@@ -14,7 +14,7 @@ import minecraftLogo from "../assets/ui/minecraftlogo.png";
 
 import { defaultInstances } from "../data/defaultInstances.js";
 
-export default function SetupMenu({ setMenu }) {
+export default function SetupMenu({ setMenu, reloadData }) {
     const Manager = useManager();
     const { settings, updateSetting } = useSettings();
 
@@ -134,7 +134,7 @@ export default function SetupMenu({ setMenu }) {
     };
 
     const makeDefaultInstances = async () => {
-        for (const inst of defaultInstances) {
+        for await (const inst of defaultInstances) {
             await Manager.instances.create(
                 inst.repo,
                 inst.tag,
@@ -175,6 +175,7 @@ export default function SetupMenu({ setMenu }) {
             if (canInstallWine === true && installWine === true) await installWineHelper();
 
             await updateSetting('hasSetup', true);
+            await reloadData();
 
             showToast("Setup saved and completed");
             setMenu('main');
@@ -207,14 +208,14 @@ export default function SetupMenu({ setMenu }) {
                     </div>
                 </h1>
                 {processing ? (
-                    <h2>Setting up your launcher...</h2>
+                    <h2>Setting up your launcher... Please wait up to 3 mins!</h2>
                 ) : (
                     <>
                         <Textbox
                             id="chosen-username"
                             onchange={async (txt) => {
                                 if (txt.trim() === "") return setReady(false);
-                                if (/^[a-zA-Z0-9_]{3,16}$/.test(txt.trim())) {
+                                if (!(/^[a-zA-Z0-9_]{3,16}$/.test(txt.trim()))) {
                                     showToast("Your username must only have letters, numbers");
                                     return setReady(false);
                                 };

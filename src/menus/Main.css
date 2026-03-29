@@ -245,7 +245,7 @@
     left: 50%;
     transform: translateX(-50%);
     width: calc(100% - 80px);
-    animation: fadeIn 0.5s ease forwards .2s;
+    animation: fadeInProgress 0.5s ease forwards .2s;
 	opacity: 0;
 }
 
@@ -278,7 +278,7 @@
     transform: translateY(-50px);
 }
 
-@keyframes fadeIn {
+@keyframes fadeInProgress {
     from {
         opacity: 0;
     }

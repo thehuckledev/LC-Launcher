@@ -22,28 +22,26 @@ export default function App() {
     const { settings, loadSettings } = useSettings();
     const Manager = useManager();
 
+    async function loadData() {
+        const profiles = await Manager.profiles.list();
+        const instances = await Manager.instances.list();
+
+        if (profiles.length > 0) setProfile(profiles[0]);
+        if (instances.length > 0) {
+            const inst = await Manager.instances.get(instances[0]);
+            setInstance(inst);
+        };
+    };
+
     useEffect(() => {
         async function load() {
             const loadedSettings = await loadSettings();
             await Manager.init();
+            await loadData();
 
-            const profiles = await Manager.profiles.list();
-            const instances = await Manager.instances.list();
-
-            if (profiles.length > 0) setProfile(profiles[0]);
-            if (instances.length > 0) {
-                const inst = await Manager.instances.get(instances[0]);
-                setInstance(inst);
-            };
-
-            if (loadedSettings.hasSetup === true) {
-                setMenu("main");
-            } else {
-                setMenu("setup");
-            };
-
-            console.log("Loaded!");
+            setMenu(loadedSettings.hasSetup ? "main" : "setup");
             setLoaded(true);
+            console.log("Loaded!");
         };
 
         load();
@@ -87,7 +85,7 @@ export default function App() {
         <>
             {loaded &&
                 <Window title="" setMenu={setMenu}>
-                    {menu === "setup" &&      <SetupMenu setMenu={setMenu} />}
+                    {menu === "setup" &&      <SetupMenu setMenu={setMenu} reloadData={loadData} />}
                     {menu === "main" &&       <MainMenu setMenu={setMenu} instance={instance} profile={profile} />}
                     {menu === "options" &&    <OptionsMenu setMenu={setMenu} />}
                     {menu === "about" &&      <AboutMenu setMenu={setMenu} />}
