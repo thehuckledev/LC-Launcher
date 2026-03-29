@@ -12,8 +12,11 @@ import SetupMenu from "./menus/Setup.jsx";
 import MainMenu from "./menus/Main.jsx";
 import OptionsMenu from "./menus/Options.jsx";
 import AboutMenu from "./menus/About.jsx";
+import PatchNotesMenu from "./menus/PatchNotes.jsx";
 
 export default function App() {
+    const [profile, setProfile] = useState(null);
+    const [instance, setInstance] = useState(null);
     const [loaded, setLoaded] = useState(false);
     const [menu, setMenu] = useState("main");
     const { settings, loadSettings } = useSettings();
@@ -23,6 +26,15 @@ export default function App() {
         async function load() {
             const loadedSettings = await loadSettings();
             await Manager.init();
+
+            const profiles = await Manager.profiles.list();
+            const instances = await Manager.instances.list();
+
+            if (profiles.length > 0) setProfile(profiles[0]);
+            if (instances.length > 0) {
+                const inst = await Manager.instances.get(instances[0]);
+                setInstance(inst);
+            };
 
             if (loadedSettings.hasSetup === true) {
                 setMenu("main");
@@ -75,10 +87,11 @@ export default function App() {
         <>
             {loaded &&
                 <Window title="" setMenu={setMenu}>
-                    {menu === "setup" &&     <SetupMenu setMenu={setMenu} />}
-                    {menu === "main" &&     <MainMenu setMenu={setMenu} />}
-                    {menu === "options" &&  <OptionsMenu setMenu={setMenu} />}
-                    {menu === "about" &&    <AboutMenu setMenu={setMenu} />}
+                    {menu === "setup" &&      <SetupMenu setMenu={setMenu} />}
+                    {menu === "main" &&       <MainMenu setMenu={setMenu} instance={instance} profile={profile} />}
+                    {menu === "options" &&    <OptionsMenu setMenu={setMenu} />}
+                    {menu === "about" &&      <AboutMenu setMenu={setMenu} />}
+                    {menu === "patchnotes" && <PatchNotesMenu setMenu={setMenu} instance={instance} />}
                 </Window>
             }
 

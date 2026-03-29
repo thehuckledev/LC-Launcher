@@ -1,0 +1,135 @@
+#top-bar > h1 {
+    font: 20px 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+    margin: 0;
+}
+
+#patchnotes {
+    height: calc(100% - 83px);
+    overflow-y: auto;
+    padding: 24px 32px;
+    margin: 10px 20px;
+
+    background: rgba(15, 15, 15, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    color: rgba(255, 255, 255, 0.9);
+    font-family: "Inter", "Segoe UI", sans-serif;
+    line-height: 1.65;
+
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+#patchnotes h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 24px 0 12px;
+
+    color: #ffffff;
+
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 6px;
+}
+
+#patchnotes h2 {
+    font-size: 20px;
+    margin: 20px 0 10px;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+#patchnotes h3 {
+    font-size: 16px;
+    margin: 16px 0 8px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+#patchnotes p {
+    margin: 10px 0;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+#patchnotes ul {
+    margin: 10px 0 10px 20px;
+}
+
+#patchnotes li {
+    margin: 6px 0;
+}
+
+#patchnotes li::marker {
+    color: rgba(120, 170, 255, 0.9);
+}
+
+#patchnotes pre {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+
+    padding: 12px;
+    border-radius: 10px;
+    overflow-x: auto;
+    margin: 14px 0;
+
+    backdrop-filter: blur(6px);
+}
+
+#patchnotes code {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 3px 6px;
+    border-radius: 6px;
+
+    font-size: 0.9em;
+    color: #ffd580;
+}
+
+#patchnotes a {
+    color: #7ab0ff;
+    text-decoration: none;
+}
+
+#patchnotes a:hover {
+    text-decoration: underline;
+}
+
+#patchnotes blockquote {
+    border-left: 3px solid rgba(120, 170, 255, 0.8);
+    padding-left: 12px;
+    margin: 14px 0;
+
+    color: rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+}
+
+#patchnotes::-webkit-scrollbar {
+    width: 8px;
+}
+
+#patchnotes::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+
+#patchnotes::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#patchnotes {
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

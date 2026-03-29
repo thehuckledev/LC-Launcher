@@ -39,18 +39,17 @@ Legacy Community Launcher is a multi-platform launcher for Minecraft Legacy Cons
 - [x] Multiple Instances
 - [x] Each profile has its own data for each instance (Move program data over when launch and move back when closed)
 - [ ] Client Argument config UI
-- [ ] Headless server tab (You can create servers with UI)
-- [ ] Download automatic updates (You can add sources. Use MinecraftConsoles as default)
+- [x] Download automatic updates (You can add sources. Use MinecraftConsoles as default)
 - [ ] Mod Loader / Mod downloader support
 - [ ] Export Worlds
 - [ ] Import Worlds
 - [ ] Discord RPC Presence
-- [ ] Use wine to run apps on linux and macos
+- [x] Use wine to run apps on linux and macos
 - [ ] Add friends in the launcher which you can launch into their server. (uses discord rpc)
 - [ ] World editor UI. Inventory health food etc
 - [ ] Sandbox Game / Server
 - [x] Skin Editor / Change Skins
-- [ ] Patch updates from Git repo
+- [x] Patch updates from Git repo
 
 <h2>Installation</h2>
 
