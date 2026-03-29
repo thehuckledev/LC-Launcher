@@ -17,6 +17,7 @@ export default defineConfig({
         target: 'safari15',
         minify: 'esbuild',
         sourcemap: false,
+        assetsInlineLimit: 0
     },
     plugins: [
         preact(),

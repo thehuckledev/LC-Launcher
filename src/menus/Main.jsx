@@ -18,6 +18,8 @@ export default function MainMenu({ setMenu }) {
     
     const [profile, setProfile] = useState(null);
     const [instance, setInstance] = useState(null);
+    const [progress, setProgress] = useState({ active: false, status: '', percent: 0 });
+    const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
         async function loadData() {
@@ -31,6 +33,18 @@ export default function MainMenu({ setMenu }) {
             };
         };
         loadData();
+    }, []);
+
+    useEffect(() => {
+        const handleProgress = (e) => setProgress(e.detail);
+        window.addEventListener('installProgress', handleProgress);
+        return () => window.removeEventListener('installProgress', handleProgress);
+    }, []);
+
+    useEffect(() => {
+        const handleProcessing = (e) => setProcessing(e.detail);
+        window.addEventListener('execProcessing', handleProcessing);
+        return () => window.removeEventListener('execProcessing', handleProcessing);
     }, []);
 
     function parseAccountType(type) {
@@ -61,16 +75,32 @@ export default function MainMenu({ setMenu }) {
                     </div>
                 </div>
                 <div id="main-actions">
-                    <Button id="news-button">
+                    <Button id="news-button" disabled={processing} pushable={!processing}>
                         <img src={newsIcon} draggable={false} />
                     </Button>
-                    <Button id="options-button" onclick={() => setMenu('options')}>
+                    <Button id="options-button" disabled={processing} pushable={!processing} onclick={() => setMenu('options')}>
                         <img src={optionsIcon} draggable={false} />
                     </Button>
                 </div>
             </div>
             <div id="bottom-bar">
-                <img id="main-logo" src={minecraftLogo} draggable={false} />
+                <img
+                    id="main-logo"
+                    className={progress.active ? "logo-active" : ""}
+                    src={minecraftLogo}
+                    draggable={false}
+                />
+                {progress.active && (
+                    <div id="progress-container">
+                        <h2 id="progress-status">{progress.label} {progress.eta && `(${progress.eta})`}</h2>
+                        <div id="progress-bar">
+                            <div
+                                id="progress-fill"
+                                style={{ width: `${progress.percent}%` }}
+                            />
+                        </div>
+                    </div>
+                )}
                 <div id="launch-options-bar">
                     <div id="instances">
                         <img id="instance-icon" src={instanceIcon} draggable={false} />
@@ -80,13 +110,13 @@ export default function MainMenu({ setMenu }) {
                         </div>
                     </div>
                     <div id="main-actions">
-                        <Button id="discover-button" disabled={!instance?.id}>
+                        <Button id="discover-button" disabled={!instance?.id || progress.active || processing} pushable={!processing}>
                             <img src={discoverIcon} draggable={false} />
                         </Button>
-                        <Button id="play-button" disabled={!instance?.id || !profile?.id} onclick={() => Manager.exec.launch(instance?.id, profile?.id)}>
+                        <Button id="play-button" disabled={!instance?.id || !profile?.id || progress.active || processing} pushable={!processing} onclick={() => Manager.exec.launch(instance?.id, profile?.id)}>
                             Play
                         </Button>
-                        <Button id="servers-button" disabled={!instance?.id}>
+                        <Button id="servers-button" disabled={!instance?.id || progress.active || processing} pushable={!processing}>
                             <img src={serversIcon} draggable={false} />
                         </Button>
                     </div>

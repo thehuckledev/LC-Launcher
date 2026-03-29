@@ -1,6 +1,8 @@
 import Neutralino from "@neutralinojs/lib";
 import { showToast } from "../components/Toast";
 import { getSetting } from "../utils/settingsManager.js";
+import Download from "../utils/download.js";
+import Unzip from "../utils/unzip.js";
 
 export class Exec {
     constructor(manager) {
@@ -92,24 +94,32 @@ export class Exec {
             await this.manager.utils.ensureDir(instancePath);
             await this.manager.utils.ensureDir(await Neutralino.filesystem.getJoinedPath(instancePath, 'content'));
 
-            showToast(`Downloading instance${isUpdate ?? ' update'}...`); //DONE TODO make it say downloading without update keyword if its not ACTUALLING FUCKING UPDATING!
             console.log("Downloading build...");
-            const download = await Neutralino.os.execCommand(`curl -L "${asset.browser_download_url}" -o "${zipPath}"`);
-            if (download.exitCode !== 0) return showToast("Error: Asset download failed");
+            const download = await new Download(asset.browser_download_url, { label: `Downloading instance${isUpdate ? ' update' : ''}` });
+            try {
+                await download.start(zipPath);
+            } catch(e) {
+                console.error(e);
+                return showToast("Error: Asset download failed");
+            };
 
-            showToast(`Extracting instance${isUpdate ?? ' update'}...`);
             console.log("Extracting build...");
             await this.backupPreserved(instancePath);
-            const unzip = await Neutralino.os.execCommand(`unzip -o "${zipPath}" -d "${instancePath}/content"`);
+            const unzipContent = new Unzip(zipPath, `${instancePath}/content`, { label: `Extracting instance${isUpdate ? ' update' : ''}` });
+            try {
+                await unzipContent.start();
+            } catch(e) {
+                console.error(e);
+                return showToast("Error: Asset unzip failed");
+            };
             await this.restorePreserved(instancePath);
-            if (unzip.exitCode !== 0) return showToast("Error: Asset unzip failed");
 
             instance.assetId = asset.id;
             instance.installed = true;
 
             await this.manager.utils.writeJSON(`${instancePath}/instance.json`, instance);
             console.log("Instance installed");
-            showToast(`Instance${isUpdate ?? ' update'} completed`);
+            showToast(`Instance${isUpdate ? ' update' : ''} completed`);
         } catch (err) {
             console.error(err);
             showToast(`Error: ${err.message}`);
@@ -154,6 +164,15 @@ export class Exec {
     };
 
     async launch(instanceId, profileId) {
+        try {
+            window.dispatchEvent(new CustomEvent("execProcessing", { detail: true }));
+            await this._launch(instanceId, profileId);
+        } catch {} finally {
+            window.dispatchEvent(new CustomEvent("execProcessing", { detail: false }));
+        };
+    };
+
+    async _launch(instanceId, profileId) {
         if (!instanceId) return showToast("You need to create an instance");
         if (!profileId) return showToast("You need to create a profile");
 
