@@ -196,6 +196,12 @@ export default function SetupMenu({ setMenu, reloadData }) {
         };
     };
 
+    //TODO add keep launcher open when game running option
+    //TODO add discord rpc option
+    //TODO add data dir option
+    //TODO add music option
+    // TODO make an options setup menu and also add the above to the normal options menu also
+
     return (
         <>
             <img id="setup-logo" src={minecraftLogo} draggable={false} />

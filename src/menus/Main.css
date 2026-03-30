@@ -73,7 +73,7 @@
 	opacity: 0;
 }
 
-#servers-button, #discover-button {
+#servers-button, #worlds-button {
     width: 40px;
 }
 
@@ -82,7 +82,7 @@
     opacity: 0;
 }
 
-.open-anim #discover-button {
+.open-anim #worlds-button {
 	animation: fade-slide-left .3s cubic-bezier(.17,.67,.57,1.42) 1.3s forwards;
     opacity: 0;
 }

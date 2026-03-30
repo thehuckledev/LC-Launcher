@@ -10,7 +10,7 @@ import instanceIcon from "../assets/icons/instance.png";
 import newsIcon from "../assets/buttons/news.svg";
 import optionsIcon from "../assets/buttons/options.svg";
 import minecraftLogo from "../assets/ui/minecraftlogo.png";
-import discoverIcon from "../assets/buttons/discover.svg";
+import worldsIcon from "../assets/buttons/worlds.svg";
 import serversIcon from "../assets/buttons/servers.svg";
 
 export default function MainMenu({ setMenu, instance, profile }) {
@@ -94,8 +94,8 @@ export default function MainMenu({ setMenu, instance, profile }) {
                         </div>
                     </div>
                     <div id="main-actions">
-                        <Button id="discover-button" disabled={!instance?.id || progress.active || processing} pushable={!processing}>
-                            <img src={discoverIcon} draggable={false} />
+                        <Button id="worlds-button" disabled={!instance?.id || progress.active || processing} pushable={!processing}>
+                            <img src={worldsIcon} draggable={false} />
                         </Button>
                         <Button id="play-button" disabled={!instance?.id || !profile?.id || progress.active || processing} pushable={!processing} onclick={() => Manager.exec.launch(instance?.id, profile?.id)}>
                             Play
