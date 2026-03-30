@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "preact/hooks";
 import Neutralino from "@neutralinojs/lib";
 
-import { startMusic, stopMusic, setVolume } from "./core/music.js";
+import { startMusic, stopMusic, setVolume } from "./utils/music.js";
 import { useSettings } from "./utils/SettingsStore.jsx";
 import { useManager } from "./utils/ManagerProvider.jsx";
 
