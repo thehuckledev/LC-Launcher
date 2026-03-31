@@ -104,6 +104,7 @@ else
 fi
 
 for APP_ARCH in "${APP_ARCH_LIST[@]}"; do
+    rm -rf "./dist/linux_${APP_ARCH}"
 
     APP_DST=./dist/linux_${APP_ARCH}/${APP_NAME}
 

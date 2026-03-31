@@ -82,6 +82,7 @@ else
 fi
 
 for APP_ARCH in "${APP_ARCH_LIST[@]}"; do
+    rm -rf "./dist/mac_${APP_ARCH}"
 
     APP_DST=./dist/mac_${APP_ARCH}/${APP_NAME}.app
     APP_MACOS=${APP_DST}/Contents/MacOS

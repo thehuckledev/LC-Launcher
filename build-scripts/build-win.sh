@@ -75,6 +75,7 @@ else
 fi
 
 for APP_ARCH in "${APP_ARCH_LIST[@]}"; do
+    rm -rf "./dist/win_${APP_ARCH}"
 
     APP_DST=./dist/win_${APP_ARCH}
 
