@@ -5,11 +5,11 @@ const audioElement = new Audio();
 audioElement.volume = 1;
 
 const audioFiles = [
-    new URL("/assets/music/Snapdragon_-_Therm#.opus", import.meta.url).href,
-    new URL("/assets/music/Aria_Math_-_C418#.opus", import.meta.url).href,
-    new URL("/assets/music/Far_-_C418#.opus", import.meta.url).href,
-    new URL("/assets/music/Kyoto_-_C418#.opus", import.meta.url).href,
-    new URL("/assets/music/Mutation_-_C418#.opus", import.meta.url).href
+    new URL("../assets/music/Snapdragon_-_Therm#.opus", import.meta.url).href,
+    new URL("../assets/music/Aria_Math_-_C418#.opus", import.meta.url).href,
+    new URL("../assets/music/Far_-_C418#.opus", import.meta.url).href,
+    new URL("../assets/music/Kyoto_-_C418#.opus", import.meta.url).href,
+    new URL("../assets/music/Mutation_-_C418#.opus", import.meta.url).href
 ];
 
 let initialized = false;
