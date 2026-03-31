@@ -5,11 +5,11 @@ const audioElement = new Audio();
 audioElement.volume = 1;
 
 const audioFiles = [
-    new URL("../assets/music/Snapdragon_-_Therm.mp3", import.meta.url).href,
-    new URL("../assets/music/Aria_Math_-_C418.mp3", import.meta.url).href,
-    new URL("../assets/music/Far_-_C418.mp3", import.meta.url).href,
-    new URL("../assets/music/Kyoto_-_C418.mp3", import.meta.url).href,
-    new URL("../assets/music/Mutation_-_C418.mp3", import.meta.url).href
+    new URL("../assets/music/Snapdragon_-_Therm.opus", import.meta.url).href,
+    new URL("../assets/music/Aria_Math_-_C418.opus", import.meta.url).href,
+    new URL("../assets/music/Far_-_C418.opus", import.meta.url).href,
+    new URL("../assets/music/Kyoto_-_C418.opus", import.meta.url).href,
+    new URL("../assets/music/Mutation_-_C418.opus", import.meta.url).href
 ];
 
 let initialized = false;
@@ -66,7 +66,7 @@ function startMovement() {
 
 function stopMovement() {
     if (!animationId) return;
-    
+
     cancelAnimationFrame(animationId);
     animationId = null;
 };
@@ -91,7 +91,7 @@ async function playSong() {
     await audioElement.play();
 
     startMovement();
-    showToast(`Now playing: ${file.replace(".mp3", "").replaceAll("_", " ")}`);
+    showToast(`Now playing: ${file.split('/').pop().replace(".opus", "").replaceAll("_", " ")}`);
 };
 
 audioElement.addEventListener("ended", () => {

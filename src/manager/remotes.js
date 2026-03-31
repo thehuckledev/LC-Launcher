@@ -6,7 +6,9 @@ export class Remotes {
     };
 
     async list(repo) {
-        const res = await fetch(`https://api.github.com/repos/${repo}/releases`);
+        const res = await fetch(`https://api.github.com/repos/${repo}/releases`, {
+            cache: "no-store"
+        });
         return await res.json();
     };
 

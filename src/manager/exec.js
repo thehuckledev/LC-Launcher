@@ -151,7 +151,9 @@ export class Exec {
                 return console.log("Skin written to:", filePath);
             };
             
-            const response = await fetch(dataURI);
+            const response = await fetch(dataURI, {
+                cache: "no-store"
+            });
             const arrayBuffer = await response.arrayBuffer();
 
             await this.manager.utils.ensureDir(`${baseDir}/Common/res/mob`);

@@ -14,10 +14,17 @@ export default defineConfig({
     build: {
         emptyOutDir: true,
         outDir: '../public',
-        target: 'safari15',
+        target: 'es2020',
         minify: 'esbuild',
         sourcemap: false,
-        assetsInlineLimit: 0
+        assetsInlineLimit: 0,
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    vendor: ['preact']
+                }
+            }
+        }
     },
     plugins: [
         preact(),
