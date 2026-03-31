@@ -22,7 +22,7 @@
 
     font: 12pt 'Minecraftia', sans-serif;
 
-    background: #999 url('./assets/ui/textbox.png') center / cover;
+    background: #999 url('/assets/ui/textbox.png') center / cover;
     backdrop-filter: brightness(50%);
     image-rendering: pixelated;
     border: 2px solid #000;
