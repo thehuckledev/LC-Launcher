@@ -10,18 +10,15 @@
     padding: 24px 32px;
     margin: 10px 20px;
 
-    background: rgba(15, 15, 15, 0.45);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.059);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
 
     color: rgba(255, 255, 255, 0.9);
-    font-family: "Inter", "Segoe UI", sans-serif;
-    line-height: 1.65;
-
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    font: 10pt 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
 }
 
 #patchnotes h1 {
@@ -31,7 +28,7 @@
 
     color: #ffffff;
 
-    text-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+    text-shadow: 3px 3px #000A;
 
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     padding-bottom: 6px;
