@@ -169,7 +169,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
     };
 
     const makeDefaultInstances = async () => { // TODO make it use the name, also add support for non github projects
-        for await (const inst of defaultInstances) { // TODO make instance icons
+        for await (const inst of defaultInstances) { //DONE TODO make instance icons
             await Manager.instances.create(
                 inst.icon,
                 inst.name,
