@@ -381,6 +381,7 @@ export class Exec {
 
                                 Neutralino.events.off('spawnedProcess', handler);
                                 if(keepLauncherOpen === false) await Neutralino.window.show();
+                                window.whenQuitting = undefined;
                                 resolve();
                                 break;
                         };
@@ -390,6 +391,7 @@ export class Exec {
             } catch(e) {
                 console.log(e);
                 if(keepLauncherOpen === false) await Neutralino.window.show();
+                window.whenQuitting = undefined;
                 resolve();
             };
         });
