@@ -330,20 +330,68 @@ export class Exec {
         showToast("Launching instance...", 1000);
         console.log("Launching:", cmd);
 
-        const startTime = Date.now();
-        const proc = await Neutralino.os.execCommand(cmd, { cwd });
-        const duration = Date.now() - startTime;
-        const sessionSeconds = Math.floor(duration / 1000);
+        const keepLauncherOpen = await getSetting("keepLauncherOpen");
+        return new Promise(async (resolve) => {
+            try { // TODO add a logs window with colors for info, error etc
+                if(keepLauncherOpen === false) setTimeout(() => { Neutralino.window.hide(); }, 2000);
+                
+                const startTime = Date.now();
+                const proc = await Neutralino.os.spawnProcess(cmd, { cwd });
+                window.whenQuitting = async (ev) => { // close game also
+                    if (!proc?.pid) return;
+                    try {
+                        console.log("Killing process:", proc.pid);
 
-        const instancePath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instanceId, "instance.json");
-        const updatedInstance = await this.manager.instances.get(instanceId);
+                        if (NL_OS === "Windows") {
+                            await Neutralino.os.execCommand(`taskkill /PID ${proc.pid} /T /F`);
+                        } else {
+                            await Neutralino.os.execCommand(`pkill -f wine`);
+                            await Neutralino.os.execCommand(`kill -9 -${proc.pid}`);
+                        };
+                    } catch (e) {
+                        console.error("Failed to kill process tree:", e);
+                    };
+                    await new Promise(r => setTimeout(r, 200));
+                };
+                const handler = async (evt) => {
+                    if (proc.id == evt.detail.id) {
+                        switch (evt.detail.action) {
+                            case 'stdOut':
+                                console.log(evt.detail.data);
+                                break;
 
-        updatedInstance.playtime = (updatedInstance.playtime || 0) + sessionSeconds;
-        await this.manager.utils.writeJSON(instancePath, updatedInstance);
+                            case 'stdErr':
+                                console.error(evt.detail.data);
+                                break;
 
-        if (proc.exitCode !== 0 && duration < 2000) {
-            showToast("Error: Failed to launch instance");
-            console.error(proc.stdErr);
-        };
+                            case 'exit':
+                                const duration = Date.now() - startTime;
+                                const sessionSeconds = Math.floor(duration / 1000);
+
+                                const instancePath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instanceId, "instance.json");
+                                const updatedInstance = await this.manager.instances.get(instanceId);
+
+                                updatedInstance.playtime = (updatedInstance.playtime || 0) + sessionSeconds;
+                                await this.manager.utils.writeJSON(instancePath, updatedInstance);
+
+                                if (proc.exitCode !== 0 && duration < 2000) {
+                                    showToast("Error: Failed to launch instance");
+                                    console.error(proc.stdErr);
+                                };
+
+                                Neutralino.events.off('spawnedProcess', handler);
+                                if(keepLauncherOpen === false) await Neutralino.window.show();
+                                resolve();
+                                break;
+                        };
+                    };
+                };
+                Neutralino.events.on('spawnedProcess', handler);
+            } catch(e) {
+                console.log(e);
+                if(keepLauncherOpen === false) await Neutralino.window.show();
+                resolve();
+            };
+        });
     };
 };

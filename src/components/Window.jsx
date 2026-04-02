@@ -57,7 +57,10 @@ export default function Window({ title, showClose = true, showMinimize = true, s
             await Neutralino.window.setMainMenu(menu);
             await Neutralino.events.on('mainMenuItemClicked', async (evt) => {
                 if (evt.detail.id == "about") setMenu('about');
-                if (evt.detail.id == "quit") await Neutralino.app.exit();
+                if (evt.detail.id == "quit") {
+                    if (window.whenQuitting) await window.whenQuitting();
+                    await Neutralino.app.exit();
+                };
             });
             console.log("Set Main Menu");
         };
@@ -157,7 +160,10 @@ export default function Window({ title, showClose = true, showMinimize = true, s
                             </div>
                         }
                         {showClose &&
-                            <div class="button" id="close-button" onClick={() => Neutralino.app.exit()}>
+                            <div class="button" id="close-button" onClick={async() => {
+                                if(window.whenQuitting) await window.whenQuitting();
+                                await Neutralino.app.exit();
+                            }}>
                                 <img class="icon" src={closeIcon} draggable={false} />
                             </div>
                         }

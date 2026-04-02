@@ -60,6 +60,9 @@ export default function OptionsMenu({ setMenu }) {
                 </div>
             </div>
             <div id="options">
+                <Button onclick={() => updateSetting('keepLauncherOpen', !settings.keepLauncherOpen)}>
+                    {settings.keepLauncherOpen == false ? 'Keep Launcher Open: Disabled' : 'Keep Launcher Open: Enabled'}
+                </Button>
                 <Button onclick={() => updateSetting('fullscreen', !settings.fullscreen)}>
                     {settings.fullscreen == false ? 'Fullscreen: Disabled' : 'Fullscreen: Enabled'}
                 </Button>
@@ -138,7 +141,10 @@ export default function OptionsMenu({ setMenu }) {
                             await Neutralino.filesystem.remove(appPath);
                         };
                         showToast("Erased data and deleted the app, quitting...");
-                        setTimeout(async() => await Neutralino.app.exit(), 200);
+                        setTimeout(async() => {
+                            if(window.whenQuitting) await window.whenQuitting();
+                            await Neutralino.app.exit();
+                        }, 200);
                     };
                 }}>
                     Uninstall
