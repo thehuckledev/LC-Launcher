@@ -358,10 +358,16 @@ export class Exec {
                         switch (evt.detail.action) {
                             case 'stdOut':
                                 console.log(evt.detail.data);
+                                window.dispatchEvent(new CustomEvent("gameLog", {
+                                    detail: { type: "out", message: evt.detail.data }
+                                }));
                                 break;
 
                             case 'stdErr':
                                 console.error(evt.detail.data);
+                                window.dispatchEvent(new CustomEvent("gameLog", {
+                                    detail: { type: "err", message: evt.detail.data }
+                                }));
                                 break;
 
                             case 'exit':

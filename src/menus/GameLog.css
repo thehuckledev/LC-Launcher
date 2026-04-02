@@ -1,0 +1,18 @@
+#top-bar > h1 {
+    font: 20px 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+    margin: 0;
+}
+
+#game-log {
+    background: #000;
+    color: #ccc;
+    font-family: monospace;
+    padding: 10px;
+    height: 250px;
+    overflow-y: auto;
+}
+
+#game-log .err {
+    color: #ff6b6b;
+}
