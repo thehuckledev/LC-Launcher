@@ -21,17 +21,21 @@ export class Instances {
         };
     };
 
-    async create(icon, name, repo, tag, exec, target, compatibilityLayer = "DIRECT", customArgs = "") {
+    async create(icon, name, serviceType, serviceDomain, repo, tag, exec, target, compatibilityLayer = "DIRECT", customArgs = "") {
         const id = crypto.randomUUID();
         const path = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id);
 
         await this.manager.utils.ensureDir(path);
         await this.manager.utils.ensureDir(await Neutralino.filesystem.getJoinedPath(path, "content"));
 
+        if (!["GITHUB","GITLAB","GITEA"].includes(serviceType)) return new Error("serviceType isn't supported yet. Only GITHUB,GITLAB,GITEA are supported at the moment.");
+
         const instance = {
             icon: icon || undefined,
             name: name || repo,
             id,
+            serviceType: serviceType || "GITHUB",
+            serviceDomain: serviceDomain || "github.com",
             repo,
             tag,
             exec,

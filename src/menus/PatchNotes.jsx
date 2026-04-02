@@ -14,7 +14,7 @@ export default function PatchNotesMenu({ setMenu, instance }) {
 
     useEffect(() => {
         async function load() {
-            const notes = await Manager.remotes.patchnotes(instance.repo, instance.tag);
+            const notes = await Manager.remotes.patchnotes(instance, instance.tag);
             setPatchnotes(notes);
         };
 

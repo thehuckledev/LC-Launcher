@@ -59,7 +59,7 @@ export default function MainMenu({ setMenu, instance, profile }) {
                     </div>
                 </div>
                 <div id="main-actions">
-                    <Button id="news-button" disabled={processing} pushable={!processing} onclick={() => setMenu('patchnotes')}>
+                    <Button id="news-button" disabled={!instance?.id || processing} pushable={!processing} onclick={() => setMenu('patchnotes')}>
                         <img src={newsIcon} draggable={false} />
                     </Button>
                     <Button id="options-button" disabled={processing} pushable={!processing} onclick={() => setMenu('options')}>

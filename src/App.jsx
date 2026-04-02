@@ -28,7 +28,7 @@ export default function App() {
 
         if (profiles.length > 0) setProfile(profiles[0]);
         if (instances.length > 0) {
-            const inst = await Manager.instances.get(instances[0]);
+            const inst = await Manager.instances.get(instances[2]);
             setInstance(inst);
         };
     };

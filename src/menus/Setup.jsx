@@ -173,6 +173,8 @@ export default function SetupMenu({ setMenu, reloadData }) {
             await Manager.instances.create(
                 inst.icon,
                 inst.name,
+                inst.serviceType,
+                inst.serviceDomain,
                 inst.repo,
                 inst.tag,
                 inst.exec,

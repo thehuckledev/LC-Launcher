@@ -78,7 +78,7 @@ export class Exec {
         try {
             if (!navigator.onLine) return showToast("Error: You must be online to install an instance");
 
-            const release = await this.manager.remotes.get(instance.repo, instance.tag);
+            const release = await this.manager.remotes.get(instance, instance.tag);
             if (!release) return showToast("Error: Release not found");
 
             if (!release.assets || release.assets.length === 0)
@@ -132,7 +132,7 @@ export class Exec {
     };
 
     async needsUpdate(instance) {
-        const release = await this.manager.remotes.get(instance.repo, instance.tag);
+        const release = await this.manager.remotes.get(instance, instance.tag);
         if (!release) return false;
 
         const asset = instance.target
@@ -256,11 +256,11 @@ export class Exec {
 
             if (compat === "WINE" || compat === "WINE64") {
                 let bin;
+                const dataDir = await getSetting("dataDirectory");
                 const prefix = `${dataDir}/pfx`;
 
                 //DONE TODO make the cmd a fallback for the built in binaries and add a popup which prompts if they want to install using prebuilt binaries
                 try {
-                    const dataDir = await getSetting("dataDirectory");
                     await Neutralino.filesystem.getStats(`${dataDir}/libraries/wine-crossover/bin/`);
                     // check if prebuilt installed above
 
