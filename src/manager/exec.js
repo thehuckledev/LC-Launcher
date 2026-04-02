@@ -19,9 +19,10 @@ export class Exec {
         ];
     };
 
-    async setupDXVK(instancePath) {
-        const dxvkLibDir = `${await getSetting("dataDirectory")}/libraries/dxvk`;
-        const winePrefix = `${instancePath}/pfx`;
+    async setupDXVK() {
+        const dataDir = await getSetting("dataDirectory");
+        const dxvkLibDir = `${dataDir}/libraries/dxvk`;
+        const winePrefix = `${dataDir}/pfx`;
 
         const system32 = `${winePrefix}/drive_c/windows/system32`;
         const syswow64 = `${winePrefix}/drive_c/windows/syswow64`;
@@ -187,9 +188,15 @@ export class Exec {
         if (!instance.installed) await this.installInstance(instance);
         if (!instance.installed) return;
 
-        if (await this.needsUpdate(instance)) {
-            console.log("Updating instance...");
-            await this.installInstance(instance, true);
+        if (await this.needsUpdate(instance)) { //DONE TODO make it prompt rather than forcing an update
+            let shouldDo = await Neutralino.os
+                        .showMessageBox('Instance Update',
+                                        'Do you want to update your current instance?',
+                                        'YES_NO', 'WARNING');
+            if(shouldDo == 'YES') {
+                console.log("Updating instance...");
+                await this.installInstance(instance, true);
+            };
         };
 
         // save skin from datauri
@@ -249,7 +256,7 @@ export class Exec {
 
             if (compat === "WINE" || compat === "WINE64") {
                 let bin;
-                const prefix = `${cwd}/pfx`;
+                const prefix = `${dataDir}/pfx`;
 
                 //DONE TODO make the cmd a fallback for the built in binaries and add a popup which prompts if they want to install using prebuilt binaries
                 try {
@@ -271,7 +278,7 @@ export class Exec {
                                 try { await Neutralino.filesystem.createDirectory(prefix); } catch {};
 
                                 await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" WINEDEBUG=-all ${bin} wineboot --init`);
-                                if(NL_OS === 'Darwin') await this.setupDXVK(cwd);
+                                if(NL_OS === 'Darwin') await this.setupDXVK();
                             };
                         } catch {
                             return showToast(`Error: ${compat} is not installed`);
@@ -288,7 +295,7 @@ export class Exec {
                                 try { await Neutralino.filesystem.createDirectory(prefix); } catch {};
 
                                 await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" WINEDEBUG=-all ${bin} wineboot --init`);
-                                if(NL_OS === 'Darwin') await this.setupDXVK(cwd);
+                                if(NL_OS === 'Darwin') await this.setupDXVK();
                             };
                         } catch {
                             return showToast(`Error: ${compat} is not installed`);
@@ -306,7 +313,7 @@ export class Exec {
             if (compat === "PROTON") {
                 if (!(await this.manager.utils.cmdExists("proton"))) return showToast(`Error: proton is not installed`);
 
-                const prefix = `${cwd}/pfx`;
+                const prefix = `${dataDir}/pfx`;
                 try { await Neutralino.filesystem.createDirectory(prefix); } catch {};
 
                 cmd =

@@ -84,6 +84,7 @@ p {
 
 #window-background>div {
     display: block;
+    background-color: #000;
     background-image: url('/assets/ui/background.jpeg');
     background-size: cover;
     background-position: center;

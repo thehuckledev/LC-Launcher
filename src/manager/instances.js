@@ -21,7 +21,7 @@ export class Instances {
         };
     };
 
-    async create(repo, tag, exec, target, compatibilityLayer = "DIRECT", customArgs = "") {
+    async create(icon, name, repo, tag, exec, target, compatibilityLayer = "DIRECT", customArgs = "") {
         const id = crypto.randomUUID();
         const path = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id);
 
@@ -29,7 +29,8 @@ export class Instances {
         await this.manager.utils.ensureDir(await Neutralino.filesystem.getJoinedPath(path, "content"));
 
         const instance = {
-            name: repo,
+            icon: icon || undefined,
+            name: name || repo,
             id,
             repo,
             tag,

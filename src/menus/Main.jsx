@@ -87,7 +87,7 @@ export default function MainMenu({ setMenu, instance, profile }) {
                 )}
                 <div id="launch-options-bar">
                     <div id="instances">
-                        <img id="instance-icon" src={instanceIcon} draggable={false} />
+                        <img id="instance-icon" src={instance?.icon || instanceIcon} draggable={false} />
                         <div id="instance-details">
                             <h1>{instance?.name || "No Instance"}</h1>
                             <h2>{instance?.tag || "N/A"}</h2>

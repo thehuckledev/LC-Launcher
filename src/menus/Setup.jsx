@@ -108,6 +108,39 @@ export default function SetupMenu({ setMenu, reloadData }) {
             await Neutralino.filesystem.remove(wineTempDir);
             await Neutralino.filesystem.remove(archivePath);
 
+            async function setupDXVK() {
+                const dxvkLibDir = `${settings.dataDirectory}/libraries/dxvk`;
+                const winePrefix = `${settings.dataDirectory}/pfx`;
+        
+                const system32 = `${winePrefix}/drive_c/windows/system32`;
+                const syswow64 = `${winePrefix}/drive_c/windows/syswow64`;
+        
+                try {
+                    await Neutralino.os.execCommand(`cp -f "${dxvkLibDir}/x64/"*.dll "${system32}"`);
+                    await Neutralino.os.execCommand(`cp -f "${dxvkLibDir}/x32/"*.dll "${syswow64}"`);
+        
+                    showToast("DXVK Applied to Wine", 2000);
+                } catch (err) {
+                    console.error("DXVK setup failed:", err);
+                    showToast("Failed to apply DXVK");
+                };
+            };
+
+            async function setupCDrive() {
+                const internalWinePath = `${settings.dataDirectory}/libraries/wine-crossover/bin/wine`;
+                const bin = `"${internalWinePath}"`;
+                const prefix = `${settings.dataDirectory}/pfx`;
+                try {
+                    await Neutralino.filesystem.getStats(prefix);
+                } catch {
+                    showToast('Setting up C Drive...');
+                    try { await Neutralino.filesystem.createDirectory(prefix); } catch {};
+
+                    await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" WINEDEBUG=-all ${bin} wineboot --init`);
+                    if(NL_OS === 'Darwin') await setupDXVK();
+                };
+            };
+
             if (NL_OS === "Darwin") {
                 showToast("Wine installed. Installing DXVK...", 3000);
 
@@ -123,8 +156,10 @@ export default function SetupMenu({ setMenu, reloadData }) {
                 await Neutralino.os.execCommand(`tar -xf "${dxvkPath}" -C "${dxvkDir}" --strip-components=1`);
 
                 await Neutralino.filesystem.remove(dxvkPath).catch(() => {});
+                await setupCDrive();
                 showToast("Wine & DXVK installed successfully", 2000);
             } else {
+                await setupCDrive();
                 showToast("Wine installed successfully", 2000);
             };
         } catch (err) {
@@ -133,9 +168,11 @@ export default function SetupMenu({ setMenu, reloadData }) {
         };
     };
 
-    const makeDefaultInstances = async () => { //TODO make it use the name, also add support for non github projects
+    const makeDefaultInstances = async () => { // TODO make it use the name, also add support for non github projects
         for await (const inst of defaultInstances) { // TODO make instance icons
             await Manager.instances.create(
+                inst.icon,
+                inst.name,
                 inst.repo,
                 inst.tag,
                 inst.exec,
@@ -196,10 +233,10 @@ export default function SetupMenu({ setMenu, reloadData }) {
         };
     };
 
-    //TODO add keep launcher open when game running option
-    //TODO add discord rpc option
-    //TODO add data dir option
-    //TODO add music option
+    // TODO add keep launcher open when game running option
+    // TODO add discord rpc option
+    // TODO add data dir option
+    // TODO add music option
     // TODO make an options setup menu and also add the above to the normal options menu also
 
     return (

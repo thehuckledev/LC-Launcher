@@ -3,6 +3,7 @@ import "./Options.css";
 import Neutralino from "@neutralinojs/lib";
 
 import { useSettings } from "../utils/SettingsStore.jsx";
+import { showToast } from "../components/Toast.jsx";
 
 import Textbox from "../components/Textbox.jsx";
 import Button from "../components/Button.jsx";
@@ -110,6 +111,37 @@ export default function OptionsMenu({ setMenu }) {
                     setTimeout(async() => await Neutralino.app.restartProcess(), 200);
                 }}>
                     Select data path
+                </Button>
+                <Button type="destructive" onclick={async () => {
+                    let shouldDo = await Neutralino.os
+                                .showMessageBox('Confirm',
+                                                'Are you sure you want to erase all data?',
+                                                'YES_NO', 'WARNING');
+                    if(shouldDo == 'YES') {
+                        await Neutralino.filesystem.remove(settings.dataDirectory);
+                        showToast("Erased data, restarting...");
+                        setTimeout(async() => await Neutralino.app.restartProcess(), 200);
+                    };
+                }}>
+                    Erase all data
+                </Button>
+                <Button type="destructive" onclick={async () => {
+                    let shouldDo = await Neutralino.os
+                                .showMessageBox('Confirm',
+                                                'Are you sure you want to uninstall?',
+                                                'YES_NO', 'WARNING');
+                    if(shouldDo == 'YES') {
+                        if (NL_OS === "Darwin") { // TODO add windows and linux uninstall
+                            const dataPath = await Neutralino.filesystem.getJoinedPath(settings.dataDirectory, "../");
+                            const appPath = await Neutralino.filesystem.getJoinedPath(NL_PATH, "../../");
+                            await Neutralino.filesystem.remove(dataPath);
+                            await Neutralino.filesystem.remove(appPath);
+                        };
+                        showToast("Erased data and deleted the app, quitting...");
+                        setTimeout(async() => await Neutralino.app.exit(), 200);
+                    };
+                }}>
+                    Uninstall
                 </Button>
             </div>
         </>

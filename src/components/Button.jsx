@@ -6,11 +6,11 @@ import { useSettings } from "../utils/SettingsStore.jsx";
 
 const sound = new Audio(clickSfx);
 
-export default function Button({ id = "", disabled = false, pushable = true, onclick = () => {}, children }) {
+export default function Button({ id = "", type="normal", disabled = false, pushable = true, onclick = () => {}, children }) {
     const { settings } = useSettings();
 
     return (
-        <div id={id} class="mc-button" disabled={disabled} onclick={(e) => {
+        <div id={id} type={type} class="mc-button" disabled={disabled} onclick={(e) => {
             if (pushable === false) return;
             sound.volume = settings.volume / 100;
             sound.play();
