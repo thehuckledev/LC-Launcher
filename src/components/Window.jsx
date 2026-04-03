@@ -85,6 +85,8 @@ export default function Window({ title, showClose = true, showMinimize = true, s
         };
 
         async function preventScrollBounce() {
+            let lastBot = null;
+            let lastTop = null;
             // stop annoying scroll bounce
             function hasScrollableParent(e) {
                 return e.composedPath().some(el => {
@@ -92,11 +94,12 @@ export default function Window({ title, showClose = true, showMinimize = true, s
 
                     const style = getComputedStyle(el);
                     const overflowY = style.overflowY;
-
-                    return (
+                    const willScroll = (
                         (overflowY === 'auto' || overflowY === 'scroll') &&
                         el.scrollHeight > el.clientHeight
                     );
+
+                    return willScroll;
                 });
             };
 

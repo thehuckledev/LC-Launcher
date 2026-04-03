@@ -1,26 +1,10 @@
 import "./GameLog.css";
 
-import { useEffect, useState } from "preact/hooks";
-
 import Button from "../components/Button.jsx";
 
 import closeIcon from "../assets/buttons/close.svg";
-
-export default function GameLog() {
-    const [logs, setLogs] = useState([]);
-
-    useEffect(() => {
-        const handler = (e) => {
-            setLogs(prev => [
-                ...prev.slice(-300),
-                e.detail
-            ]);
-        };
-
-        window.addEventListener("gameLog", handler);
-        return () => window.removeEventListener("gameLog", handler);
-    }, []);
-
+// TODO add filter by type info, error etc. also add searchbox
+export default function GameLogMenu({ setMenu, logs }) { // TODO add line numbers and parse stdErr when using wine to parse info error from the actual msg
     return (
         <>
             <div id="top-bar">
@@ -33,8 +17,9 @@ export default function GameLog() {
             </div>
             <div id="game-log">
                 {logs.map((log, i) => (
-                    <div key={i} class={log.type}>
-                        {log.message}
+                    <div key={i} class={`log-entry ${log.type}`}>
+                        <span className="line-number">{i + 1}</span>
+                        <span className="log-message">{log.message}</span>
                     </div>
                 ))}
             </div>

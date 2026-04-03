@@ -170,6 +170,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
 
     const makeDefaultInstances = async () => { //DONE TODO make it use the name, also add support for non github projects
         for await (const inst of defaultInstances) { //DONE TODO make instance icons
+            if (!inst.supportedPlatforms.includes(NL_OS)) continue;
             await Manager.instances.create(
                 inst.icon,
                 inst.name,

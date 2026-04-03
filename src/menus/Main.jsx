@@ -12,12 +12,12 @@ import optionsIcon from "../assets/buttons/options.svg";
 import minecraftLogo from "../assets/ui/minecraftlogo.png";
 import worldsIcon from "../assets/buttons/worlds.svg";
 import serversIcon from "../assets/buttons/servers.svg";
+import gameLogIcon from "../assets/buttons/gamelog.svg"
 
-export default function MainMenu({ setMenu, instance, profile }) {
+export default function MainMenu({ setMenu, instance, profile, processing, setProcessing }) {
     const Manager = useManager();
     
     const [progress, setProgress] = useState({ active: false, status: '', percent: 0 });
-    const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
         const handleProgress = (e) => setProgress(e.detail);
@@ -59,7 +59,10 @@ export default function MainMenu({ setMenu, instance, profile }) {
                     </div>
                 </div>
                 <div id="main-actions">
-                    <Button id="news-button" disabled={!instance?.id || processing} pushable={!processing} onclick={() => setMenu('patchnotes')}>
+                    <Button id="logs-button" disabled={!instance?.id || !processing} pushable={processing} onclick={() => setMenu('gamelog')}>
+                        <img src={gameLogIcon} draggable={false} />
+                    </Button>
+                    <Button id="news-button" disabled={!instance?.id} pushable={instance?.id} onclick={() => setMenu('patchnotes')}>
                         <img src={newsIcon} draggable={false} />
                     </Button>
                     <Button id="options-button" disabled={processing} pushable={!processing} onclick={() => setMenu('options')}>

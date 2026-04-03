@@ -13,12 +13,15 @@ import MainMenu from "./menus/Main.jsx";
 import OptionsMenu from "./menus/Options.jsx";
 import AboutMenu from "./menus/About.jsx";
 import PatchNotesMenu from "./menus/PatchNotes.jsx";
+import GameLogMenu from "./menus/GameLog.jsx";
 
-export default function App() {
+export default function App() { // TODO add launcher update prompt which checks if theres a newer version of the launcher
+    const [processing, setProcessing] = useState(false);
     const [profile, setProfile] = useState(null);
     const [instance, setInstance] = useState(null);
     const [loaded, setLoaded] = useState(false);
     const [menu, setMenu] = useState("main");
+    const [logs, setLogs] = useState([]);
     const { settings, loadSettings } = useSettings();
     const Manager = useManager();
 
@@ -81,15 +84,28 @@ export default function App() {
         else Neutralino.window.unmaximize();
     }, [settings.fullscreen]);
 
+    useEffect(() => {
+        const handler = (e) => {
+            setLogs(prev => [
+                ...prev.slice(-300),
+                e.detail
+            ]);
+        };
+
+        window.addEventListener("gameLog", handler);
+        return () => window.removeEventListener("gameLog", handler);
+    }, []);
+
     return (
         <>
             {loaded &&
                 <Window title="" setMenu={setMenu}>
                     {menu === "setup" &&      <SetupMenu setMenu={setMenu} reloadData={loadData} />}
-                    {menu === "main" &&       <MainMenu setMenu={setMenu} instance={instance} profile={profile} />}
+                    {menu === "main" &&       <MainMenu setMenu={setMenu} instance={instance} profile={profile} processing={processing} setProcessing={setProcessing} />}
                     {menu === "options" &&    <OptionsMenu setMenu={setMenu} />}
                     {menu === "about" &&      <AboutMenu setMenu={setMenu} />}
                     {menu === "patchnotes" && <PatchNotesMenu setMenu={setMenu} instance={instance} />}
+                    {menu === "gamelog" &&    <GameLogMenu setMenu={setMenu} logs={logs} />}
                 </Window>
             }
 

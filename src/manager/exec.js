@@ -132,13 +132,18 @@ export class Exec {
     };
 
     async needsUpdate(instance) {
-        const release = await this.manager.remotes.get(instance, instance.tag);
-        if (!release) return false;
+        try {
+            const release = await this.manager.remotes.get(instance, instance.tag);
+            if (!release) return false;
 
-        const asset = instance.target
-            ? release.assets.find(a => a.name === instance.target)
-            : release.assets[0];
-        return asset.id !== instance.assetId;
+            const asset = instance.target
+                ? release.assets.find(a => a.name === instance.target)
+                : release.assets[0];
+            return asset.id !== instance.assetId;
+        } catch(e) {
+            console.error(e);
+            return false;
+        };
     };
 
     async writeSkin(instanceId, dataURI) {
@@ -188,7 +193,7 @@ export class Exec {
         if (!instance.installed) await this.installInstance(instance);
         if (!instance.installed) return;
 
-        if (await this.needsUpdate(instance)) { //DONE TODO make it prompt rather than forcing an update
+        if (navigator.onLine === true && await this.needsUpdate(instance)) { //DONE TODO make it prompt rather than forcing an update
             let shouldDo = await Neutralino.os
                         .showMessageBox('Instance Update',
                                         'Do you want to update your current instance?',

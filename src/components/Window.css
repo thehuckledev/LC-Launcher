@@ -134,6 +134,7 @@ p {
     margin-top: 32px;
     padding: 20px;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #titlebar {

@@ -5,14 +5,58 @@
 }
 
 #game-log {
-    background: #000;
-    color: #ccc;
-    font-family: monospace;
-    padding: 10px;
-    height: 250px;
+    height: calc(100% - 83px);
     overflow-y: auto;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+    padding: 16px 0;
+    margin: 10px 20px;
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: color-mix(in srgb, #1a1a1a 95%, #e8e8e8 5%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    border-radius: 8px;
+
+    color: rgb(232, 232, 232);
+    font: 10pt monospace;
 }
 
-#game-log .err {
-    color: #ff6b6b;
+#game-log::-webkit-scrollbar {
+    width: 8px;
+}
+
+#game-log::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+
+#game-log::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.log-entry {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 12px;
+}
+
+.line-number {
+    color: rgba(255, 255, 255, 0.444);
+    text-align: right;
+    user-select: none;
+    padding-right: 8px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.log-message {
+    line-height: 1.6;
+    white-space: pre-wrap;
+    tab-size: 4;
+    word-break: break-word;
+}
+
+.log-entry.err .log-message {
+    color: rgb(246, 36, 81);
 }
