@@ -171,6 +171,36 @@ export class Exec {
         };
     };
 
+    parseWINELog(line) {
+        if (!line || typeof line !== "string") return { type: "text", message: line };
+
+        const msg = line.trim();
+        const regex = /^(?:([\d.]+):)?(?:([a-f0-9]{4}):)?([a-z]+):([^:]+?):(?:([^:\s]+)\s)?(.*)$/i;
+        const match = regex.exec(msg);
+        if (!match) return { type: "text", message: msg };
+
+        const [, timestamp, pid, level, channel, func, message] = match;
+
+        const typeMap = {
+            err: "error",
+            warn: "warn",
+            fixme: "fixme",
+            trace: "trace",
+            info: "info"
+        };
+
+        let type = typeMap[level?.toLowerCase()] || "text";
+
+        return {
+            type,
+            timestamp: timestamp || null,
+            pid: pid || null,
+            channel: channel || null,
+            func: func || null,
+            message: message?.trim() || ""
+        };
+    };
+
     async launch(instanceId, profileId) {
         try {
             window.dispatchEvent(new CustomEvent("execProcessing", { detail: true }));
@@ -312,7 +342,7 @@ export class Exec {
                         return showToast(`Error: ${compat} is not installed`);
                 };
                 
-                cmd = `${instance.customArgs ? `${instance.customArgs} ` : ""}WINEPREFIX="${prefix}" ${bin} "${execPath}" ${joinedArgs}`;
+                cmd = `${instance.customArgs ? `${instance.customArgs} ` : ""}WINEPREFIX="${prefix}" WINEDEBUG=fixme+all,warn+all,err+all,+timestamp ${bin} "${execPath}" ${joinedArgs}`;
             };
 
             if (compat === "PROTON") {
@@ -335,6 +365,7 @@ export class Exec {
         showToast("Launching instance...", 1000);
         console.log("Launching:", cmd);
 
+        const isTranslated = instance.compatibilityLayer !== "DIRECT";
         const keepLauncherOpen = await getSetting("keepLauncherOpen");
         return new Promise(async (resolve) => {
             try { // TODO add a logs window with colors for info, error etc
@@ -362,16 +393,25 @@ export class Exec {
                     if (proc.id == evt.detail.id) {
                         switch (evt.detail.action) {
                             case 'stdOut':
-                                console.log(evt.detail.data);
+                                if(keepLauncherOpen === false) return;
+
                                 window.dispatchEvent(new CustomEvent("gameLog", {
                                     detail: { type: "out", message: evt.detail.data }
                                 }));
                                 break;
 
                             case 'stdErr':
-                                console.error(evt.detail.data);
+                                if(keepLauncherOpen === false) return;
+
+                                let msg = { type: "err", message: evt.detail.data };
+                                if(isTranslated) { // parse wine logs
+                                    const parsed = this.parseWINELog(evt.detail.data);
+                                    if (!parsed) return;
+                                    msg = parsed;
+                                };
+
                                 window.dispatchEvent(new CustomEvent("gameLog", {
-                                    detail: { type: "err", message: evt.detail.data }
+                                    detail: msg
                                 }));
                                 break;
 

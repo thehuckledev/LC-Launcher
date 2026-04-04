@@ -55,8 +55,43 @@
     white-space: pre-wrap;
     tab-size: 4;
     word-break: break-word;
+    user-select: text;
+    -webkit-user-select: text;
 }
 
-.log-entry.err .log-message {
+.log-message::selection {
+    background: #797979bc;
+}
+
+.log-entry.error .log-message {
     color: rgb(246, 36, 81);
+}
+
+.log-entry.warn .log-message {
+    color: rgb(255, 183, 77);
+}
+
+.log-entry.fixme .log-message {
+    color: rgb(255, 120, 120);
+}
+
+.log-entry.trace .log-message {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.log-entry.info .log-message {
+    color: rgb(120, 200, 255);
+}
+
+.log-entry.call .log-message {
+    color: rgb(180, 140, 255);
+}
+
+.log-entry.return .log-message {
+    color: rgb(140, 255, 180);
+}
+
+.log-entry.crash .log-message {
+    color: red;
+    font-weight: bold;
 }
