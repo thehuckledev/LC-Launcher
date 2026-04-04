@@ -50,7 +50,7 @@ Legacy Community Launcher is a multi-platform launcher for Minecraft Legacy Cons
 - [ ] Sandbox Game / Server
 - [x] Skin Editor / Change Skins
 - [x] Patch updates from Git repo
-- [ ] Logs window for current instance with find, colors for error msgs etc
+- [x] Logs window for current instance with find, colors for error msgs etc
 - [ ] Import and export instances
 - [ ] Big screen mode with controller support
 
