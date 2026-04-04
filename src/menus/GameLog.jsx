@@ -5,8 +5,8 @@ import { useRef, useEffect, useState } from "preact/hooks";
 import Button from "../components/Button.jsx";
 
 import closeIcon from "../assets/buttons/close.svg";
-// TODO add filter by type info, error etc. also add searchbox
-export default function GameLogMenu({ setMenu, logs }) { // TODO add line numbers and parse stdErr when using wine to parse info error from the actual msg
+// TODO add searchbox
+export default function GameLogMenu({ setMenu, logs }) {
     const logRef = useRef();
     const [hideWine, setHideWine] = useState(false);
     const shouldStickRef = useRef(true);

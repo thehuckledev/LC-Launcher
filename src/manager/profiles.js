@@ -19,11 +19,7 @@ export class Profiles {
 
         if(rawSkinDataURI)
             [ skinDataURI, skinRenderDataURI ] = await this.manager.skins.process(rawSkinDataURI);
-
-        //DONE TODO make it detect 64x64 skin and turn into 64x32
-        //DONE TODO make it render skin head
-        //DONE TODO make it fall back to steve
-
+        
         const profile = {
             id: crypto.randomUUID(),
             username,

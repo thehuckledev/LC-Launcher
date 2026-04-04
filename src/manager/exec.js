@@ -223,7 +223,7 @@ export class Exec {
         if (!instance.installed) await this.installInstance(instance);
         if (!instance.installed) return;
 
-        if (navigator.onLine === true && await this.needsUpdate(instance)) { //DONE TODO make it prompt rather than forcing an update
+        if (navigator.onLine === true && await this.needsUpdate(instance)) {
             let shouldDo = await Neutralino.os
                         .showMessageBox('Instance Update',
                                         'Do you want to update your current instance?',
@@ -294,7 +294,6 @@ export class Exec {
                 const dataDir = await getSetting("dataDirectory");
                 const prefix = `${dataDir}/pfx`;
 
-                //DONE TODO make the cmd a fallback for the built in binaries and add a popup which prompts if they want to install using prebuilt binaries
                 try {
                     await Neutralino.filesystem.getStats(`${dataDir}/libraries/wine-crossover/bin/`);
                     // check if prebuilt installed above
@@ -368,7 +367,7 @@ export class Exec {
         const isTranslated = instance.compatibilityLayer !== "DIRECT";
         const keepLauncherOpen = await getSetting("keepLauncherOpen");
         return new Promise(async (resolve) => {
-            try { //DONE TODO add a logs window with colors for info, error etc
+            try {
                 if(keepLauncherOpen === false) setTimeout(() => { Neutralino.window.hide(); }, 2000);
                 
                 const startTime = Date.now();
