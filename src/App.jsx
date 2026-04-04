@@ -15,7 +15,6 @@ import AboutMenu from "./menus/About.jsx";
 import PatchNotesMenu from "./menus/PatchNotes.jsx";
 import GameLogMenu from "./menus/GameLog.jsx";
 // TODO add game crash detection and popup
-// TODO add would you like to join our discord prompt
 export default function App() { // TODO add launcher update prompt which checks if theres a newer version of the launcher
     const [processing, setProcessing] = useState(false);
     const [profile, setProfile] = useState(null);

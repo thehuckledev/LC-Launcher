@@ -6,6 +6,8 @@ import { useManager } from "../utils/ManagerProvider.jsx";
 import { useSettings } from "../utils/SettingsStore.jsx";
 import { showToast } from "../components/Toast.jsx";
 
+import config from "../data/config.js";
+
 import Button from "../components/Button.jsx";
 import Textbox from "../components/Textbox.jsx";
 import Checkbox from "../components/Checkbox.jsx";
@@ -186,11 +188,24 @@ export default function SetupMenu({ setMenu, reloadData }) {
         };
     };
 
+    const joinDiscordPrompt = async () => {
+        let shouldDo = await Neutralino.os
+                    .showMessageBox('LC Launcher Discord',
+                                    'Do you want to join our Discord server?',
+                                    'YES_NO', 'INFO');
+        if(shouldDo == 'YES') {
+            console.log("Opening discord...");
+            await Neutralino.os.open(config.discordInvite);
+        };
+    };
+
     const handleNext = async () => {
         if (!ready) return showToast("You need to enter a valid username");
 
         setProcessing(true);
         try {
+            joinDiscordPrompt();
+
             if (skin) {
                 const file = await Neutralino.filesystem.readBinaryFile(skin);
                 const base64String = btoa(
