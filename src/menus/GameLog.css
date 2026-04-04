@@ -4,6 +4,16 @@
     margin: 0;
 }
 
+#main-actions:has(.mc-textbox #search-query) {
+    width: 450px !important;
+}
+.mc-textbox:has(#search-query), #search-query {
+    width: 250px !important;
+}
+label[for="search-query"] {
+    display: none;
+}
+
 #game-log {
     width: calc(100vw - 80px);
     height: calc(100% - 83px);
