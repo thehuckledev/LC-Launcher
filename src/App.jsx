@@ -87,7 +87,7 @@ export default function App() { // TODO add launcher update prompt which checks 
     useEffect(() => {
         const handler = (e) => {
             setLogs(prev => [
-                ...prev.slice(-300),
+                ...prev.slice(-1000),
                 e.detail
             ]);
         };

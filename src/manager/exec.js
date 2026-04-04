@@ -172,11 +172,12 @@ export class Exec {
     };
 
     parseWINELog(line) {
-        if (!line || typeof line !== "string") return { type: "text", message: line };
+        if (!line || typeof line !== "string") return;
 
         const msg = line.trim();
-        const regex = /^(?:([\d.]+):)?(?:([a-f0-9]{4}):)?([a-z]+):([^:]+?):(?:([^:\s]+)\s)?(.*)$/i;
+        const regex = /^(?:([\d.]+):)?(?:([a-f0-9]{4}):)?([a-z]+):([^:]+?):(?:([^:\s]+)(?:\s|:))?(.*)$/i;
         const match = regex.exec(msg);
+        console.log(line, match)
         if (!match) return { type: "text", message: msg };
 
         const [, timestamp, pid, level, channel, func, message] = match;
@@ -185,8 +186,7 @@ export class Exec {
             err: "error",
             warn: "warn",
             fixme: "fixme",
-            trace: "trace",
-            info: "info"
+            trace: "trace"
         };
 
         let type = typeMap[level?.toLowerCase()] || "text";
@@ -342,7 +342,7 @@ export class Exec {
                         return showToast(`Error: ${compat} is not installed`);
                 };
                 
-                cmd = `${instance.customArgs ? `${instance.customArgs} ` : ""}WINEPREFIX="${prefix}" WINEDEBUG=fixme+all,warn+all,err+all,+timestamp ${bin} "${execPath}" ${joinedArgs}`;
+                cmd = `${instance.customArgs ? `${instance.customArgs} ` : ""}WINEPREFIX="${prefix}" WINEDEBUG=err+all,warn+d3d,warn+msvcrt,fixme+d3d,fixme+ntdll,+timestamp ${bin} "${execPath}" ${joinedArgs}`;
             };
 
             if (compat === "PROTON") {
@@ -368,7 +368,7 @@ export class Exec {
         const isTranslated = instance.compatibilityLayer !== "DIRECT";
         const keepLauncherOpen = await getSetting("keepLauncherOpen");
         return new Promise(async (resolve) => {
-            try { // TODO add a logs window with colors for info, error etc
+            try { //DONE TODO add a logs window with colors for info, error etc
                 if(keepLauncherOpen === false) setTimeout(() => { Neutralino.window.hide(); }, 2000);
                 
                 const startTime = Date.now();
@@ -392,29 +392,36 @@ export class Exec {
                 const handler = async (evt) => {
                     if (proc.id == evt.detail.id) {
                         switch (evt.detail.action) {
-                            case 'stdOut':
+                            case 'stdOut': {
                                 if(keepLauncherOpen === false) return;
 
-                                window.dispatchEvent(new CustomEvent("gameLog", {
-                                    detail: { type: "out", message: evt.detail.data }
-                                }));
-                                break;
-
-                            case 'stdErr':
-                                if(keepLauncherOpen === false) return;
-
-                                let msg = { type: "err", message: evt.detail.data };
-                                if(isTranslated) { // parse wine logs
-                                    const parsed = this.parseWINELog(evt.detail.data);
-                                    if (!parsed) return;
-                                    msg = parsed;
+                                const lines = evt.detail.data.split(/\r?\n/);
+                                for (const line of lines) {
+                                    window.dispatchEvent(new CustomEvent("gameLog", {
+                                        detail: { type: "out", from: "DIRECT", message: line }
+                                    }));
                                 };
-
-                                window.dispatchEvent(new CustomEvent("gameLog", {
-                                    detail: msg
-                                }));
                                 break;
+                            };
+                            case 'stdErr': {
+                                if(keepLauncherOpen === false) return;
 
+                                let lines = evt.detail.data.split(/\r?\n/);
+                                for (const line of lines) {
+                                    let msg = { type: "err", from: "DIRECT", message: line };
+                                    if(isTranslated) { // parse wine logs
+                                        const parsed = this.parseWINELog(line);
+                                        if (!parsed) return;
+                                        parsed.from = "WINE";
+                                        msg = parsed;
+                                    };
+
+                                    window.dispatchEvent(new CustomEvent("gameLog", {
+                                        detail: msg
+                                    }));
+                                };
+                                break;
+                            };
                             case 'exit':
                                 const duration = Date.now() - startTime;
                                 const sessionSeconds = Math.floor(duration / 1000);

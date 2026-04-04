@@ -1,6 +1,6 @@
 import "./GameLog.css";
 
-import { useRef, useEffect } from "preact/hooks";
+import { useRef, useEffect, useState } from "preact/hooks";
 
 import Button from "../components/Button.jsx";
 
@@ -8,6 +8,7 @@ import closeIcon from "../assets/buttons/close.svg";
 // TODO add filter by type info, error etc. also add searchbox
 export default function GameLogMenu({ setMenu, logs }) { // TODO add line numbers and parse stdErr when using wine to parse info error from the actual msg
     const logRef = useRef();
+    const [hideWine, setHideWine] = useState(false);
     const shouldStickRef = useRef(true);
 
     useEffect(() => {
@@ -42,15 +43,21 @@ export default function GameLogMenu({ setMenu, logs }) { // TODO add line number
             <div id="top-bar">
                 <h1>Game Log</h1>
                 <div id="main-actions">
+                    <Button id="filter-button" onclick={() => setHideWine(prev => !prev)} disabled={hideWine}>
+                        W
+                    </Button>
                     <Button id="back-button" onclick={() => setMenu('main')}>
                         <img id="back-icon" src={closeIcon} draggable={false} />
                     </Button>
                 </div>
             </div>
             <div id="game-log" ref={logRef}>
-                {logs.map((log, i) => (
-                    <div key={i} class={`log-entry ${log.type}`}>
-                        <span className="line-number">{i + 1}</span>
+                {logs
+                    .map((log, i) => ({ log, oi: i }))
+                    .filter(({ log }) => !(hideWine && log.from === "WINE"))
+                    .map(({ log, oi }) => (
+                    <div key={oi} class={`log-entry ${log.type}`}>
+                        <span className="line-number">{oi + 1}</span>
                         <span className="log-message">[{log.timestamp || "--"}] [{log.type.toUpperCase()}]{log.channel && ` ${log.channel}`}{log.func && `:${log.func}()`} {log.message}</span>
                     </div>
                 ))}
