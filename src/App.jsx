@@ -96,6 +96,10 @@ export default function App() { // TODO add launcher update prompt which checks 
         return () => window.removeEventListener("gameLog", handler);
     }, []);
 
+    useEffect(() => {
+        if(processing === false) setLogs([]);
+    }, [processing])
+
     return (
         <>
             {loaded &&
