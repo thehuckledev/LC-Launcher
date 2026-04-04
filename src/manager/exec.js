@@ -282,7 +282,7 @@ export class Exec {
                                 showToast('Setting up C Drive...');
                                 try { await Neutralino.filesystem.createDirectory(prefix); } catch {};
 
-                                await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" WINEDEBUG=-all ${bin} wineboot --init`);
+                                await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" ${bin} wineboot --init`);
                                 if(NL_OS === 'Darwin') await this.setupDXVK();
                             };
                         } catch {
@@ -299,7 +299,7 @@ export class Exec {
                                 showToast('Setting up C Drive...');
                                 try { await Neutralino.filesystem.createDirectory(prefix); } catch {};
 
-                                await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" WINEDEBUG=-all ${bin} wineboot --init`);
+                                await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" ${bin} wineboot --init`);
                                 if(NL_OS === 'Darwin') await this.setupDXVK();
                             };
                         } catch {
@@ -312,7 +312,7 @@ export class Exec {
                         return showToast(`Error: ${compat} is not installed`);
                 };
                 
-                cmd = `${instance.customArgs ? `${instance.customArgs} ` : ""}WINEPREFIX="${prefix}" WINEDEBUG=-all ${bin} "${execPath}" ${joinedArgs}`;
+                cmd = `${instance.customArgs ? `${instance.customArgs} ` : ""}WINEPREFIX="${prefix}" ${bin} "${execPath}" ${joinedArgs}`;
             };
 
             if (compat === "PROTON") {
