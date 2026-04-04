@@ -362,7 +362,7 @@ export class Exec {
             ) showToast("You should have a compatibility layer on linux and macOS", 1000);
         };
 
-        showToast("Launching instance...", 1000);
+        showToast("Launching instance...", 1000); // TODO when the game is closed from the main menu exit game btn it doesnt close wine-preloader process
         console.log("Launching:", cmd);
 
         const isTranslated = instance.compatibilityLayer !== "DIRECT";
