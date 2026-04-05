@@ -285,15 +285,17 @@ export class Exec {
         const joinedArgs = args.map(a => `"${a}"`).join(" ");
         let cmd = `"${execPath}" ${joinedArgs}`;
 
+        const dataDir = await getSetting("dataDirectory");
+        const prefix = `${dataDir}/pfx`;
+        let wineServerBin = "wineserver";
+
         // compatibility layers
         if (NL_OS === "Linux" || NL_OS === "Darwin") {
             const compat = instance.compatibilityLayer;
 
             if (compat === "WINE" || compat === "WINE64") {
                 let bin;
-                const dataDir = await getSetting("dataDirectory");
-                const prefix = `${dataDir}/pfx`;
-
+                
                 try {
                     await Neutralino.filesystem.getStats(`${dataDir}/libraries/wine-crossover/bin/`);
                     // check if prebuilt installed above
@@ -304,6 +306,7 @@ export class Exec {
                         try {
                             await Neutralino.filesystem.getStats(internalWinePath);
                             bin = `WINEDLLOVERRIDES="d3d11=n,b;dxgi=n,b" "${internalWinePath}"`;
+                            wineServerBin = `${dataDir}/libraries/wine-crossover/bin/wineserver`;
 
                             try {
                                 await Neutralino.filesystem.getStats(prefix);
@@ -321,6 +324,7 @@ export class Exec {
                         try {
                             await Neutralino.filesystem.getStats(internalWine64Path);
                             bin = `WINEDLLOVERRIDES="d3d11=n,b;dxgi=n,b" "${internalWine64Path}"`;
+                            wineServerBin = `${dataDir}/libraries/wine-crossover/bin/wineserver`;
 
                             try {
                                 await Neutralino.filesystem.getStats(prefix);
@@ -364,7 +368,7 @@ export class Exec {
         showToast("Launching instance...", 1000); // TODO when the game is closed from the main menu exit game btn it doesnt close wine-preloader process
         console.log("Launching:", cmd);
 
-        const isTranslated = instance.compatibilityLayer !== "DIRECT";
+        const isTranslated = instance.compatibilityLayer !== "DIRECT" && (NL_OS === "Linux" || NL_OS === "Darwin");
         const keepLauncherOpen = await getSetting("keepLauncherOpen");
         return new Promise(async (resolve) => {
             try {
@@ -380,8 +384,11 @@ export class Exec {
                         if (NL_OS === "Windows") {
                             await Neutralino.os.execCommand(`taskkill /PID ${proc.pid} /T /F`);
                         } else {
-                            await Neutralino.os.execCommand(`pkill -f wine`);
-                            await Neutralino.os.execCommand(`kill -9 -${proc.pid}`);
+                            try {
+                                await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" "${wineServerBin}" -k`);
+                            } catch {
+                                await Neutralino.os.execCommand(`kill -9 -${proc.pid}`);
+                            };
                         };
                     } catch (e) {
                         console.error("Failed to kill process tree:", e);
@@ -424,6 +431,20 @@ export class Exec {
                             case 'exit':
                                 const duration = Date.now() - startTime;
                                 const sessionSeconds = Math.floor(duration / 1000);
+
+                                if (isTranslated) (async () => {
+                                    try {
+                                        console.log("Soft shutdown wine...");
+                                        await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" "${wineServerBin}" -w`);
+                                    } catch (e) {
+                                        console.log("Force shutdown wine...");
+                                        try {
+                                            await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" "${wineServerBin}" -k`);
+                                        } catch (err) {
+                                            console.error("Wineserver couldn't stop:", err);
+                                        };
+                                    };
+                                })();
 
                                 const instancePath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instanceId, "instance.json");
                                 const updatedInstance = await this.manager.instances.get(instanceId);

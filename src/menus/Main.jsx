@@ -14,7 +14,7 @@ import worldsIcon from "../assets/buttons/worlds.svg";
 import serversIcon from "../assets/buttons/servers.svg";
 import gameLogIcon from "../assets/buttons/gamelog.svg"
 
-export default function MainMenu({ setMenu, instance, profile, processing, setProcessing }) {
+export default function MainMenu({ setMenu, instance, profile, processing }) {
     const Manager = useManager();
     
     const [progress, setProgress] = useState({ active: false, status: '', percent: 0 });
@@ -23,12 +23,6 @@ export default function MainMenu({ setMenu, instance, profile, processing, setPr
         const handleProgress = (e) => setProgress(e.detail);
         window.addEventListener('installProgress', handleProgress);
         return () => window.removeEventListener('installProgress', handleProgress);
-    }, []);
-
-    useEffect(() => {
-        const handleProcessing = (e) => setProcessing(e.detail);
-        window.addEventListener('execProcessing', handleProcessing);
-        return () => window.removeEventListener('execProcessing', handleProcessing);
     }, []);
 
     function parseAccountType(type) {

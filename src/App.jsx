@@ -31,7 +31,7 @@ export default function App() { // TODO add launcher update prompt which checks 
 
         if (profiles.length > 0) setProfile(profiles[0]);
         if (instances.length > 0) {
-            const inst = await Manager.instances.get(instances[2]);
+            const inst = await Manager.instances.get(instances[0]);
             setInstance(inst);
         };
     };
@@ -97,21 +97,30 @@ export default function App() { // TODO add launcher update prompt which checks 
     }, []);
 
     useEffect(() => {
-        if(processing === false) setLogs([]);
-    }, [processing])
+        const handleProcessing = (e) => {
+            if(e.detail === false) {
+                setMenu("main");
+                setLogs([]);
+            };
+            setProcessing(e.detail);
+        };
+        window.addEventListener('execProcessing', handleProcessing);
+        return () => window.removeEventListener('execProcessing', handleProcessing);
+    }, []);
 
     return (
         <>
-            {loaded &&
-                <Window title="" setMenu={setMenu}>
+            <Window title="" setMenu={setMenu}>
+                {loaded && <>
                     {menu === "setup" &&      <SetupMenu setMenu={setMenu} reloadData={loadData} />}
-                    {menu === "main" &&       <MainMenu setMenu={setMenu} instance={instance} profile={profile} processing={processing} setProcessing={setProcessing} />}
+                    {menu === "main" &&       <MainMenu setMenu={setMenu} instance={instance} profile={profile} processing={processing} />}
                     {menu === "options" &&    <OptionsMenu setMenu={setMenu} />}
                     {menu === "about" &&      <AboutMenu setMenu={setMenu} />}
                     {menu === "patchnotes" && <PatchNotesMenu setMenu={setMenu} instance={instance} />}
                     {menu === "gamelog" &&    <GameLogMenu setMenu={setMenu} logs={logs} />}
-                </Window>
-            }
+                </>}
+            </Window>
+            
 
             <Toast />
         </>
