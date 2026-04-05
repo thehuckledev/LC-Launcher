@@ -11,11 +11,20 @@ export default function Textbox({ id, onchange = (txt) => { }, value = "", place
                 placeholder={placeholder}
                 minLength={minlength}
                 maxLength={maxlength}
+                onBlur={(e) => {
+                    if (
+                        e.target.value.trim().length >= minlength &&
+                        e.target.value.trim().length <= maxlength
+                    ) onchange(e.target.value);
+                }}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' &&
                         e.target.value.trim().length >= minlength &&
                         e.target.value.trim().length <= maxlength
-                    ) onchange(e.target.value);
+                    ) {
+                        e.target.blur();
+                        onchange(e.target.value);
+                    };
                 }}
             />
         </div>
