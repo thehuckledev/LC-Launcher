@@ -195,7 +195,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
                                     'YES_NO', 'INFO');
         if(shouldDo == 'YES') {
             console.log("Opening discord...");
-            for (const inv of config.discordInvite) {
+            for await (const inv of config.discordInvite) {
                 await Neutralino.os.open(inv);
             };
         };
