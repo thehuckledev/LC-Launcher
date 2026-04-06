@@ -18,7 +18,7 @@ import PatchNotesMenu from "./menus/PatchNotes.jsx";
 import GameLogMenu from "./menus/GameLog.jsx";
 // TODO make a windows install.bat
 // TODO add game crash detection and popup
-export default function App() { // TODO add launcher update prompt which checks if theres a newer version of the launcher
+export default function App() {
     const [processing, setProcessing] = useState(false);
     const [profile, setProfile] = useState(null);
     const [instance, setInstance] = useState(null);
