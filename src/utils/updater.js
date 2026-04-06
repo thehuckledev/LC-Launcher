@@ -2,7 +2,7 @@ import Neutralino from "@neutralinojs/lib";
 import config from "../data/config.js";
 
 export const checkForUpdates = async() => {
-    //if (NL_ARGS.includes("--neu-dev-extension")) return console.log("Update check bypassed, dev mode is on!");
+    if (NL_ARGS.includes("--neu-dev-extension")) return console.log("Update check bypassed, dev mode is on!");
     if (navigator.onLine === false) return;
 
     try {
