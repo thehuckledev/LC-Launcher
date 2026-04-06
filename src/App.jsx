@@ -11,6 +11,7 @@ import Window from "./components/Window.jsx";
 import Toast from "./components/Toast.jsx";
 
 import SetupMenu from "./menus/Setup.jsx";
+import SetupOptionsMenu from "./menus/SetupOptions.jsx";
 import MainMenu from "./menus/Main.jsx";
 import OptionsMenu from "./menus/Options.jsx";
 import AboutMenu from "./menus/About.jsx";
@@ -120,16 +121,16 @@ export default function App() {
         <>
             <Window title="" setMenu={setMenu}>
                 {loaded && <>
-                    {menu === "setup" &&      <SetupMenu setMenu={setMenu} reloadData={loadData} />}
-                    {menu === "main" &&       <MainMenu setMenu={setMenu} instance={instance} profile={profile} processing={processing} />}
-                    {menu === "options" &&    <OptionsMenu setMenu={setMenu} />}
-                    {menu === "about" &&      <AboutMenu setMenu={setMenu} />}
-                    {menu === "patchnotes" && <PatchNotesMenu setMenu={setMenu} instance={instance} />}
-                    {menu === "gamelog" &&    <GameLogMenu setMenu={setMenu} logs={logs} />}
+                    {menu === "setup" &&        <SetupMenu setMenu={setMenu} reloadData={loadData} />}
+                    {menu === "setupoptions" && <SetupOptionsMenu setMenu={setMenu} />}
+                    {menu === "main" &&         <MainMenu setMenu={setMenu} instance={instance} profile={profile} processing={processing} />}
+                    {menu === "options" &&      <OptionsMenu setMenu={setMenu} />}
+                    {menu === "about" &&        <AboutMenu setMenu={setMenu} />}
+                    {menu === "patchnotes" &&   <PatchNotesMenu setMenu={setMenu} instance={instance} />}
+                    {menu === "gamelog" &&      <GameLogMenu setMenu={setMenu} logs={logs} />}
                 </>}
             </Window>
             
-
             <Toast />
         </>
     );
