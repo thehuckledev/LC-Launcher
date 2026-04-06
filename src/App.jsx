@@ -16,6 +16,7 @@ import OptionsMenu from "./menus/Options.jsx";
 import AboutMenu from "./menus/About.jsx";
 import PatchNotesMenu from "./menus/PatchNotes.jsx";
 import GameLogMenu from "./menus/GameLog.jsx";
+// TODO make the menu sfx use LCE version rather than modern java ones
 // TODO stop launcher playing music on game launch
 // TODO make a windows install.bat
 // TODO add game crash detection and popup
