@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "preact/hooks";
 import Neutralino from "@neutralinojs/lib";
+import config from "./data/config.js";
 
+import { checkForUpdates } from "./utils/updater.js";
 import { startMusic, stopMusic, setVolume } from "./utils/music.js";
 import { useSettings } from "./utils/SettingsStore.jsx";
 import { useManager } from "./utils/ManagerProvider.jsx";
@@ -14,6 +16,7 @@ import OptionsMenu from "./menus/Options.jsx";
 import AboutMenu from "./menus/About.jsx";
 import PatchNotesMenu from "./menus/PatchNotes.jsx";
 import GameLogMenu from "./menus/GameLog.jsx";
+// TODO make a windows install.bat
 // TODO add game crash detection and popup
 export default function App() { // TODO add launcher update prompt which checks if theres a newer version of the launcher
     const [processing, setProcessing] = useState(false);
@@ -31,8 +34,9 @@ export default function App() { // TODO add launcher update prompt which checks 
 
         if (profiles.length > 0) setProfile(profiles[0]);
         if (instances.length > 0) {
-            const inst = await Manager.instances.get(instances[0]);
-            setInstance(inst);
+            const instancesObj = await Promise.all(instances.map(id => Manager.instances.get(id)));
+            const inst = instancesObj.find(i => i.name === config.defaultInstance);
+            if (inst) setInstance(inst);
         };
     };
 
@@ -45,6 +49,8 @@ export default function App() { // TODO add launcher update prompt which checks 
             setMenu(loadedSettings.hasSetup ? "main" : "setup");
             setLoaded(true);
             console.log("Loaded!");
+
+            await checkForUpdates();
         };
 
         load();

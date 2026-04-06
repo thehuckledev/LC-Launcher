@@ -133,18 +133,30 @@ export default function OptionsMenu({ setMenu }) {
                                 .showMessageBox('Confirm',
                                                 'Are you sure you want to uninstall?',
                                                 'YES_NO', 'WARNING');
-                    if(shouldDo == 'YES') {
-                        if (NL_OS === "Darwin") { // TODO add windows and linux uninstall
-                            const dataPath = await Neutralino.filesystem.getJoinedPath(settings.dataDirectory, "../");
-                            const appPath = await Neutralino.filesystem.getJoinedPath(NL_PATH, "../../");
-                            await Neutralino.filesystem.remove(dataPath);
-                            await Neutralino.filesystem.remove(appPath);
-                        };
-                        showToast("Erased data and deleted the app, quitting...");
-                        setTimeout(async() => {
-                            if(window.whenQuitting) await window.whenQuitting();
+                    if (shouldDo !== 'YES') return;
+
+                    try {
+                        const dataPath = await Neutralino.filesystem.getJoinedPath(settings.dataDirectory, "../");
+                        await Neutralino.filesystem.remove(dataPath);
+
+                        let appPath;
+                        if (NL_OS === "Windows") // TODO make sure this works
+                            appPath = await Neutralino.filesystem.getJoinedPath(NL_PATH, "../../");
+                        else if (NL_OS === "Linux")
+                            appPath = NL_PATH;
+                        else if (NL_OS === "Darwin")
+                            appPath = await Neutralino.filesystem.getJoinedPath(NL_PATH, "../../");
+
+                        await Neutralino.filesystem.remove(appPath);
+
+                        showToast("Uninstalled, quitting...");
+                        setTimeout(async () => {
+                            if (window.whenQuitting) await window.whenQuitting();
                             await Neutralino.app.exit();
                         }, 200);
+                    } catch (e) {
+                        console.error(e);
+                        showToast("Failed to uninstall");
                     };
                 }}>
                     Uninstall

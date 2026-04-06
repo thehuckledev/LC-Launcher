@@ -1,0 +1,8 @@
+{
+    "applicationId": "dev.huckle.legacycommunitylauncher",
+    "version": "0.1.1",
+    "resourcesURL": "https://git.huckle.dev/TheHuckle/LegacyCommunityLauncher/releases/latest/update.neu",
+    "data": {
+        "release_notes": "- Dev Build still"
+    }
+}
