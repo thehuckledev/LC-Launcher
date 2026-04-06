@@ -50,7 +50,7 @@ export default function App() { // TODO add launcher update prompt which checks 
             setLoaded(true);
             console.log("Loaded!");
 
-            await checkForUpdates();
+            setTimeout(checkForUpdates, 2000);
         };
 
         load();
