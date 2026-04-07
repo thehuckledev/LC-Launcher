@@ -1,7 +1,25 @@
 #options {
+    padding: 0 15px;
     margin-top: 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 5px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+}
+
+#options::-webkit-scrollbar {
+    width: 8px;
+}
+
+#options::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+
+#options::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
 }

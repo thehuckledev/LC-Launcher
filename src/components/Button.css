@@ -1,6 +1,7 @@
 /* Taken from https://codepen.io/joexmdq/pen/EOMLzg. All credit given. Modified slightly */
 /* Minecraft Style Button */
 .mc-button {
+	min-height: var(--btn-size);
 	height: var(--btn-size);
 	width: calc(var(--btn-size) * 10);
 	cursor: pointer;

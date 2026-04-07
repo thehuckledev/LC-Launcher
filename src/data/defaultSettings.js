@@ -6,6 +6,7 @@ export const defaultSettings = {
     volume: 80,
     menuMusic: true,
     fullscreen: false,
+    discordRPC: true,
     dataDirectory: async () => {
         const homeDir =
             (await Neutralino.os.getEnv("HOME")) ||

@@ -23,6 +23,9 @@ export default function SetupOptionsMenu({ setMenu }) {
                     </div>
                 </h1>
                 <h2>Setup options. You may edit these later as well!</h2>
+                <Button onclick={() => updateSetting('discordRPC', !settings.discordRPC)}>
+                    {settings.discordRPC == false ? 'Discord RPC: Disabled' : 'Discord RPC: Enabled'}
+                </Button>
                 <Button onclick={() => updateSetting('keepLauncherOpen', !settings.keepLauncherOpen)}>
                     {settings.keepLauncherOpen == false ? 'Keep Launcher Open: Disabled' : 'Keep Launcher Open: Enabled'}
                 </Button>

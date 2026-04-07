@@ -60,6 +60,9 @@ export default function OptionsMenu({ setMenu }) {
                 </div>
             </div>
             <div id="options">
+                <Button onclick={() => updateSetting('discordRPC', !settings.discordRPC)}>
+                    {settings.discordRPC == false ? 'Discord RPC: Disabled' : 'Discord RPC: Enabled'}
+                </Button>
                 <Button onclick={() => updateSetting('keepLauncherOpen', !settings.keepLauncherOpen)}>
                     {settings.keepLauncherOpen == false ? 'Keep Launcher Open: Disabled' : 'Keep Launcher Open: Enabled'}
                 </Button>
