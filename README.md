@@ -1,4 +1,4 @@
-> # [Click to join the discord please!](https://discord.com/invite/WnzeHSUfCg/)
+> # [Click to join the discord please!](https://discord.gg/DBw6V5v8C9)
 
 > **NOTE** <br>
 > Legacy Community Launcher does not contain any code from Minecraft Legacy Console Edition. Therefore, please don't DMCA this project. 
@@ -23,7 +23,7 @@
   &nbsp;
   <a href="https://github.com/thehuckledev/LC-Launcher/releases/"><img src="https://img.shields.io/github/v/release/thehuckledev/LC-Launcher?sort=semver&display_name=tag&date_order_by=published_at&style=for-the-badge&logo=hackthebox&logoColor=bdbdbd&color=7BDCB5"></a>
   &nbsp;
-  <a href="https://discord.com/invite/WnzeHSUfCg/"><img src="https://img.shields.io/discord/1482886577867981082?style=for-the-badge&color=%237289DA&labelColor=45464f&logo=discord&logoColor=bdbdbd"></a>
+  <a href="https://discord.gg/DBw6V5v8C9"><img src="https://img.shields.io/discord/1482886577867981082?style=for-the-badge&color=%237289DA&labelColor=45464f&logo=discord&logoColor=bdbdbd"></a>
 </div>
 
 <br>
