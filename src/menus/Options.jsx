@@ -143,9 +143,7 @@ export default function OptionsMenu({ setMenu }) {
                         await Neutralino.filesystem.remove(dataPath);
 
                         let appPath;
-                        if (NL_OS === "Windows") // TODO make sure this works
-                            appPath = await Neutralino.filesystem.getJoinedPath(NL_PATH, "../../");
-                        else if (NL_OS === "Linux")
+                        if (NL_OS === "Windows" || NL_OS === "Linux") // TODO make sure this works
                             appPath = NL_PATH;
                         else if (NL_OS === "Darwin")
                             appPath = await Neutralino.filesystem.getJoinedPath(NL_PATH, "../../");

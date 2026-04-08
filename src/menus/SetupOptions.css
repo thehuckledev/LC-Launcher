@@ -1,50 +1,4 @@
-#setup-logo {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    display: block;
-    transform: translate(-50%, -50%);
-    width: 350px;
-    opacity: 0;
-    animation: logo-back-down-setup 1.6s ease-in-out forwards;
-}
-
-@keyframes logo-back-down-setup {
-    0% {
-        opacity: 0;
-        transform: perspective(1000px) translate(-50%, -300px) rotateX(-15deg);
-    }
-
-    50% {
-        opacity: 1;
-        transform: perspective(1000px) translate(-50%, -50%) rotateX(-15deg);
-    }
-
-    100% {
-        opacity: 0;
-        transform: perspective(1000px) translate(-50%, 300px) rotateX(0deg);
-    }
-}
-
-#setup,
-#setup-action-bar {
-    opacity: 0;
-    animation: fade-expand .3s linear 1.6s forwards;
-}
-
-@keyframes fade-expand {
-    0% {
-        transform: scale(0.93);
-        opacity: 0;
-    }
-
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-#setup {
+    #setupOptions {
     height: 100%;
     width: 100%;
     padding: 20px;
@@ -53,7 +7,7 @@
     gap: 15px;
 }
 
-#setup-action-bar {
+#setupOptions-action-bar {
     display: flex;
     flex-direction: row;
     gap: 5px;
@@ -61,11 +15,11 @@
     width: 100%;
 }
 
-#setup-action-bar>.mc-button {
+#setupOptions-action-bar>.mc-button {
     width: 130px;
 }
 
-#setup > h2 {
+#setupOptions > h2 {
     font: 14px 'Minecraftia', sans-serif;
     text-shadow: 2px 2px #000A;
 

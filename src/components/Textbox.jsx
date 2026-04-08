@@ -11,6 +11,9 @@ export default function Textbox({ id, onchange = (txt) => { }, value = "", place
                 placeholder={placeholder}
                 minLength={minlength}
                 maxLength={maxlength}
+                spellcheck="false"
+                autocomplete="off"
+                aria-autocomplete="none"
                 onBlur={(e) => {
                     if (
                         e.target.value.trim().length >= minlength &&

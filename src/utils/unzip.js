@@ -28,45 +28,39 @@ export default class Unzip {
         this.emit();
 
         try {
-            this.status = "counting";
-            this.emit();
+            if (NL_OS === "Windows") {
+                this.status = "extracting";
+                this.progress = 0;
+                this.emit();
 
-            const listProc = await Neutralino.os.execCommand(`unzip -l "${this.zipPath}" | tail -n 1 | awk '{print $2}'`);
-            this.totalFiles = parseInt(listProc.stdOut.trim());
+                const proc = await Neutralino.os.spawnProcess(`powershell -NoProfile -Command "Expand-Archive -LiteralPath '${this.zipPath}' -DestinationPath '${this.destPath}' -Force"`);
+                this.procId = proc.id;
 
-            this.status = "extracting";
-            this.emit();
+                let fakingProgress = true;
+                let timeoutFunc = null;
+                const fakeProgress = () => {
+                    if (!fakingProgress || this.progress >= 90) return;
+                    const delay = 1000 + Math.random() * 1000;
+                    const increment = Math.floor(Math.random() * 8) + 2;
 
-            const proc = await Neutralino.os.spawnProcess(`unzip -o "${this.zipPath}" -d "${this.destPath}"`);
-            this.procId = proc.id;
+                    timeoutFunc = setTimeout(() => {
+                        if(!fakingProgress) return;
+                        this.progress = Math.min(this.progress + increment, 90);
+                        this.emit();
+                        fakeProgress();
+                    }, delay);
+                };
+                fakeProgress();
 
-            await new Promise((resolve) => {
-                const handler = (evt) => {
-                    if (evt.detail.id !== proc.id) return;
-                    if (evt.detail.action === "stdOut") {
-                        const lines = evt.detail.data.split("\n");
-                        for (const line of lines) {
-                            if (
-                                line.includes("inflating:") ||
-                                line.includes("extracting:") ||
-                                line.includes("creating:")
-                            ) {
-                                this.extracted++;
+                await new Promise((resolve) => {
+                    const handler = (evt) => {
+                        if (evt.detail.id !== proc.id) return;
+                        if (evt.detail.action !== "exit") return;
 
-                                const percent =
-                                    (this.extracted / this.totalFiles) * 100;
-
-                                if (percent > this.lastPercent) {
-                                    this.lastPercent = percent;
-                                    this.progress = Math.floor(percent);
-                                    this.emit();
-                                };
-                            };
-                        };
-                    };
-
-                    if (evt.detail.action === "exit") {
                         Neutralino.events.off("spawnedProcess", handler);
+
+                        clearTimeout(timeoutFunc);
+                        fakingProgress = false;
 
                         this.progress = 100;
                         this.status = "finished";
@@ -74,10 +68,61 @@ export default class Unzip {
 
                         resolve();
                     };
-                };
 
-                Neutralino.events.on("spawnedProcess", handler);
-            });
+                    Neutralino.events.on("spawnedProcess", handler);
+                });
+            } else {
+                this.status = "counting";
+                this.emit();
+
+                const listProc = await Neutralino.os.execCommand(`unzip -l "${this.zipPath}" | tail -n 1 | awk '{print $2}'`);
+                this.totalFiles = parseInt(listProc.stdOut.trim());
+
+                this.status = "extracting";
+                this.emit();
+
+                const proc = await Neutralino.os.spawnProcess(`unzip -o "${this.zipPath}" -d "${this.destPath}"`);
+                this.procId = proc.id;
+
+                await new Promise((resolve) => {
+                    const handler = (evt) => {
+                        if (evt.detail.id !== proc.id) return;
+                        if (evt.detail.action === "stdOut") {
+                            const lines = evt.detail.data.split("\n");
+                            for (const line of lines) {
+                                if (
+                                    line.includes("inflating:") ||
+                                    line.includes("extracting:") ||
+                                    line.includes("creating:")
+                                ) {
+                                    this.extracted++;
+
+                                    const percent =
+                                        (this.extracted / this.totalFiles) * 100;
+
+                                    if (percent > this.lastPercent) {
+                                        this.lastPercent = percent;
+                                        this.progress = Math.floor(percent);
+                                        this.emit();
+                                    };
+                                };
+                            };
+                        };
+
+                        if (evt.detail.action === "exit") {
+                            Neutralino.events.off("spawnedProcess", handler);
+
+                            this.progress = 100;
+                            this.status = "finished";
+                            this.emit();
+
+                            resolve();
+                        };
+                    };
+
+                    Neutralino.events.on("spawnedProcess", handler);
+                });
+            };
         } catch (err) {
             this.status = "error";
             this.error = err.message;

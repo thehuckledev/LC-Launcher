@@ -6,7 +6,6 @@ audioElement.volume = 1;
 
 const audioFiles = [
     new URL("../assets/music/Aria_Math_-_C418--.opus", import.meta.url).href,
-    new URL("../assets/music/Far_-_C418--.opus", import.meta.url).href,
     new URL("../assets/music/Kyoto_-_C418--.opus", import.meta.url).href,
     new URL("../assets/music/Mutation_-_C418--.opus", import.meta.url).href
 ];
@@ -80,7 +79,7 @@ function getNextIndex() {
     return index;
 };
 
-async function playSong() {
+async function playSong() {// TODO fix issue on windows with user required interaction to play music
     await setupAudio();
 
     const index = getNextIndex();
@@ -110,4 +109,8 @@ export function stopMusic() {
 
 export function setVolume(vol) {
     if (feedbackNode) feedbackNode.gain.value = vol;
+};
+
+export function getVolume() {
+    if (feedbackNode) return feedbackNode.gain.value;
 };

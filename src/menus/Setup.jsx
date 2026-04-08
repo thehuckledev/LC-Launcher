@@ -31,9 +31,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
         async function checkWine() {
             try {
                 if (NL_OS !== "Linux" &&
-                    NL_OS !== "Darwin" &&
-                    NL_ARCH !== "x64" &&
-                    NL_ARCH !== "arm"
+                    NL_OS !== "Darwin"
                 ) return setCanInstallWine(false);
 
                 const res = await Neutralino.os.execCommand("wine --version");
@@ -204,10 +202,9 @@ export default function SetupMenu({ setMenu, reloadData }) {
     const handleNext = async () => {
         if (!ready) return showToast("You need to enter a valid username");
 
+        joinDiscordPrompt();
         setProcessing(true);
         try {
-            joinDiscordPrompt();
-
             if (skin) {
                 const file = await Neutralino.filesystem.readBinaryFile(skin);
                 const base64String = btoa(
@@ -349,7 +346,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
                             </Button>
                         </div>
                         <br />
-                        {canInstallWine &&
+                        {canInstallWine === true &&
                             <Checkbox
                                 id="install-wine-checkbox"
                                 value={installWine}
@@ -365,7 +362,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
                     </>
                 )}
             </div>
-            <div id="action-bar">
+            <div id="setup-action-bar">
                 <Button id="skip-button" disabled={processing} onclick={async() => {
                     await updateSetting('hasSetup', true);
                     setMenu('main');

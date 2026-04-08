@@ -17,28 +17,30 @@ export default function Window({ title, showClose = true, showMinimize = true, s
     }, []);
     
     useEffect(() => {
+        function stopKeybinds() {
+            document.addEventListener("keydown", (e) => {
+                const isCtrl = e.ctrlKey || e.metaKey;
+            
+                if (isCtrl) {
+                    const key = e.key.toLowerCase();
+                    if (key === "+" || key === "=" || key === "-" || key === "r" || key === "p" || key === "u" || key === "f" || key === "g" || key === "j") e.preventDefault();
+                };
+            });
+        };
+
         async function WINDOWS_resizeRatio() {
             if (NL_OS !== "Windows") return; // fix windows scaling issues. windows is soo odd man
 
-            const displays = await Neutralino.computer.getDisplays();
-            if (displays.length < 1) return; // u dont need this bud!
-            const display = displays[0];
+            const scale = window.devicePixelRatio || 1;
 
-            const screenWidth = display.resolution.width;
-            const screenHeight = display.resolution.height;
-
-            const ratio = 600 / 1000; // 4:3
-
-            const width = Math.round(screenWidth * 0.6);
-            const height = Math.round(width * ratio);
+            const width = Math.round(1000 * scale);
+            const height = Math.round(620 * scale);
 
             await Neutralino.window.setSize({
                 width,
-                height,
-                minWidth: width,
-                minHeight: height
+                height
             });
-            await Neutralino.window.center(); // for some reason it only works one time
+            await Neutralino.window.center();
         };
 
         async function createMenuBar() {
@@ -113,6 +115,7 @@ export default function Window({ title, showClose = true, showMinimize = true, s
             createMenuBar();
             preventInspect();
             preventScrollBounce();
+            stopKeybinds();
             WINDOWS_resizeRatio();
 
             await Neutralino.window.setDraggableRegion("window-title");

@@ -18,7 +18,7 @@ export const defaultSettings = {
                     homeDir,
                     "AppData",
                     "Roaming",
-                    "LegacyCommunityLauncher",
+                    "LC Launcher.exe",
                     "data"
                 );
 

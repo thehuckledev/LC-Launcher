@@ -4,6 +4,8 @@ import { getSetting } from "../utils/settingsManager.js";
 import Download from "../utils/download.js";
 import Unzip from "../utils/unzip.js";
 
+import charPng from '../assets/misc/char.png';
+
 export class Exec {
     constructor(manager) {
         this.manager = manager;
@@ -96,7 +98,7 @@ export class Exec {
             await this.manager.utils.ensureDir(await Neutralino.filesystem.getJoinedPath(instancePath, 'content'));
 
             console.log("Downloading build...");
-            const download = await new Download(asset.browser_download_url, { label: `Downloading instance${isUpdate ? ' update' : ''}` });
+            const download = await new Download(asset.browser_download_url, { label: `Downloading instance${isUpdate ? ' update' : ''}...` });
             try {
                 await download.start(zipPath);
             } catch(e) {
@@ -106,7 +108,7 @@ export class Exec {
 
             console.log("Extracting build...");
             await this.backupPreserved(instancePath);
-            const unzipContent = new Unzip(zipPath, `${instancePath}/content`, { label: `Extracting instance${isUpdate ? ' update' : ''}` });
+            const unzipContent = new Unzip(zipPath, `${instancePath}/content`, { label: `Extracting instance${isUpdate ? ' update' : ''}...` });
             try {
                 await unzipContent.start();
             } catch(e) {
@@ -153,7 +155,7 @@ export class Exec {
 
             if (!dataURI) {
                 await this.manager.utils.ensureDir(`${baseDir}/Common/res/mob`);
-                await Neutralino.resources.extractFile('/src/assets/misc/char.png', filePath);
+                await Neutralino.resources.extractFile(`/public${charPng}`, filePath);
                 return console.log("Skin written to:", filePath);
             };
             
@@ -368,11 +370,15 @@ export class Exec {
         showToast("Launching instance...", 1000);
         console.log("Launching:", cmd);
 
+        window.dispatchEvent(new CustomEvent("silenceMusic", { detail: true }));
         const isTranslated = instance.compatibilityLayer !== "DIRECT" && (NL_OS === "Linux" || NL_OS === "Darwin");
         const keepLauncherOpen = await getSetting("keepLauncherOpen");
         return new Promise(async (resolve) => {
             try {
-                if(keepLauncherOpen === false) setTimeout(() => { Neutralino.window.hide(); }, 2000);
+                if(keepLauncherOpen === false) {
+                    if (NL_OS === "Windows") setTimeout(() => { Neutralino.window.hide(); }, 200);
+                    else setTimeout(() => { Neutralino.window.hide(); }, 2000);
+                };
                 
                 const startTime = Date.now();
                 const proc = await Neutralino.os.spawnProcess(cmd, { cwd });
@@ -458,7 +464,13 @@ export class Exec {
                                 };
 
                                 Neutralino.events.off('spawnedProcess', handler);
-                                if(keepLauncherOpen === false) await Neutralino.window.show();
+                                if(keepLauncherOpen === false) {
+                                    await Neutralino.window.show();
+                                    await Neutralino.window.focus();
+                                    await Neutralino.window.setAlwaysOnTop(true);
+                                    setTimeout(() => { Neutralino.window.setAlwaysOnTop(false); }, 200);
+                                };
+                                window.dispatchEvent(new CustomEvent("silenceMusic", { detail: false }));
                                 window.whenQuitting = undefined;
                                 resolve();
                                 break;
@@ -468,7 +480,13 @@ export class Exec {
                 Neutralino.events.on('spawnedProcess', handler);
             } catch(e) {
                 console.log(e);
-                if(keepLauncherOpen === false) await Neutralino.window.show();
+                if(keepLauncherOpen === false) {
+                    await Neutralino.window.show();
+                    await Neutralino.window.focus();
+                    await Neutralino.window.setAlwaysOnTop(true);
+                    setTimeout(() => { Neutralino.window.setAlwaysOnTop(false); }, 200);
+                };
+                window.dispatchEvent(new CustomEvent("silenceMusic", { detail: false }));
                 window.whenQuitting = undefined;
                 resolve();
             };

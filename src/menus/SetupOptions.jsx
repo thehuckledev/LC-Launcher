@@ -1,9 +1,7 @@
-import "./Setup.css";
+import "./SetupOptions.css";
 
 import { useSettings } from "../utils/SettingsStore.jsx";
 import Button from "../components/Button.jsx";
-
-import minecraftLogo from "../assets/ui/minecraftlogo.png";
 
 export default function SetupOptionsMenu({ setMenu }) {
     const { settings, updateSetting } = useSettings();
@@ -13,8 +11,7 @@ export default function SetupOptionsMenu({ setMenu }) {
 
     return (
         <>
-            <img id="setup-logo" src={minecraftLogo} draggable={false} />
-            <div id="setup">
+            <div id="setupOptions">
                 <h1 class="moto">Welcome to
                     <div class="slidingVertical">
                         <span>LC Launcher</span>
@@ -36,7 +33,7 @@ export default function SetupOptionsMenu({ setMenu }) {
                     {settings.menuMusic == false ? 'Menu Music: Disabled' : 'Menu Music: Enabled'}
                 </Button>
             </div>
-            <div id="action-bar">
+            <div id="setupOptions-action-bar">
                 <div></div>
                 <Button id="done-button" onclick={() => setMenu('main')}>
                     Done
