@@ -17,6 +17,8 @@ import OptionsMenu from "./menus/Options.jsx";
 import AboutMenu from "./menus/About.jsx";
 import PatchNotesMenu from "./menus/PatchNotes.jsx";
 import GameLogMenu from "./menus/GameLog.jsx";
+// TODO add 4jcraft and https://github.com/LCE-Hub/LCE-Revelations
+// TODO convert LCE world to Java worlds. https://je2be.app
 // TODO make the menu sfx use LCE version rather than modern java ones
 // TODO make a windows install.bat
 // TODO add game crash detection and popup
