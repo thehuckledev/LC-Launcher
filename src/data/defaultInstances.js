@@ -17,7 +17,7 @@ export const defaultInstances = [
         name: "MinecraftConsoles",
         serviceType: "GITHUB",
         serviceDomain: "github.com",
-        repo: "smartcmd/MinecraftConsoles",
+        repo: "MCLCE/MinecraftConsoles",
         tag: "nightly",
         exec: "Minecraft.Client.exe",
         target: "LCEWindows64.zip",
