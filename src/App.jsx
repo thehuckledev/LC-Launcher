@@ -23,6 +23,7 @@ import GameLogMenu from "./menus/GameLog.jsx";
 // TODO make a windows install.bat
 // TODO add game crash detection and popup
 // TODO make all the build scripts use node rather than .sh so windows support
+// TODO make the skin save a slim and non slim version so that LegacyEvolved can use slim skin
 export default function App() {
     const [processing, setProcessing] = useState(false);
     const [profile, setProfile] = useState(null);
