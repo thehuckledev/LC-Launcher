@@ -28,10 +28,7 @@
     "private": true,
     "scripts": {
         "dev": "node ./build-scripts/dev.js",
-        "build-mac": "sh ./build-scripts/build-mac.sh",
-        "build-linux": "sh ./build-scripts/build-linux.sh",
-        "build-win": "sh ./build-scripts/build-win.sh",
-        "build": "sh ./build-scripts/build-all.sh"
+        "build": "node ./build-scripts/build.js"
     },
     "dependencies": {
         "@neutralinojs/lib": "^6.5.0",

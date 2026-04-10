@@ -23,4 +23,4 @@ if (!fs.existsSync(path.join(cwd, "bin/neutralino-win_x64.exe"))) {
     child_process.execSync("npx neu update", execOptions);
 };
 
-child_process.execSync("npx neu run", execOptions);
+child_process.execSync("WEBKIT_DISABLE_COMPOSITING_MODE=1 npx neu run", execOptions);
