@@ -1,7 +1,9 @@
 import "./Main.css";
 
+import Neutralino from "@neutralinojs/lib";
 import { useState, useEffect } from "preact/hooks";
 import { useManager } from "../utils/ManagerProvider.jsx";
+import { useSettings } from "../utils/SettingsStore.jsx";
 
 import Button from "../components/Button.jsx";
 
@@ -12,10 +14,12 @@ import optionsIcon from "../assets/buttons/options.svg";
 import minecraftLogo from "../assets/ui/minecraftlogo.png";
 import worldsIcon from "../assets/buttons/worlds.svg";
 import serversIcon from "../assets/buttons/servers.svg";
-import gameLogIcon from "../assets/buttons/gamelog.svg"
+import gameLogIcon from "../assets/buttons/gamelog.svg";
+import folderIcon from "../assets/buttons/folder.svg";
 
 export default function MainMenu({ setMenu, instance, profile, processing }) {
     const Manager = useManager();
+    const { settings } = useSettings();
     
     const [progress, setProgress] = useState({ active: false, status: '', percent: 0 });
 
@@ -58,6 +62,15 @@ export default function MainMenu({ setMenu, instance, profile, processing }) {
                     </Button>
                     <Button id="news-button" disabled={!instance?.id} pushable={instance?.id} onclick={() => setMenu('patchnotes')}>
                         <img src={newsIcon} draggable={false} />
+                    </Button>
+                    <Button id="folder-button" disabled={!instance?.id} pushable={instance?.id} onclick={async() => {
+                        let cmd = `start ""`;
+                        if (NL_OS === "Linux") cmd = "xdg-open";
+                        if (NL_OS === "Darwin") cmd = "open";
+                        const instPath = await Neutralino.filesystem.getJoinedPath(settings.dataDirectory, "instances", instance.id);
+                        await Neutralino.os.execCommand(`${cmd} "${instPath}"`)
+                    }}>
+                        <img src={folderIcon} draggable={false} />
                     </Button>
                     <Button id="options-button" disabled={processing} pushable={!processing} onclick={() => setMenu('options')}>
                         <img src={optionsIcon} draggable={false} />

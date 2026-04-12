@@ -17,6 +17,9 @@ import OptionsMenu from "./menus/Options.jsx";
 import AboutMenu from "./menus/About.jsx";
 import PatchNotesMenu from "./menus/PatchNotes.jsx";
 import GameLogMenu from "./menus/GameLog.jsx";
+import CrashMenu from "./menus/Crash.jsx";
+// TODO add screenshot menu
+// TODO add dev tools like .arc .pak and .loc editor
 // TODO convert LCE world to Java worlds. https://je2be.app
 // TODO add game crash detection and popup
 // TODO make the skin save a slim and non slim version so that LegacyEvolved can use slim skin
@@ -24,6 +27,7 @@ import GameLogMenu from "./menus/GameLog.jsx";
 // TODO make the app prompt to install if its in the downloads folder (or not in the right folder)
 export default function App() {
     const [processing, setProcessing] = useState(false);
+    const [crashed, setCrashed] = useState(false);
     const [profile, setProfile] = useState(null);
     const [instance, setInstance] = useState(null);
     const [loaded, setLoaded] = useState(false);
@@ -119,7 +123,7 @@ export default function App() {
 
     useEffect(() => {
         const handleProcessing = (e) => {
-            if(e.detail === false) {
+            if(e.detail === false && crashed === false) {
                 setMenu("main");
                 setLogs([]);
             };
@@ -127,6 +131,16 @@ export default function App() {
         };
         window.addEventListener('execProcessing', handleProcessing);
         return () => window.removeEventListener('execProcessing', handleProcessing);
+    }, [crashed]);
+
+    useEffect(() => {
+        const handler = () => {
+            setCrashed(true);
+            setMenu("crash");
+        };
+
+        window.addEventListener("gameCrash", handler);
+        return () => window.removeEventListener("gameCrash", handler);
     }, []);
 
     return (
@@ -140,6 +154,7 @@ export default function App() {
                     {menu === "about" &&        <AboutMenu setMenu={setMenu} />}
                     {menu === "patchnotes" &&   <PatchNotesMenu setMenu={setMenu} instance={instance} />}
                     {menu === "gamelog" &&      <GameLogMenu setMenu={setMenu} logs={logs} />}
+                    {menu === "crash" &&        <CrashMenu setMenu={setMenu} setCrashed={setCrashed} setLogs={setLogs} logs={logs} />}
                 </>}
             </Window>
             

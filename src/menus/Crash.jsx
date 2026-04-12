@@ -1,4 +1,5 @@
-import "./GameLog.css";
+import "./Crash.css";
+import "./GameLog.jsx";
 
 import Neutralino from "@neutralinojs/lib";
 import { useRef, useEffect, useState } from "preact/hooks";
@@ -9,8 +10,9 @@ import Textbox from "../components/Textbox.jsx";
 
 import closeIcon from "../assets/buttons/close.svg";
 import saveIcon from "../assets/buttons/save.svg";
+import copyIcon from "../assets/buttons/copy.svg";
 
-export default function GameLogMenu({ setMenu, logs }) {
+export default function CrashMenu({ setMenu, setCrashed, setLogs, logs }) {
     const logRef = useRef();
     const [searchQuery, setSearchQuery] = useState("");
     const [hideWine, setHideWine] = useState(false);
@@ -44,15 +46,20 @@ export default function GameLogMenu({ setMenu, logs }) {
     }, [logs]);
 
     async function saveLogs() {
-        const startName = (d => `${d.toISOString().slice(0,10)}_${d.toTimeString().slice(0,5).replace(':','-')}`)(new Date());
+        const startTime = (d => `${d.toISOString().slice(0,10)}_${d.toTimeString().slice(0,5).replace(':','-')}`)(new Date());
         const res = await Neutralino.os.showSaveDialog("Select a location for the log");
         if (!res) return;
         const src = res.trim();
         if (!src.endsWith(".txt")) return showToast("You must save as a .txt file");
 
         const header = 
-`=== LC Launcher Log ===
-Saved on: ${startName}
+`=== LC Launcher Crash Log ===
+Saved at: ${startTime}
+Platform: ${NL_OS || "Unknown"} (${NL_ARCH || "Unknown"})
+
+Version: ${NL_APPVERSION || "Unknown"}
+NeutralinoJS Client: ${NL_CVERSION || "Unknown"} (${NL_CCOMMIT || "Unknown"})
+NeutralinoJS Server: ${NL_VERSION || "Unknown"} (${NL_COMMIT || "Unknown"})
 
 `;
         const body = logs
@@ -66,10 +73,38 @@ Saved on: ${startName}
         showToast("Log saved to location");
     };
 
+    async function copyLog() {
+        const startTime = (d => `${d.toISOString().slice(0,10)}_${d.toTimeString().slice(0,5).replace(':','-')}`)(new Date());
+        const header = 
+`=== LC Launcher Crash Log ===
+Saved at: ${startTime}
+Platform: ${NL_OS || "Unknown"} (${NL_ARCH || "Unknown"})
+
+Version: ${NL_APPVERSION || "Unknown"}
+NeutralinoJS Client: ${NL_CVERSION || "Unknown"} (${NL_CCOMMIT || "Unknown"})
+NeutralinoJS Server: ${NL_VERSION || "Unknown"} (${NL_COMMIT || "Unknown"})
+
+`;
+        const body = logs
+            .map(log =>
+                `[${log.timestamp || "--"}] [${log.type.toUpperCase()}]${log.channel ? ` ${log.channel}` : ""}${log.func ? `:${log.func}()` : ""} ${log.message}`
+            )
+            .join("\n");
+
+        const logContent = header + body;
+
+        try {
+            await Neutralino.clipboard.writeText(logContent);
+            showToast("Crash log copied to clipboard");
+        } catch {
+            showToast("Failed to copy crash log");
+        };
+    };
+
     return (
         <>
             <div id="top-bar">
-                <h1>Game Log</h1>
+                <h1>Crash Log</h1>
                 <div id="main-actions">
                     <Textbox
                         id="search-query"
@@ -82,10 +117,17 @@ Saved on: ${startName}
                     <Button id="filter-button" onclick={() => setHideWine(prev => !prev)} disabled={hideWine}>
                         W
                     </Button>
+                    <Button id="copy-button" onclick={copyLog}>
+                        <img id="copy-icon" src={copyIcon} draggable={false} />
+                    </Button>
                     <Button id="save-button" onclick={saveLogs}>
                         <img id="save-icon" src={saveIcon} draggable={false} />
                     </Button>
-                    <Button id="back-button" onclick={() => setMenu('main')}>
+                    <Button id="back-button" onclick={() => {
+                        setCrashed(false);
+                        setLogs([]);
+                        setMenu('main');
+                    }}>
                         <img id="back-icon" src={closeIcon} draggable={false} />
                     </Button>
                 </div>

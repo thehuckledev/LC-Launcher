@@ -179,7 +179,6 @@ export class Exec {
         const msg = line.trim();
         const regex = /^(?:([\d.]+):)?(?:([a-f0-9]{4}):)?([a-z]+):([^:]+?):(?:([^:\s]+)(?:\s|:))?(.*)$/i;
         const match = regex.exec(msg);
-        console.log(line, match)
         if (!match) return { type: "text", message: msg };
 
         const [, timestamp, pid, level, channel, func, message] = match;
@@ -381,6 +380,7 @@ export class Exec {
                 };
                 
                 const startTime = Date.now();
+                let crashDetected = false;
                 const proc = await Neutralino.os.spawnProcess(cmd, { cwd });
                 window.whenQuitting = async (ev) => { // close game also
                     if (!proc?.pid) return;
@@ -423,9 +423,28 @@ export class Exec {
                                     let msg = { type: "err", from: "DIRECT", message: line };
                                     if(isTranslated) { // parse wine logs
                                         const parsed = this.parseWINELog(line);
-                                        if (!parsed) return;
+                                        if (!parsed) continue;
                                         parsed.from = "WINE";
                                         msg = parsed;
+
+                                        const lower = parsed.message?.toLowerCase() || "";
+                                        if (
+                                            lower.includes("unhandled") ||
+                                            lower.includes("segmentation fault") ||
+                                            lower.includes("stack overflow") ||
+                                            lower.includes("crash") ||
+                                            lower.includes("fault")
+                                        ) crashDetected = true;
+                                    } else {
+                                        const lower = line.toLowerCase();
+                                        if (
+                                            lower.includes("exception") ||
+                                            lower.includes("fatal") ||
+                                            lower.includes("segmentation fault") ||
+                                            lower.includes("crash") ||
+                                            lower.includes("failed") ||
+                                            lower.includes("panic")
+                                        ) crashDetected = true;
                                     };
 
                                     window.dispatchEvent(new CustomEvent("gameLog", {
@@ -435,6 +454,7 @@ export class Exec {
                                 break;
                             };
                             case 'exit':
+                                const exitCode = evt.detail.data;
                                 const duration = Date.now() - startTime;
                                 const sessionSeconds = Math.floor(duration / 1000);
 
@@ -458,10 +478,17 @@ export class Exec {
                                 updatedInstance.playtime = (updatedInstance.playtime || 0) + sessionSeconds;
                                 await this.manager.utils.writeJSON(instancePath, updatedInstance);
 
-                                if (proc.exitCode !== 0 && duration < 2000) {
+                                // crash detection
+                                if (exitCode !== 0 || crashDetected) {
+                                    console.log("CRASHED!", exitCode)
+                                    window.dispatchEvent(new CustomEvent("gameCrash"));
+                                    await new Promise(r => setTimeout(r, 100));
+                                };
+                                    
+                                /*if (exitCode !== 0 && duration < 2000) {
                                     showToast("Error: Failed to launch instance");
                                     console.error(proc.stdErr);
-                                };
+                                };*/
 
                                 Neutralino.events.off('spawnedProcess', handler);
                                 if(keepLauncherOpen === false) {
@@ -470,8 +497,10 @@ export class Exec {
                                     await Neutralino.window.setAlwaysOnTop(true);
                                     setTimeout(() => { Neutralino.window.setAlwaysOnTop(false); }, 200);
                                 };
+
                                 window.dispatchEvent(new CustomEvent("silenceMusic", { detail: false }));
                                 window.whenQuitting = undefined;
+
                                 resolve();
                                 break;
                         };
