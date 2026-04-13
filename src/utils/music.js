@@ -79,7 +79,7 @@ function getNextIndex() {
     return index;
 };
 
-async function playSong() {// TODO fix issue on windows with user required interaction to play music
+async function playSong() {//! TODO fix issue on windows with user required interaction to play music
     await setupAudio();
 
     const index = getNextIndex();

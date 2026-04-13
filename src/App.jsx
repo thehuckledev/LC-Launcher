@@ -23,7 +23,9 @@ import CrashMenu from "./menus/Crash.jsx";
 // TODO convert LCE world to Java worlds. https://je2be.app
 // TODO make the skin save a slim and non slim version so that LegacyEvolved can use slim skin
 // TODO make each profile have multiple skins
-// TODO make the app prompt to install if its in the downloads folder (or not in the right folder)
+//! TODO make the app prompt to install if its in the downloads folder (or not in the right folder)
+//! TODO make the create profile and profile dropdown work
+//! TODO make the create instance and instance dropdown work
 export default function App() {
     const [processing, setProcessing] = useState(false);
     const [crashed, setCrashed] = useState(false);
