@@ -21,7 +21,6 @@ import CrashMenu from "./menus/Crash.jsx";
 // TODO add screenshot menu
 // TODO add dev tools like .arc .pak and .loc editor
 // TODO convert LCE world to Java worlds. https://je2be.app
-// TODO add game crash detection and popup
 // TODO make the skin save a slim and non slim version so that LegacyEvolved can use slim skin
 // TODO make each profile have multiple skins
 // TODO make the app prompt to install if its in the downloads folder (or not in the right folder)
