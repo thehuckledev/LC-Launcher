@@ -48,7 +48,8 @@
             "resizable": true,
             "useSavedState": false,
             "exitProcessOnClose": true,
-            "injectGlobals": true
+            "injectGlobals": true,
+            "webviewArgs": "--autoplay-policy=no-user-gesture-required"
         }
     },
 

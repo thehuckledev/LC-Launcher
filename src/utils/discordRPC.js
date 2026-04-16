@@ -55,7 +55,7 @@ export default class DiscordRPC {
                 await Neutralino.os.execCommand(`taskkill /IM simple-discord-rpc.exe /F`);
             else if (NL_OS === "Linux")
                 await Neutralino.os.execCommand(`pkill -f simple-discord-rpc-linux`);
-            else
+            else if (NL_OS === "Darwin")
                 await Neutralino.os.execCommand(`pkill -f simple-discord-rpc-osx`);
         } catch {};
     };
@@ -81,11 +81,13 @@ export default class DiscordRPC {
     };
 
     async disable() {
-        if (!this.procId) return;
+        if (typeof this.procId !== "number") return;
 
         try {
             await Neutralino.os.updateSpawnedProcess(this.procId, "exit");
         } catch {};
+
+        await this.killAllInstances();
 
         this.procId = null;
         this.enabled = false;

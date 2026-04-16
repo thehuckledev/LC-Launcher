@@ -6,7 +6,6 @@ import Button from "../components/Button.jsx";
 export default function SetupOptionsMenu({ setMenu }) {
     const { settings, updateSetting } = useSettings();
 
-    //! TODO add discord rpc option
     // TODO add data dir option
 
     return (
