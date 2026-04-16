@@ -153,6 +153,7 @@ export default function OptionsMenu({ setMenu }) {
                         showToast("Uninstalled, quitting...");
                         setTimeout(async () => {
                             if (window.whenQuitting) await window.whenQuitting();
+                            if (window.beforeExitRPC) await window.beforeExitRPC();
                             await Neutralino.app.exit();
                         }, 200);
                     } catch (e) {

@@ -1,0 +1,21 @@
+[package]
+name = "simple-discord-rpc"
+version = "0.1.2"
+edition = "2021"
+authors = ["DaBigBlob <research@0x000.io>"]
+description = "Simple cross-platform discord RPC CLI."
+repository = "https://github.com/DaBigBlob/simple-discord-rpc"
+homepage = "https://github.com/DaBigBlob/simple-discord-rpc"
+documentation = "https://github.com/DaBigBlob/simple-discord-rpc"
+readme = "README.md"
+license-file = "LICENSE"
+keywords = ["discord", "RPC"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+discord-rich-presence = "0.2.3"
+clap = {version = "4.4.10", features = ["derive"] }
+
+[profile.release]
+opt-level = 2
+lto = true

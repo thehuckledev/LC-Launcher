@@ -61,6 +61,7 @@ export default function Window({ title, showClose = true, showMinimize = true, s
                 if (evt.detail.id == "about") setMenu('about');
                 if (evt.detail.id == "quit") {
                     if (window.whenQuitting) await window.whenQuitting();
+                    if (window.beforeExitRPC) await window.beforeExitRPC();
                     await Neutralino.app.exit();
                 };
             });
@@ -168,6 +169,7 @@ export default function Window({ title, showClose = true, showMinimize = true, s
                         {showClose &&
                             <div class="button" id="close-button" onClick={async() => {
                                 if(window.whenQuitting) await window.whenQuitting();
+                                if (window.beforeExitRPC) await window.beforeExitRPC();
                                 await Neutralino.app.exit();
                             }}>
                                 <img class="icon" src={closeIcon} draggable={false} />

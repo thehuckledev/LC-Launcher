@@ -32,14 +32,26 @@ function ensureDependencies() {
     };
 };
 
-function buildBase(binary) {
+function buildBase() {
     console.log("\nBuilding Neutralino app...");
-    run(`rm -rf ./dist/${binary}`);
+    run(`rm -rf ./dist/`);
     run("npx neu build");
 };
 
 function copyIfExists(src, dest) {
     if (exists(src)) run(`cp -r "${src}" "${dest}"`);
+};
+
+function copyLibs(src, dest, filterFn) {
+    if (!exists(src)) return;
+
+    fs.mkdirSync(dest, { recursive: true });
+    for (const file of fs.readdirSync(src)) {
+        const fullSrc = path.join(src, file);
+        const fullDest = path.join(dest, file);
+
+        if (fs.statSync(fullSrc).isFile() && filterFn(file)) fs.copyFileSync(fullSrc, fullDest);
+    };
 };
 
 function buildLinux(cfg) {
@@ -64,6 +76,7 @@ function buildLinux(cfg) {
         run(`cp "./dist/${binary}/resources.neu" "${outDir}/"`);
 
         copyIfExists(`./dist/${binary}/extensions`, outDir);
+        copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.endsWith("linux"));
 
         const tarName = `./dist/${appName}-linux-${arch}.tar.gz`;
         run(`tar -cJf "${tarName}" -C ./dist/linux_${arch} "${appName}"`);
@@ -98,6 +111,7 @@ function buildMac(cfg) {
         run(`cp "./dist/${binary}/resources.neu" "${appDir}/Contents/Resources/"`);
 
         copyIfExists(`./dist/${binary}/extensions`, `${appDir}/Contents/Resources/`);
+        copyLibs(`./libs`, `${appDir}/Contents/Resources/libs/`, (f) => f.endsWith("osx"));
 
         const zipName = `./dist/${appName}-mac-${arch}.zip`;
         run(`cd ./dist && zip -9 -rq "${path.basename(zipName)}" "mac_${arch}"`);
@@ -130,6 +144,7 @@ function buildWin(cfg) {
         run(`cp "./dist/${binary}/resources.neu" "${outDir}/"`);
 
         copyIfExists(`./dist/${binary}/extensions`, outDir);
+        copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.endsWith(".exe"));
 
         const zipName = `./dist/${appName.replace(".exe", "")}-win-${arch}.zip`;
         run(`cd ./dist && zip -9 -rq "${path.basename(zipName)}" "win_${arch}"`);
@@ -143,7 +158,7 @@ console.log("Building for all platforms...");
 const cfg = loadConfig();
 
 ensureDependencies();
-buildBase(cfg.cli.binaryName);
+buildBase();
 buildLinux(cfg);
 buildMac(cfg);
 buildWin(cfg);

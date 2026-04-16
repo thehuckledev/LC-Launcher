@@ -6,6 +6,7 @@ import { checkForUpdates } from "./utils/updater.js";
 import { startMusic, stopMusic, setVolume } from "./utils/music.js";
 import { useSettings } from "./utils/SettingsStore.jsx";
 import { useManager } from "./utils/ManagerProvider.jsx";
+import DiscordRPC from "./utils/discordRPC.js";
 
 import Window from "./components/Window.jsx";
 import Toast from "./components/Toast.jsx";
@@ -36,6 +37,23 @@ export default function App() {
     const [logs, setLogs] = useState([]);
     const { settings, loadSettings } = useSettings();
     const Manager = useManager();
+
+    const rpcRef = useRef(null);
+    if (!rpcRef.current) {
+        rpcRef.current = new DiscordRPC({
+            clientId: config.rpcClientID,
+            details: "",
+            state: "",
+            largeImageText: "",
+            largeImageKey: config.rpcIcon,
+            smallImageText: "",
+            smallImageKey: "",
+            button1Label: config.button1Label,
+            button1Url: config.button1Url,
+            button2Label: config.button2Label,
+            button2Url: config.button2Url
+        });
+    };
 
     async function loadData() {
         const profiles = await Manager.profiles.list();
@@ -73,6 +91,62 @@ export default function App() {
 
         return () => clearTimeout(timer);
     }, []);
+
+    useEffect(() => {
+        const rpc = rpcRef.current;
+        if (!rpc) return;
+
+        if (settings.discordRPC === true) rpc.enable();
+        else rpc.disable();
+    }, [settings.discordRPC]);
+
+    useEffect(() => {
+        const rpc = rpcRef.current;
+        if (!rpc || !settings.discordRPC) return;
+    
+        let details = "";
+        let state = profile?.username 
+                    ? `${profile.username} • ${profile.type.charAt(0) + profile.type.substring(1).toLowerCase()}`
+                    : "No profile";
+        let largeImageText = profile?.uid ? `${NL_APPVERSION ? `v${NL_APPVERSION}` : ''} • Profile UID: ${profile.uid.substring(2)}` : `${NL_APPVERSION ? `v${NL_APPVERSION}` : ''}`;
+        switch (menu) {
+            case processing:
+                details = `Playing on ${instance?.name || "Unknown"}`;
+                break;
+            case "main":
+                details = "In Main Menu";
+                break;
+            case "options":
+                details = "Editing Options";
+                break;
+            case "setup":
+                details = "Setting up launcher";
+                break;
+            case "patchnotes":
+                details = "Viewing Patch Notes";
+                break;
+            case "gamelog":
+                details = "Viewing Game Logs";
+                break;
+            case "crash":
+                details = "Viewing Crash Logs";
+                break;
+        };
+
+        // cant do below because discord doesnt allow data uri :(
+        /*let smallImageText = "";
+        let smallImageKey = "";
+        if (processing && instance?.name) {
+            smallImageText = "Instance Icon";
+            smallImageKey = instance?.icon;
+        } else if (!processing && profile?.username) {
+            smallImageText = `${profile?.username}'s Skin`;
+            smallImageKey = profile?.skinRender;
+        };*/
+
+        console.log("Updating RPC:", { details, state });
+        rpc.edit({ details, state, largeImageText });
+    }, [menu, instance, profile, processing, settings.discordRPC]);
 
     useEffect(() => {
         if (openAnimPlaying.current == true) {
