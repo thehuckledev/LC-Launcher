@@ -1,0 +1,68 @@
+#top-bar > h1 {
+    font: 20px 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+    margin: 0;
+}
+
+#create-instance {
+    width: calc(100vw - 80px);
+    height: calc(100% - 83px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+
+    color: rgba(255, 255, 255, 0.9);
+    font: 10pt 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+    padding-right: 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#create-instance::-webkit-scrollbar {
+    width: 8px;
+}
+
+#create-instance::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+
+#create-instance::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.instance-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #ffffff22;
+}
+
+.instance-section:last-child {
+    border-bottom: none;
+}
+
+.instance-section h3 {
+    grid-column: 1 / -1;
+    font: 12px 'Minecraftia', sans-serif;
+    color: #aaa;
+    margin: 5px 0;
+    text-transform: uppercase;
+}
+
+#done-instance-action-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    justify-content: space-between;
+    width: 100%;
+}
+
+#done-instance-action-bar>.mc-button {
+    width: 130px;
+}

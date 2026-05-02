@@ -45,10 +45,13 @@ export default function GameLogMenu({ setMenu, logs }) {
 
     async function saveLogs() {
         const startName = (d => `${d.toISOString().slice(0,10)}_${d.toTimeString().slice(0,5).replace(':','-')}`)(new Date());
-        const res = await Neutralino.os.showSaveDialog("Select a location for the log");
+        const res = await Neutralino.os.showSaveDialog("Select a location for the log ( Must use .log )", {
+            filters: [{ name: 'LCE Log Files', extensions: ['log'] }],
+            defaultPath: NL_OS === "Darwin" ? undefined : `lclauncher_${startName}.log`
+        });
         if (!res) return;
         const src = res.trim();
-        if (!src.endsWith(".txt")) return showToast("You must save as a .txt file");
+        if (!src.endsWith(".log")) return showToast("You must save as a .log file");
 
         const header = 
 `=== LC Launcher Log ===

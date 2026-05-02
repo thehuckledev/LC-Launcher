@@ -98,7 +98,7 @@ export class Exec {
             await this.manager.utils.ensureDir(await Neutralino.filesystem.getJoinedPath(instancePath, 'content'));
 
             console.log("Downloading build...");
-            const download = await new Download(asset.browser_download_url, { label: `Downloading instance${isUpdate ? ' update' : ''}...` });
+            const download = new Download(asset.browser_download_url, { label: `Downloading instance${isUpdate ? ' update' : ''}...` });
             try {
                 await download.start(zipPath);
             } catch(e) {
@@ -108,11 +108,32 @@ export class Exec {
 
             console.log("Extracting build...");
             await this.backupPreserved(instancePath);
-            const unzipContent = new Unzip(zipPath, `${instancePath}/content`, { label: `Extracting instance${isUpdate ? ' update' : ''}...` });
+            const contentDir = `${instancePath}/content`;
+            const unzipContent = new Unzip(zipPath, contentDir, { label: `Extracting instance${isUpdate ? ' update' : ''}...` });
             try {
                 await unzipContent.start();
+
+                // fix some zips having folders but some using root
+                const entries = await Neutralino.filesystem.readDirectory(contentDir);
+                if (entries.length === 1 && entries[0].type === 'DIRECTORY') {
+                    const rootDirName = entries[0].entry;
+                    const rootDirPath = await Neutralino.filesystem.getJoinedPath(contentDir, rootDirName);
+                    
+                    const rootFiles = await Neutralino.filesystem.readDirectory(rootDirPath);
+                    for (const file of rootFiles) {
+                        const srcPath = await Neutralino.filesystem.getJoinedPath(rootDirPath, file.entry);
+                        const destPath = await Neutralino.filesystem.getJoinedPath(contentDir, file.entry);
+                        
+                        if (NL_OS === "Windows") await Neutralino.os.execCommand(`move "${srcPath}" "${destPath}"`);
+                        else await Neutralino.os.execCommand(`mv "${srcPath}" "${destPath}"`);
+                    };
+                    await Neutralino.filesystem.remove(rootDirPath);
+                };
             } catch(e) {
                 console.error(e);
+                try { // remove zip
+                    await Neutralino.filesystem.remove(`${this.manager.instancesDir}/${instance.id}/${instance.target}`);
+                } catch { }
                 return showToast("Error: Asset unzip failed");
             };
             await this.restorePreserved(instancePath);
@@ -293,77 +314,66 @@ export class Exec {
         // compatibility layers
         if (NL_OS === "Linux" || NL_OS === "Darwin") {
             const compat = instance.compatibilityLayer;
+            const runtimePath = `${dataDir}/libraries/runtime`;
+            const prefix = `${dataDir}/pfx`;
+            
+            let bin = "";
 
             if (compat === "WINE" || compat === "WINE64") {
-                let bin;
-                
-                try {
-                    await Neutralino.filesystem.getStats(`${dataDir}/libraries/wine-crossover/bin/`);
-                    // check if prebuilt installed above
-
-                    const internalWinePath = `${dataDir}/libraries/wine-crossover/bin/wine`;
-                    const internalWine64Path = `${dataDir}/libraries/wine-crossover/bin/wine64`;
-                    if(compat === "WINE") {
-                        try {
-                            await Neutralino.filesystem.getStats(internalWinePath);
-                            bin = `WINEDLLOVERRIDES="d3d11=n,b;dxgi=n,b" "${internalWinePath}"`;
-                            wineServerBin = `${dataDir}/libraries/wine-crossover/bin/wineserver`;
-
-                            try {
-                                await Neutralino.filesystem.getStats(prefix);
-                            } catch {
-                                showToast('Setting up C Drive...');
-                                try { await Neutralino.filesystem.createDirectory(prefix); } catch {};
-
-                                await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" ${bin} wineboot --init`);
-                                if(NL_OS === 'Darwin') await this.setupDXVK();
-                            };
-                        } catch {
-                            return showToast(`Error: ${compat} is not installed`);
-                        };
-                    } else if(compat === "WINE64") {
-                        try {
-                            await Neutralino.filesystem.getStats(internalWine64Path);
-                            bin = `WINEDLLOVERRIDES="d3d11=n,b;dxgi=n,b" "${internalWine64Path}"`;
-                            wineServerBin = `${dataDir}/libraries/wine-crossover/bin/wineserver`;
-
-                            try {
-                                await Neutralino.filesystem.getStats(prefix);
-                            } catch {
-                                showToast('Setting up C Drive...');
-                                try { await Neutralino.filesystem.createDirectory(prefix); } catch {};
-
-                                await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" ${bin} wineboot --init`);
-                                if(NL_OS === 'Darwin') await this.setupDXVK();
-                            };
-                        } catch {
-                            return showToast(`Error: ${compat} is not installed`);
-                        };
+                if (NL_OS === "Darwin") {
+                    try {
+                        await Neutralino.filesystem.getStats(`${runtimePath}/bin/wine64`);
+                        const winePath = `${runtimePath}/bin/wine64`;
+                        wineServerBin = `${runtimePath}/bin/wineserver`;
+                        
+                        const env = `WINEPREFIX="${prefix}" WINEESYNC=1 MTL_HUD_ENABLED=0 WINEDLLOVERRIDES="d3d11=n,b;dxgi=n,b"`;
+                        bin = `${env} "${winePath}"`;
+                        
+                        try { await Neutralino.filesystem.getStats(prefix); } catch {
+                            showToast('Setting up C Drive...');
+                            await Neutralino.os.execCommand(`${env} "${winePath}" wineboot --init`);
+                            await this.setupDXVK();
+                        }
+                    } catch (e) {
+                        bin = `WINEPREFIX="${prefix}" ${compat.toLowerCase()}`;
                     };
-                } catch(e) {
-                    bin = compat.toLowerCase();
-                    if (!(await this.manager.utils.cmdExists(bin)))
-                        return showToast(`Error: ${compat} is not installed`);
+                } else {
+                    bin = `WINEPREFIX="${prefix}" ${compat.toLowerCase()}`;
                 };
-                
-                cmd = `${instance.customArgs ? `${instance.customArgs} ` : ""}WINEPREFIX="${prefix}" WINEDEBUG=err+all,warn+d3d,warn+msvcrt,fixme+d3d,fixme+ntdll,+timestamp ${bin} "${execPath}" ${joinedArgs}`;
             };
 
             if (compat === "PROTON") {
-                if (!(await this.manager.utils.cmdExists("proton"))) return showToast(`Error: proton is not installed`);
+                if (NL_OS === "Linux") {
+                    try {
+                        await Neutralino.filesystem.getStats(`${runtimePath}/bin/wine`);
+                        const winePath = `${runtimePath}/bin/wine`;
+                        wineServerBin = `${runtimePath}/bin/wineserver`;
 
-                const prefix = `${dataDir}/pfx`;
-                try { await Neutralino.filesystem.createDirectory(prefix); } catch {};
+                        const env = `WINEPREFIX="${prefix}" WINEESYNC=1 STEAM_COMPAT_CLIENT_INSTALL_PATH="/tmp" STEAM_COMPAT_DATA_PATH="${prefix}"`;
+                        bin = `${env} "${winePath}"`;
 
-                cmd =
-                    `STEAM_COMPAT_CLIENT_INSTALL_PATH="" ` +
-                    `STEAM_COMPAT_DATA_PATH="${prefix}" ` +
-                    `proton run "${execPath}" ${joinedArgs}`;
+                        try { await Neutralino.filesystem.getStats(prefix); } catch {
+                            showToast('Setting up C Drive...');
+                            await Neutralino.os.execCommand(`${env} "${winePath}" wineboot --init`);
+                        }
+                    } catch (e) {
+                        bin = `STEAM_COMPAT_CLIENT_INSTALL_PATH="" STEAM_COMPAT_DATA_PATH="${prefix}" proton run`;
+                    };
+                } else {
+                    bin = `STEAM_COMPAT_CLIENT_INSTALL_PATH="" STEAM_COMPAT_DATA_PATH="${prefix}" proton run`;
+                };
             };
 
-            if (compat === "DIRECT" &&
-                execPath.endsWith(".exe")
-            ) showToast("You should have a compatibility layer on linux and macOS", 1000);
+            if (bin !== "") {
+                const baseCmd = bin.split(" ").pop().replace(/"/g, "");
+                if (baseCmd.includes("/") || await this.manager.utils.cmdExists(baseCmd)) {
+                    const debug = "WINEDEBUG=err+all,warn+d3d,warn+msvcrt,fixme+d3d,fixme+ntdll,+timestamp";
+                    cmd = `${instance.customArgs ? `${instance.customArgs} ` : ""}${debug} ${bin} "${execPath}" ${joinedArgs}`;
+                } else return showToast(`Error: ${compat} is not installed on your system`);
+            };
+
+            if (compat === "DIRECT" && execPath.endsWith(".exe"))
+                showToast("You should have a compatibility layer on Linux and macOS", 1000);
         };
 
         showToast("Launching instance...", 1000);

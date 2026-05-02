@@ -45,6 +45,26 @@ export class Profiles {
         await this.manager.utils.writeJSON(this.manager.profilesFile, profiles);
     };
 
+    async update(id, updates = {}) {
+        const profiles = await this.list();
+        const index = profiles.findIndex(p => p.id === id);
+        
+        if (index === -1) throw new Error("Profile not found");
+
+        const profile = profiles[index];
+        if (updates.username) profile.username = updates.username;
+        if (updates.skin) {
+            const [skinDataURI, skinRenderDataURI] = await this.manager.skins.process(updates.skin);
+            profile.skin = skinDataURI;
+            profile.skinRender = skinRenderDataURI;
+        };
+
+        profiles[index] = profile;
+        await this.manager.utils.writeJSON(this.manager.profilesFile, profiles);
+
+        return profile;
+    };
+
     async delete(id) {
         let profiles = await this.list();
         profiles = profiles.filter(p => p.id !== id);

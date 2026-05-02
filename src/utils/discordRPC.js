@@ -101,22 +101,24 @@ export default class DiscordRPC {
     };
 
     async updateProcess() {
-        const payload = JSON.stringify({
-            state: this.state,
-            details: this.details,
+        try {
+            const payload = JSON.stringify({
+                state: this.state,
+                details: this.details,
 
-            large_image_key: this.largeImageKey,
-            large_image_text: this.largeImageText,
-            small_image_key: this.smallImageKey,
-            small_image_text: this.smallImageText,
+                large_image_key: this.largeImageKey,
+                large_image_text: this.largeImageText,
+                small_image_key: this.smallImageKey,
+                small_image_text: this.smallImageText,
 
-            button1_label: this.button1Label,
-            button1_url: this.button1Url,
-            button2_label: this.button2Label,
-            button2_url: this.button2Url
-        });
+                button1_label: this.button1Label,
+                button1_url: this.button1Url,
+                button2_label: this.button2Label,
+                button2_url: this.button2Url
+            });
 
-        await Neutralino.os.updateSpawnedProcess(this.procId, 'stdIn', payload + "\n");
+            await Neutralino.os.updateSpawnedProcess(this.procId, 'stdIn', payload + "\n");
+        } catch(e) {};
     }
 
     _bindExitHandlers() {

@@ -1,4 +1,5 @@
 /* credit to https://github.com/Pixel1011/Minecraft-legacy-skin-server/blob/main/SkinServer/src/SkinConverter.ts for the original skin conversion logic which helped me realise how simple it was. all credits given */
+import Neutralino from "@neutralinojs/lib";
 
 export class Skins {
     constructor(manager) {
@@ -35,7 +36,9 @@ export class Skins {
     async process(dataURI) {
         let processedDataURI = dataURI;
 
-        const img = await this.dataURI_Img(dataURI);
+        let img;
+        if (dataURI.startsWith("data:")) img = await this.dataURI_Img(dataURI);
+        else img = await this.file_Img(dataURI);
 
         this.canvas.width = 64;
         this.canvas.height = img.height;
@@ -117,5 +120,20 @@ export class Skins {
             };
             img.src = dataURI;
         });
+    };
+
+    async file_Img(skin) {
+        const file = await Neutralino.filesystem.readBinaryFile(skin);
+        const base64String = btoa(
+            new Uint8Array(file)
+                .reduce((data, byte) => data + String.fromCharCode(byte), '')
+        );
+
+        let mimeType = 'image/png';
+        if (skin.endsWith('.jpg') || skin.endsWith('.jpeg'))
+            mimeType = 'image/jpeg';
+        
+        const skinDataURI = `data:${mimeType};base64,${base64String}`;
+        return await this.dataURI_Img(skinDataURI);
     };
 };

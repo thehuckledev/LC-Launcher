@@ -8,6 +8,7 @@
     width: calc(100vw - 80px);
     height: calc(100% - 83px);
     overflow-y: auto;
+    overflow-x: hidden;
     scroll-behavior: smooth;
     overscroll-behavior: none;
     padding: 24px 32px;
@@ -33,7 +34,7 @@
 
     text-shadow: 3px 3px #000A;
 
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.08);
     padding-bottom: 6px;
 }
 
@@ -120,10 +121,10 @@
 }
 
 #patchnotes {
-    animation: fadeIn 0.4s ease;
+    animation: PatchNotesFadeIn 0.4s ease;
 }
 
-@keyframes fadeIn {
+@keyframes PatchNotesFadeIn {
     from {
         opacity: 0;
         transform: translateY(6px);

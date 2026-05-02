@@ -18,6 +18,7 @@ label[for="search-query"] {
     width: calc(100vw - 80px);
     height: calc(100% - 83px);
     overflow-y: auto;
+    overflow-x: hidden;
     scroll-behavior: smooth;
     overscroll-behavior: none;
     padding: 16px 0;

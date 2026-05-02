@@ -11,8 +11,10 @@ export default function Textbox({ id, onchange = (txt) => { }, value = "", place
                 placeholder={placeholder}
                 minLength={minlength}
                 maxLength={maxlength}
-                spellcheck="false"
-                autocomplete="off"
+                spellCheck="false" 
+                autoCorrect="off"
+                autoCapitalize="off"
+                autoComplete="off"
                 aria-autocomplete="none"
                 onBlur={(e) => {
                     if (

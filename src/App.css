@@ -1,0 +1,36 @@
+#instance-drop-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px); /* Blurs the menu behind it */
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none; /* Allows the drop event to pass through to the window */
+    border: 2px solid #388e3c; /* Minecraft green or your theme color */
+    border-radius: 9px;
+    box-sizing: border-box;
+    animation: pulse-border 1.5s infinite;
+}
+
+.instance-drop-inner {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.9);
+    font: 10pt 'Minecraftia', sans-serif;
+    text-shadow: 3px 3px #000A;
+}
+
+.instance-drop-inner p {
+    color: rgba(195, 195, 195, 0.9);
+    text-shadow: 2px 2px #000A;
+}
+
+@keyframes pulse-border {
+    0% { border-color: #66becb87; }
+    50% { border-color: #66becb; }
+    100% { border-color: #66becb87; }
+}

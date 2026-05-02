@@ -1,6 +1,9 @@
+import "./App.css";
+
 import { useState, useEffect, useRef } from "preact/hooks";
 import Neutralino from "@neutralinojs/lib";
 import config from "./data/config.js";
+import { defaultInstances } from "./data/defaultInstances.js";
 
 import { checkForUpdates } from "./utils/updater.js";
 import { startMusic, stopMusic, setVolume } from "./utils/music.js";
@@ -9,7 +12,7 @@ import { useManager } from "./utils/ManagerProvider.jsx";
 import DiscordRPC from "./utils/discordRPC.js";
 
 import Window from "./components/Window.jsx";
-import Toast from "./components/Toast.jsx";
+import Toast, { showToast } from "./components/Toast.jsx";
 
 import SetupMenu from "./menus/Setup.jsx";
 import SetupOptionsMenu from "./menus/SetupOptions.jsx";
@@ -19,24 +22,33 @@ import AboutMenu from "./menus/About.jsx";
 import PatchNotesMenu from "./menus/PatchNotes.jsx";
 import GameLogMenu from "./menus/GameLog.jsx";
 import CrashMenu from "./menus/Crash.jsx";
+import CreateProfileMenu from "./menus/CreateProfile.jsx";
+import CreateInstanceMenu from "./menus/CreateInstance.jsx";
+import EditProfileMenu from "./menus/EditProfile.jsx";
+import EditInstanceMenu from "./menus/EditInstance.jsx";
+// TODO accept local builds when creating instance. also accept urls like ddl
+// TODO make it so the skin can come from username java
 // TODO add screenshot menu
 // TODO add dev tools like .arc .pak and .loc editor
 // TODO convert LCE world to Java worlds. https://je2be.app
 // TODO make the skin save a slim and non slim version so that LegacyEvolved can use slim skin
 // TODO make each profile have multiple skins
-// TODO add cape menu and make the profile skin be placed as a DLC rather than replacing steve
-//! TODO make the app prompt to install if its in the downloads folder (or not in the right folder)
-//! TODO make the create profile and profile dropdown work
-//! TODO make the create instance and instance dropdown work
+// TODO add cape menu and make the profile skin be placed as a DLC rather than replacing stev
+// TODO make instances appear as games in steam
+//! TODO instance custom icons
 export default function App() {
     const [processing, setProcessing] = useState(false);
     const [crashed, setCrashed] = useState(false);
     const [profile, setProfile] = useState(null);
     const [instance, setInstance] = useState(null);
+    const [profilesList, setProfilesList] = useState([]);
+    const [instancesList, setInstancesList] = useState([]);
     const [loaded, setLoaded] = useState(false);
     const [menu, setMenu] = useState("main");
     const [logs, setLogs] = useState([]);
-    const { settings, loadSettings } = useSettings();
+    const [dropHighlight, setDropHighlight] = useState(false);
+    const dragCounter = useRef(0);
+    const { settings, loadSettings, updateSetting } = useSettings();
     const Manager = useManager();
 
     const rpcRef = useRef(null);
@@ -55,16 +67,43 @@ export default function App() {
             button2Url: config.button2Url
         });
     };
-
-    async function loadData() {
+    
+    async function loadData(loadedSettings = settings) {
         const profiles = await Manager.profiles.list();
         const instances = await Manager.instances.list();
+        const instancesData = await Promise.all(instances.map(id => Manager.instances.get(id)));
+        
+        setProfilesList(profiles);
+        setInstancesList(instancesData);
 
-        if (profiles.length > 0) setProfile(profiles[0]);
+        if (profiles.length > 0) {
+            const lastProfile = profiles.find(p => p.id === loadedSettings.lastProfileID);
+            if (lastProfile) setProfile(lastProfile);
+            else setProfile(profiles[0]);
+        };
         if (instances.length > 0) {
             const instancesObj = await Promise.all(instances.map(id => Manager.instances.get(id)));
-            const inst = instancesObj.find(i => i.name === config.defaultInstance);
-            if (inst) setInstance(inst);
+            const defaultInst = instancesObj.find(i => i.id === config.defaultInstance);
+            const lastInst = instancesObj.find(i => i.id === loadedSettings.lastInstanceID);
+
+            if (lastInst) setInstance(lastInst);
+            else if (defaultInst) setInstance(defaultInst);
+            else setInstance(instancesObj[0]);
+        };
+    };
+
+    async function syncDefaultInstances() {
+        const installedInstances = await Manager.instances.list();
+        const installedObjects = await Promise.all(installedInstances.map(id => Manager.instances.get(id)));
+
+        for await (const inst of defaultInstances) {
+            if (!inst.supportedPlatforms.includes(NL_OS)) continue;
+
+            const existing = installedObjects.find(i => i.id === inst.id);
+            if (!existing) continue;
+
+            const { id, ...updateData } = inst; 
+            await Manager.instances.update(existing.id, updateData);
         };
     };
 
@@ -72,7 +111,8 @@ export default function App() {
         async function load() {
             const loadedSettings = await loadSettings();
             await Manager.init();
-            await loadData();
+            await syncDefaultInstances();
+            await loadData(loadedSettings);
 
             setMenu(loadedSettings.hasSetup ? "main" : "setup");
             setLoaded(true);
@@ -83,6 +123,16 @@ export default function App() {
 
         load();
     }, []);
+
+    useEffect(() => {
+        if (profile?.uid && settings.lastProfileID !== profile.id)
+            updateSetting('lastProfileID', profile.id);
+    }, [profile]);
+
+    useEffect(() => {
+        if (instance?.id && settings.lastInstanceID !== instance.id)
+            updateSetting('lastInstanceID', instance.id);
+    }, [instance]);
 
     const openAnimPlaying = useRef(true);
     useEffect(() => {
@@ -131,6 +181,18 @@ export default function App() {
                 break;
             case "crash":
                 details = "Viewing Crash Logs";
+                break;
+            case "createprofile":
+                details = "Creating a new profile";
+                break;
+            case "createinstance":
+                details = "Creating a new instance";
+                break;
+            case "editprofile":
+                details = "Editing Profile";
+                break;
+            case "editinstance":
+                details = "Editing Instance";
                 break;
         };
 
@@ -219,21 +281,81 @@ export default function App() {
         return () => window.removeEventListener("gameCrash", handler);
     }, []);
 
+    useEffect(() => {
+        const handleDrop = async (e) => {
+            e.preventDefault();
+            dragCounter.current = 0;
+            setDropHighlight(false);
+
+            const file = e.dataTransfer.files[0];
+            if (!file || !file.name.endsWith(".lceinstance.json")) return showToast("The instance file must end with .lceinstance.json");
+
+            try {
+                const text = await file.text();
+                const newInst = await Manager.instances.import(text);
+                
+                await loadData();
+                setInstance(newInst);
+            } catch (err) {
+                console.error(err);
+            };
+        };
+
+        const highlight = (e) => {
+            e.preventDefault();
+            dragCounter.current++;
+            setDropHighlight(true);
+        };
+
+        const unhighlight = (e) => {
+            e.preventDefault();
+            dragCounter.current--;
+            if (dragCounter.current === 0) setDropHighlight(false);
+        };
+
+        const preventDefault = (e) => e.preventDefault();
+
+        window.addEventListener("dragover", preventDefault);
+        window.addEventListener("dragenter", highlight);
+        window.addEventListener("dragleave", unhighlight);
+        window.addEventListener("drop", handleDrop);
+        
+        return () => {
+            window.removeEventListener("dragover", preventDefault);
+            window.removeEventListener("dragenter", highlight);
+            window.removeEventListener("dragleave", unhighlight);
+            window.removeEventListener("drop", handleDrop);
+        };
+    }, [Manager]);
+
     return (
         <>
-            <Window title="" setMenu={setMenu}>
+            <Window title="" setMenu={setMenu} isPanorama={Array.isArray(instance?.background)} backgroundSrc={instance?.background}>
+                {dropHighlight && (
+                    <div id="instance-drop-area">
+                        <div className="instance-drop-inner">
+                            <h2>Drop Instance File Here</h2>
+                            <p>.lceinstance.json</p>
+                        </div>
+                    </div>
+                )}
+                
                 {loaded && <>
-                    {menu === "setup" &&        <SetupMenu setMenu={setMenu} reloadData={loadData} />}
-                    {menu === "setupoptions" && <SetupOptionsMenu setMenu={setMenu} />}
-                    {menu === "main" &&         <MainMenu setMenu={setMenu} instance={instance} profile={profile} processing={processing} />}
-                    {menu === "options" &&      <OptionsMenu setMenu={setMenu} />}
-                    {menu === "about" &&        <AboutMenu setMenu={setMenu} />}
-                    {menu === "patchnotes" &&   <PatchNotesMenu setMenu={setMenu} instance={instance} />}
-                    {menu === "gamelog" &&      <GameLogMenu setMenu={setMenu} logs={logs} />}
-                    {menu === "crash" &&        <CrashMenu setMenu={setMenu} setCrashed={setCrashed} setLogs={setLogs} logs={logs} />}
+                    {menu === "setup" &&          <SetupMenu setMenu={setMenu} reloadData={loadData} />}
+                    {menu === "setupoptions" &&   <SetupOptionsMenu setMenu={setMenu} />}
+                    {menu === "main" &&           <MainMenu setMenu={setMenu} instance={instance} setInstance={setInstance} profile={profile} setProfile={setProfile} instancesList={instancesList} profilesList={profilesList} processing={processing} />}
+                    {menu === "options" &&        <OptionsMenu setMenu={setMenu} />}
+                    {menu === "about" &&          <AboutMenu setMenu={setMenu} />}
+                    {menu === "patchnotes" &&     <PatchNotesMenu setMenu={setMenu} instance={instance} />}
+                    {menu === "gamelog" &&        <GameLogMenu setMenu={setMenu} logs={logs} />}
+                    {menu === "crash" &&          <CrashMenu setMenu={setMenu} setCrashed={setCrashed} setLogs={setLogs} logs={logs} />}
+                    {menu === "createprofile" &&  <CreateProfileMenu setMenu={setMenu} setProfile={setProfile} />}
+                    {menu === "createinstance" && <CreateInstanceMenu setMenu={setMenu} setInstance={setInstance} />}
+                    {menu === "editprofile" &&    <EditProfileMenu setMenu={setMenu} profile={profile} setProfile={setProfile} />}
+                    {menu === "editinstance" &&   <EditInstanceMenu setMenu={setMenu} instance={instance} setInstance={setInstance} loadData={loadData} />}
                 </>}
             </Window>
-            
+
             <Toast />
         </>
     );

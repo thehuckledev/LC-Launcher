@@ -7,6 +7,8 @@ export const defaultSettings = {
     menuMusic: true,
     fullscreen: false,
     discordRPC: true,
+    lastProfileID: null,
+    lastInstanceID: null,
     dataDirectory: async () => {
         const homeDir =
             (await Neutralino.os.getEnv("HOME")) ||
@@ -27,9 +29,9 @@ export const defaultSettings = {
                     homeDir,
                     ".local",
                     "share",
-                    "LegacyCommunityLauncher",
+                    NL_ARGS[0].split("/").at(-1),
                     "data"
-                );
+                ); // NL_ARGS[0].split("/").at(-1) gives you the executable's path
 
             case "Darwin":
                 return await Neutralino.filesystem.getJoinedPath(

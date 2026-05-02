@@ -65,7 +65,7 @@
     width: 130px;
 }
 
-#setup > h2 {
+#setup > h2, #setup-processing > h2 {
     font: 14px 'Minecraftia', sans-serif;
     text-shadow: 2px 2px #000A;
 
@@ -151,5 +151,45 @@
 
     100% {
         opacity: 0;
+    }
+}
+
+#progress-container {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 80px);
+    animation: fadeInProgress 0.5s ease forwards .2s;
+	opacity: 0;
+}
+
+#progress-status {
+    color: white;
+    font: 10pt 'Minecraftia', sans-serif;
+    margin-bottom: 8px;
+	margin-left: 3px;
+    text-shadow: 2px 2px 0 #000;
+}
+
+#progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #7a7a7a;
+    border: 2px solid #7a7a7a;
+}
+
+#progress-fill {
+    height: 100%;
+    background: #00ff00;
+    transition: width 0.2s linear;
+}
+
+@keyframes fadeInProgress {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
     }
 }

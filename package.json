@@ -28,12 +28,15 @@
     "private": true,
     "scripts": {
         "dev": "node ./build-scripts/dev.js",
-        "build": "node ./build-scripts/build.js"
+        "build": "node ./build-scripts/build.js",
+        "build-debug": "node ./build-scripts/build.js --debug"
     },
     "dependencies": {
         "@neutralinojs/lib": "^6.5.0",
+        "motion": "^12.38.0",
         "nano-markdown": "^1.2.2",
-        "preact": "^10.29.0"
+        "preact": "^10.29.0",
+        "three": "^0.184.0"
     },
     "devDependencies": {
         "@neutralinojs/neu": "^11.6.0",

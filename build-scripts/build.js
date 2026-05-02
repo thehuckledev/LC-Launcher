@@ -20,6 +20,21 @@ function loadConfig() {
     return cfg;
 };
 
+function patchConfig(on) {
+    const cfg = JSON.parse(fs.readFileSync(CONF, "utf-8"));
+
+    if (on) {
+        const isDebug = process.argv.includes("--debug");
+        if(!isDebug) cfg.modes.window.enableInspector = false;
+        cfg.tokenSecurity = "one-time";
+    } else {
+        cfg.modes.window.enableInspector = true;
+        cfg.tokenSecurity = "none";
+    };
+
+    fs.writeFileSync(CONF, JSON.stringify(cfg, null, 4));
+};
+
 function ensureDependencies() {
     if (!exists("./node_modules/@neutralinojs/neu")) {
         console.log("Installing npm dependencies...");
@@ -73,6 +88,7 @@ function buildLinux(cfg) {
         console.log(`Building Linux (${arch})...`);
 
         run(`cp "${exe}" "${outDir}/"`);
+        run(`cp "./src/assets/icon.png" "${outDir}/"`);
         run(`cp "./dist/${binary}/resources.neu" "${outDir}/"`);
 
         copyIfExists(`./dist/${binary}/extensions`, outDir);
@@ -90,6 +106,11 @@ function buildMac(cfg) {
     const binary = cfg.cli.binaryName;
     const appName = cfg.buildScript.mac.appName;
 
+    const appVersion = cfg.version;
+    const appMinOs = cfg.buildScript.mac.minimumOS;
+    const appId = cfg.buildScript.mac.appIdentifier;
+    const appBundle = cfg.buildScript.mac.appBundleName;
+
     for (const arch of archList) {
         const appDir = `./dist/mac_${arch}/${appName}.app`;
         const exe = `./dist/${binary}/${binary}-mac_${arch}`;
@@ -105,10 +126,26 @@ function buildMac(cfg) {
 
         run(`cp -r ./build-scripts/_app_scaffolds/mac/myapp.app/* "${appDir}/"`);
 
+        const plistPath = path.join(appDir, "Contents/Info.plist");
+        if (exists(plistPath)) {
+            let plistContent = fs.readFileSync(plistPath, "utf-8");
+            plistContent = plistContent
+                .replace(/{APP_NAME}/g, appName)
+                .replace(/{APP_BUNDLE}/g, appBundle)
+                .replace(/{APP_ID}/g, appId)
+                .replace(/{APP_VERSION}/g, appVersion)
+                .replace(/{APP_MIN_OS}/g, appMinOs);
+
+            fs.writeFileSync(plistPath, plistContent);
+        };
+
         run(`cp "${exe}" "${appDir}/Contents/MacOS/main"`);
         run(`chmod 755 "${appDir}/Contents/MacOS/main"`);
 
         run(`cp "./dist/${binary}/resources.neu" "${appDir}/Contents/Resources/"`);
+
+        const appIcon = cfg.buildScript.mac.appIcon;
+        if (appIcon && exists(appIcon)) run(`cp "${appIcon}" "${appDir}/Contents/Resources/"`);
 
         copyIfExists(`./dist/${binary}/extensions`, `${appDir}/Contents/Resources/`);
         copyLibs(`./libs`, `${appDir}/Contents/Resources/libs/`, (f) => f.endsWith("osx"));
@@ -134,7 +171,7 @@ function buildWin(cfg) {
         if (!exists(exe)) {
             console.error(`Missing binary: ${exe}`);
             process.exit(1);
-        }
+        };
 
         console.log(`Building Windows (${arch})...`);
 
@@ -158,9 +195,11 @@ console.log("Building for all platforms...");
 const cfg = loadConfig();
 
 ensureDependencies();
+patchConfig(true);
 buildBase();
 buildLinux(cfg);
 buildMac(cfg);
 buildWin(cfg);
+patchConfig(false);
 
 console.log("\nAll platforms built.\n");

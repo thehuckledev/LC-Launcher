@@ -15,187 +15,131 @@ import Checkbox from "../components/Checkbox.jsx";
 import minecraftLogo from "../assets/ui/minecraftlogo.png";
 
 import { defaultInstances } from "../data/defaultInstances.js";
+import Download from "../utils/download.js";
+import Unzip from "../utils/unzip.js";
 
 export default function SetupMenu({ setMenu, reloadData }) {
     const Manager = useManager();
     const { settings, updateSetting } = useSettings();
 
-    const [canInstallWine, setCanInstallWine] = useState(false);
-    const [installWine, setInstallWine] = useState(true);
+    const [canInstallRuntime, setCanInstallRuntime] = useState(false);
+    const [installRuntime, setInstallRuntime] = useState(true);
     const [ready, setReady] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [username, setUsername] = useState("");
     const [skin, setSkin] = useState(undefined);
+    const [progress, setProgress] = useState({ active: false, label: '', percent: 0 });
+
+    useEffect(() => {
+        const handleProgress = (e) => setProgress(e.detail);
+        window.addEventListener('installProgress', handleProgress);
+        return () => window.removeEventListener('installProgress', handleProgress);
+    }, []);
 
     useEffect(() => {
         async function checkWine() {
             try {
                 if (NL_OS !== "Linux" &&
                     NL_OS !== "Darwin"
-                ) return setCanInstallWine(false);
+                ) return setCanInstallRuntime(false);
 
-                const res = await Neutralino.os.execCommand("wine --version");
+                const res = await Neutralino.os.execCommand("command -v wine");
 
-                if (res.exitCode === 0) setCanInstallWine(false);
-                else setCanInstallWine(true);
+                if (res.exitCode === 0) setCanInstallRuntime(false);
+                else setCanInstallRuntime(true);
             } catch (err) {
                 console.error(err);
-                setCanInstallWine(false);
-                setInstallWine(false);
+                setCanInstallRuntime(false);
+                setInstallRuntime(false);
             };
         };
 
         checkWine();
     }, []);
 
-    async function installWineHelper() {
+    async function installRuntimeHelper() {
+        const runtimeDir = `${settings.dataDirectory}/libraries/runtime`;
+        const runtimeTempDir = `${settings.dataDirectory}/libraries/_runtime`;
+        let archivePath = null;
         try {
-            const wineDir = `${settings.dataDirectory}/libraries/wine-crossover`;
-            const dxvkDir = `${settings.dataDirectory}/libraries/dxvk`;
-            const wineTempDir = `${settings.dataDirectory}/libraries/_wine`;
-            let downloadUrl = "";
-            let expectedHash = "";
-            let archiveName = "";
+            const prefix = `${settings.dataDirectory}/pfx`;
 
-            const dxvkArchive = `dxvk-macOS-async-v1.10.3-20230507-repack.tar.gz`;
-            const dxvkUrl = `https://github.com/Gcenx/DXVK-macOS/releases/download/v1.10.3-20230507-repack/${dxvkArchive}`;
-            const dxvkHash = "acd1520ad105d8ef124a09c8e11a259a5dc8bdc565ad18e0e52693f9807b2477";
-            const dxvkPath = `${settings.dataDirectory}/libraries/${dxvkArchive}`;
-            
-            if (NL_OS === "Linux") {
-                if (NL_ARCH === "x64") {
-                    archiveName = "wine-11.5-staging-x86.tar.xz";
-                    downloadUrl = `https://github.com/Kron4ek/Wine-Builds/releases/download/11.5/${archiveName}`;
-                    expectedHash = "c72cfadce331b8af3cb0c2a767a7b75d5b96eabf2d26baf0797d57f0b6625c6f";
-                } else if (NL_ARCH === "arm") {
-                    archiveName = "wine-11.5-staging-amd64-wow64.tar.xz";
-                    downloadUrl = `https://github.com/Kron4ek/Wine-Builds/releases/download/11.5/${archiveName}`;
-                    expectedHash = "33a3bd827e2252a169e87487255441f9ad2e84f1e8382a67b5734066ea908f96";
-                };
-            } else if (NL_OS === "Darwin") {
-                archiveName = "wine-crossover-23.7.1-1-osx64.tar.xz"; 
-                downloadUrl = `https://github.com/Gcenx/winecx/releases/download/crossover-wine-23.7.1-1/${archiveName}`;
-                expectedHash = "e24ba084737c8823e8439f7cb75d436a917fd92fc34b832bcaa0c0037eb33d03"; 
-            };
+            let repo = "";
+            if (NL_OS === "Darwin") repo = "Gcenx/game-porting-toolkit";
+            else if (NL_OS === "Linux") repo = "GloriousEggroll/proton-ge-custom";
 
-            try {
-                await Neutralino.filesystem.createDirectory(wineDir);
-            } catch {};
-            try {
-                await Neutralino.filesystem.createDirectory(wineTempDir);
-            } catch {};
+            showToast(`Fetching latest runtime...`);
 
-            const archivePath = `${settings.dataDirectory}/libraries/${archiveName}`;
+            let apiResponse = await Neutralino.os.execCommand(`curl -s https://api.github.com/repos/${repo}/releases/latest`);
+            let releaseData = JSON.parse(apiResponse.stdOut);
 
-            showToast(`Installing Wine...`, 3000);
+            let asset = releaseData.assets.find(a => a.name.endsWith('.tar.xz') || a.name.endsWith('.tar.gz'));
+            if (!asset) throw new Error("No archive found in runtime release");
 
-            await Neutralino.os.execCommand(`curl -L -o "${archivePath}" "${downloadUrl}"`);
+            const downloadUrl = asset.browser_download_url;
+            archivePath = `${settings.dataDirectory}/libraries/${asset.name}`;
 
-            const hasher = (NL_OS === "Linux") ? "sha256sum" : "shasum -a 256";
-            let check = await Neutralino.os.execCommand(`${hasher} "${archivePath}" | cut -d ' ' -f 1`);
-            if (check.stdOut.trim() !== expectedHash) throw new Error("WINE Checksum failed, try manual install");
+            await Neutralino.filesystem.createDirectory(runtimeDir).catch(()=>{});
+            await Neutralino.filesystem.createDirectory(runtimeTempDir).catch(()=>{});
 
-            await Neutralino.os.execCommand(`tar -xf "${archivePath}" -C "${wineTempDir}" --strip-components=1`);
+            const runtimeDownload = new Download(downloadUrl, { label: `Downloading Runtime...` });
+            await runtimeDownload.start(archivePath);
+
+            const runtimeUnzip = new Unzip(archivePath, runtimeTempDir, { label: "Extracting Runtime..." });
+            await runtimeUnzip.start();
 
             if (NL_OS === "Darwin") {
-                const internalWineSource = `${wineTempDir}/Contents/Resources/wine`;
-                await Neutralino.os.execCommand(`cp -R "${internalWineSource}/." "${wineDir}"`);
-                await Neutralino.os.execCommand(`xattr -rd com.apple.quarantine "${wineDir}"`);
+                const internalRuntimeSource = `${runtimeTempDir}/Game Porting Toolkit.app/Contents/Resources/wine`;
+                await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
+                await Neutralino.os.execCommand(`xattr -rd com.apple.quarantine "${runtimeDir}"`);
             } else {
-                await Neutralino.os.execCommand(`cp -R "${wineTempDir}/." "${wineDir}"`);
+                await Neutralino.os.execCommand(`cp -R "${runtimeTempDir}/." "${runtimeDir}"`);
             };
+            await Neutralino.filesystem.remove(archivePath).catch(()=>{});
+            await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
 
-            await Neutralino.filesystem.remove(wineTempDir);
-            await Neutralino.filesystem.remove(archivePath);
+            showToast('Setting up C Drive...');
+            await Neutralino.filesystem.createDirectory(prefix).catch(()=>{});
 
-            async function setupDXVK() {
-                const dxvkLibDir = `${settings.dataDirectory}/libraries/dxvk`;
-                const winePrefix = `${settings.dataDirectory}/pfx`;
-        
-                const system32 = `${winePrefix}/drive_c/windows/system32`;
-                const syswow64 = `${winePrefix}/drive_c/windows/syswow64`;
-        
-                try {
-                    await Neutralino.os.execCommand(`cp -f "${dxvkLibDir}/x64/"*.dll "${system32}"`);
-                    await Neutralino.os.execCommand(`cp -f "${dxvkLibDir}/x32/"*.dll "${syswow64}"`);
-        
-                    showToast("DXVK Applied to Wine", 2000);
-                } catch (err) {
-                    console.error("DXVK setup failed:", err);
-                    showToast("Failed to apply DXVK");
-                };
-            };
+            const wineBin = (NL_OS === "Darwin") ? "wine64" : "wine";
+            const winePath = `${runtimeDir}/bin/${wineBin}`;
 
-            async function setupCDrive() {
-                const internalWinePath = `${settings.dataDirectory}/libraries/wine-crossover/bin/wine`;
-                const bin = `"${internalWinePath}"`;
-                const prefix = `${settings.dataDirectory}/pfx`;
-                try {
-                    await Neutralino.filesystem.getStats(prefix);
-                } catch {
-                    showToast('Setting up C Drive...');
-                    try { await Neutralino.filesystem.createDirectory(prefix); } catch {};
+            let envVars = `WINEPREFIX="${prefix}" WINEDEBUG=-all WINEESYNC=1 `;
+            if (NL_OS === "Darwin") envVars += `MTL_HUD_ENABLED=0 `;
+            else envVars += `STEAM_COMPAT_CLIENT_INSTALL_PATH="/tmp" STEAM_COMPAT_DATA_PATH="${prefix}" `;
 
-                    await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" WINEDEBUG=-all ${bin} wineboot --init`);
-                    if(NL_OS === 'Darwin') await setupDXVK();
-                };
-            };
-
-            if (NL_OS === "Darwin") {
-                showToast("Wine installed. Installing DXVK...", 3000);
-
-                // DXVK
-                await Neutralino.os.execCommand(`curl -L -o "${dxvkPath}" "${dxvkUrl}"`);
-
-                let dxvkCheck = await Neutralino.os.execCommand(`shasum -a 256 "${dxvkPath}" | cut -d ' ' -f 1`);
-                if (dxvkCheck.stdOut.trim() !== dxvkHash) throw new Error("DXVK Checksum failed, try manual install");
-
-                try {
-                    await Neutralino.filesystem.createDirectory(dxvkDir);
-                } catch {};
-                await Neutralino.os.execCommand(`tar -xf "${dxvkPath}" -C "${dxvkDir}" --strip-components=1`);
-
-                await Neutralino.filesystem.remove(dxvkPath).catch(() => {});
-                await setupCDrive();
-                showToast("Wine & DXVK installed successfully", 2000);
-            } else {
-                await setupCDrive();
-                showToast("Wine installed successfully", 2000);
-            };
+            await Neutralino.os.execCommand(`${envVars} "${winePath}" wineboot --init`);
         } catch (err) {
-            console.error("Wine download failed:", err);
-            showToast("Wine install failed, try manual install");
+            console.error("Runtime download failed:", err);
+            showToast("Runtime install failed, try manual install");
+
+            await Neutralino.filesystem.remove(runtimeDir).catch(()=>{});
+            await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
+            if(archivePath !== null) await Neutralino.filesystem.remove(archivePath).catch(()=>{});
         };
     };
 
     const makeDefaultInstances = async () => {
         for await (const inst of defaultInstances) {
             if (!inst.supportedPlatforms.includes(NL_OS)) continue;
-            await Manager.instances.create(
-                inst.icon,
-                inst.name,
-                inst.serviceType,
-                inst.serviceDomain,
-                inst.repo,
-                inst.tag,
-                inst.exec,
-                inst.target,
-                inst.compatibilityLayer,
-                inst.customArgs
-            );
+            await Manager.instances.create(inst.id, inst);
         };
     };
 
     const joinDiscordPrompt = async () => {
-        let shouldDo = await Neutralino.os
-                    .showMessageBox('LC Launcher Discord',
-                                    'Do you want to join our Discord server?',
-                                    'YES_NO', 'INFO');
-        if(shouldDo == 'YES') {
-            console.log("Opening discord...");
-            for await (const inv of config.discordInvite) {
-                await Neutralino.os.open(inv);
+        try {
+            let shouldDo = await Neutralino.os
+                        .showMessageBox('LC Launcher Discord',
+                                        'Do you want to join our Discord server?',
+                                        'YES_NO', 'INFO');
+            if(shouldDo == 'YES') {
+                console.log("Opening discord...");
+                for await (const inv of config.discordInvite) {
+                    await Neutralino.os.open(inv);
+                };
             };
+        } catch(e) {
+            console.error("Error joining discord: ")
         };
     };
 
@@ -205,28 +149,14 @@ export default function SetupMenu({ setMenu, reloadData }) {
         joinDiscordPrompt();
         setProcessing(true);
         try {
-            if (skin) {
-                const file = await Neutralino.filesystem.readBinaryFile(skin);
-                const base64String = btoa(
-                    new Uint8Array(file)
-                        .reduce((data, byte) => data + String.fromCharCode(byte), '')
-                );
-
-                let mimeType = 'image/png';
-                if (skin.endsWith('.jpg') || skin.endsWith('.jpeg'))
-                    mimeType = 'image/jpeg';
-                
-                const skinDataURI = `data:${mimeType};base64,${base64String}`;
-                await Manager.profiles.create(username, skinDataURI);
-            } else {
-                await Manager.profiles.create(username);
-            };
+            if (skin) await Manager.profiles.create(username, skin);
+            else await Manager.profiles.create(username);
 
             // make insts
             await makeDefaultInstances();
 
-            // install wine
-            if (canInstallWine === true && installWine === true) await installWineHelper();
+            // install runtime
+            if (canInstallRuntime === true && installRuntime === true) await installRuntimeHelper();
 
             await updateSetting('hasSetup', true);
             await reloadData();
@@ -262,7 +192,20 @@ export default function SetupMenu({ setMenu, reloadData }) {
                     </div>
                 </h1>
                 {processing ? (
-                    <h2>Setting up your launcher... Please wait up to 3 mins!</h2>
+                    <div id="setup-processing">
+                        <h2>Setting up your launcher...</h2>
+                        {progress.active ? (
+                            <div id="progress-container">
+                                <h2 id="progress-status">{progress.label} {progress.eta && `(${progress.eta})`}</h2>
+                                <div id="progress-bar">
+                                    <div
+                                        id="progress-fill"
+                                        style={{ width: `${progress.percent}%` }}
+                                    />
+                                </div>
+                            </div>
+                        ) : ""}
+                    </div>
                 ) : (
                     <>
                         <Textbox
@@ -346,14 +289,14 @@ export default function SetupMenu({ setMenu, reloadData }) {
                             </Button>
                         </div>
                         <br />
-                        {canInstallWine === true &&
+                        {canInstallRuntime === true &&
                             <Checkbox
-                                id="install-wine-checkbox"
-                                value={installWine}
+                                id="install-runtime-checkbox"
+                                value={installRuntime}
                                 onchange={(state) => {
-                                    setInstallWine(state);
+                                    setInstallRuntime(state);
                                 }}
-                                label="Install wine for me (Recommended)"
+                                label="Install wine / proton for me (Recommended)"
                             />
                         }
                         <br />
@@ -363,13 +306,13 @@ export default function SetupMenu({ setMenu, reloadData }) {
                 )}
             </div>
             <div id="setup-action-bar">
-                <Button id="skip-button" disabled={processing} onclick={async() => {
+                <Button id="skip-button" disabled={processing} pushable={!processing} onclick={async() => {
                     await updateSetting('hasSetup', true);
                     setMenu('main');
                 }}>
                     Skip Setup
                 </Button>
-                <Button id="done-button" disabled={!ready || processing} onclick={handleNext}>
+                <Button id="done-button" disabled={!ready || processing} pushable={ready && !processing} onclick={handleNext}>
                     Done
                 </Button>
             </div>

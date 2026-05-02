@@ -139,23 +139,76 @@ export default function OptionsMenu({ setMenu }) {
                     if (shouldDo !== 'YES') return;
 
                     try {
-                        const dataPath = await Neutralino.filesystem.getJoinedPath(settings.dataDirectory, "../");
-                        await Neutralino.filesystem.remove(dataPath);
+                        if (NL_OS === "Windows") {
+                            const rawAppData = await Neutralino.filesystem.getJoinedPath(NL_PATH, "../");
+                            const appData = rawAppData.replace(/\//g, '\\');
 
-                        let appPath;
-                        if (NL_OS === "Windows" || NL_OS === "Linux") // TODO make sure this works
-                            appPath = NL_PATH;
-                        else if (NL_OS === "Darwin")
-                            appPath = await Neutralino.filesystem.getJoinedPath(NL_PATH, "../../");
+                            const appPath = NL_PATH.replace(/\//g, '\\');
+                            const tempDir = await Neutralino.os.getEnv('TEMP');
+                            const batchPath = `${tempDir}\\uninstall_lc_launcher.bat`;
 
-                        await Neutralino.filesystem.remove(appPath);
+                            const batchContent = [
+                                `@echo off`,
+                                `title LC Launcher Uninstaller`,
+                                `echo.`,
+                                `echo  ---------------------------------------------------------`,
+                                `echo   Don't worry, this is just uninstalling LC Launcher!`,
+                                `echo   This window will close automatically in a few seconds`,
+                                `echo  ---------------------------------------------------------`,
+                                `echo.`,
+                                `timeout /t 3 /nobreak > nul`,
+                                `taskkill /F /IM "LC Launcher.exe" /T > nul 2>&1`,
+                                `if exist "${appData}\\Microsoft\\Windows\\Start Menu\\Programs\\LC Launcher.lnk" del /f /q "${appData}\\Microsoft\\Windows\\Start Menu\\Programs\\LC Launcher.lnk"`,
+                                `cd /`,
+                                `:retry`,
+                                `rd /s /q "${appPath}" >nul 2>&1`,
+                                `if exist "${appPath}" (`,
+                                `    timeout /t 1 > nul`,
+                                `    goto retry`,
+                                `)`,
+                                `msg %username% "LC Launcher has been successfully uninstalled"`,
+                                `del "%~f0" >nul 2>&1 & exit`
+                            ].join('\r\n');
 
-                        showToast("Uninstalled, quitting...");
-                        setTimeout(async () => {
-                            if (window.whenQuitting) await window.whenQuitting();
-                            if (window.beforeExitRPC) await window.beforeExitRPC();
+                            await Neutralino.filesystem.writeFile(batchPath, batchContent);
+                            await Neutralino.os.execCommand(`cmd /c start /min "" "${batchPath}"`);
                             await Neutralino.app.exit();
-                        }, 200);
+                        } else if (NL_OS === "Darwin") {
+                            const dataPath = await Neutralino.filesystem.getJoinedPath(settings.dataDirectory, "../");
+                            const appPath = await Neutralino.filesystem.getJoinedPath(NL_PATH, "../../");
+
+                            await Neutralino.filesystem.remove(dataPath);
+                            await Neutralino.filesystem.remove(appPath);
+
+                            showToast("Uninstalled, quitting...");
+                            setTimeout(async () => {
+                                if (window.whenQuitting) await window.whenQuitting();
+                                if (window.beforeExitRPC) await window.beforeExitRPC();
+                                await Neutralino.app.exit();
+                            }, 200);
+                        } else if (NL_OS === "Linux") {
+                            try {
+                                const home = await Neutralino.os.getEnv('HOME');
+                                const desktopFolder = `${home}/.local/share/applications`;
+                                const shortcutPath = `${desktopFolder}/${NL_APPID}.desktop`;
+
+                                await Neutralino.filesystem.getStats(shortcutPath);
+                                await Neutralino.filesystem.remove(shortcutPath);
+                            } catch (err) {
+                                if (err.code === 'NE_FS_NOPATHE') console.log("Linux shortcut never existed");
+                                else console.error("Error removing linux shortcut:", err);
+                            };
+
+                            const appPath = NL_PATH;
+                            await Neutralino.filesystem.remove(appPath);
+
+                            showToast("Uninstalled, quitting...");
+                            setTimeout(async () => {
+                                if (window.whenQuitting) await window.whenQuitting();
+                                if (window.beforeExitRPC) await window.beforeExitRPC();
+                                await Neutralino.app.exit();
+                            }, 200);
+                        };
                     } catch (e) {
                         console.error(e);
                         showToast("Failed to uninstall");

@@ -1,6 +1,5 @@
 {
     "$schema": "https://raw.githubusercontent.com/neutralinojs/neutralinojs/main/schemas/neutralino.config.schema.json",
-    
     "applicationId": "dev.huckle.legacycommunitylauncher",
     "applicationName": "LC Launcher",
     "applicationIcon": "./assets/icon.png",
@@ -8,12 +7,10 @@
     "author": "TheHuckle",
     "description": "Multi-platform launcher for Minecraft Legacy Console Edition forks.",
     "copyright": "© 2026 TheHuckle. All rights reserved.",
-
     "defaultMode": "window",
     "port": 0,
     "documentRoot": "/public/",
     "url": "/",
-
     "enableServer": true,
     "enableNativeAPI": true,
     "tokenSecurity": "none",
@@ -52,7 +49,6 @@
             "webviewArgs": "--autoplay-policy=no-user-gesture-required"
         }
     },
-
     "cli": {
         "binaryName": "LC_Launcher",
         "binaryVersion": "6.4.0",

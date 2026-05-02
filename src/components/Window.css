@@ -54,6 +54,7 @@ p {
 #app {
     border-radius: 10px;
     border: 1px solid #48545c;
+    background-color: #000;
     overflow: hidden;
     height: 100vh;
     width: 100vw;
@@ -76,16 +77,23 @@ p {
     border-radius: 10px;
     overflow: hidden;
     background-color: #000;
+
+    transition: opacity 0.2s ease;
 }
 
 .maximized #window-background {
     border-radius: 0;
 }
 
-#window-background>div {
+.window-background-inner {
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.2s ease;
+}
+
+.window-background-inner>div {
     display: block;
     background-color: #000;
-    background-image: url('/assets/ui/background.jpeg');
     background-size: cover;
     background-position: center;
     width: 100%;
@@ -93,10 +101,21 @@ p {
 
     filter: blur(2px);
     transform: scale(1.05);
+    position: absolute;
+    z-index: -1;
 }
 
-#window-background.fade>div::before,
-#window-background.fade>div::after {
+#panorama-canvas {
+    width: 100% !important;
+    height: 100% !important;
+    filter: brightness(80%) blur(2px);
+    transform: scale(1.05);
+    position: absolute;
+    z-index: -1;
+}
+
+#window-background.fade .window-background-inner::before,
+#window-background.fade .window-background-inner::after {
   content: "";
   position: absolute;
   left: 0;
@@ -105,12 +124,12 @@ p {
   pointer-events: none;
 }
 
-#window-background.fade>div::before {
+#window-background.fade .window-background-inner::before {
   top: 0;
   background: linear-gradient(to bottom, black, transparent);
 }
 
-#window-background.fade>div::after {
+#window-background.fade .window-background-inner::after {
   bottom: 0;
   background: linear-gradient(to top, black, transparent);
 }
@@ -135,6 +154,8 @@ p {
     padding: 20px;
     overflow-y: auto;
     overflow-x: hidden;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
 }
 
 #titlebar {
@@ -260,12 +281,12 @@ p {
     display: none;
 }
 
-#window-background.animated>div {
+#window-background.animated>.window-background-inner {
 	filter: blur(20px) brightness(0%);
 	background-color: black;
 }
 
-#window-background.animated>div {
+#window-background.animated>.window-background-inner, #window-background.animated .window-background-inner {
 	animation: fade-background .4s linear 1.1s forwards;
 	filter: blur(20px) brightness(0%);
 }

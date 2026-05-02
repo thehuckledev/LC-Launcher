@@ -46,6 +46,7 @@ export default class Download {
                     switch(evt.detail.action) {
                         case 'stdOut':
                         case 'stdErr':
+                            console.log(evt.detail.data)
                             const output = evt.detail.data;
                             const match = output.match(/[\d.]+/g);
                             if (match && output.includes("%")) {

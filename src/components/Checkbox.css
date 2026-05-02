@@ -19,6 +19,8 @@
     width: calc(var(--textbox-size) / 1.5);
     cursor: pointer;
     overflow: visible;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
 
     font: 12pt 'Minecraftia', sans-serif;
 

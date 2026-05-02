@@ -1,0 +1,128 @@
+.mc-select-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: calc(var(--textbox-size) * 10);
+}
+
+.mc-select-label {
+    font: 10pt 'Minecraftia', sans-serif;
+    color: #e0e0e0;
+    text-shadow: 2px 2px #000A;
+}
+
+.mc-select-btn {
+    height: var(--textbox-size);
+
+    background: #999 url('/assets/ui/textbox.png') center / cover;
+    image-rendering: pixelated;
+
+    border: 2px solid #000;
+    padding: 0 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+
+    font: 12pt 'Minecraftia', sans-serif;
+    color: white;
+    position: relative;
+}
+
+.mc-select-btn span {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-right: 10px;
+}
+
+.mc-select-arrow {
+    width: 11px;
+    height: 11px;
+
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+
+    transform: rotate(45deg);
+    margin-bottom: 4px;
+    filter: drop-shadow(1px 0px #000A) drop-shadow(2px 0px #000A);
+    transition: transform 0.2s ease;
+}
+
+.mc-select-btn.is-open .mc-select-arrow {
+    transform-origin: center;
+    transform: translateY(50%) rotate(225deg);
+}
+
+.mc-select-menu {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+
+    background: #222;
+    border: 2px solid #000;
+
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+
+    padding-right: 2px;
+    z-index: 100;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.mc-select-menu::-webkit-scrollbar {
+    width: 8px;
+}
+
+.mc-select-menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+
+.mc-select-menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.mc-select-option {
+    padding: 6px 10px;
+    font: 10pt 'Minecraftia', sans-serif;
+    cursor: pointer;
+    color: #ccc;
+    border-bottom: 1px solid #333;
+}
+
+.mc-select-option:last-child {
+    border-bottom: none;
+}
+
+.mc-select-option:hover {
+    background: #333;
+    color: white;
+}
+
+.mc-select-option.selected {
+    color: #ffffa0;
+    background: #444;
+}
+
+.menu-open {
+    animation: selectSlideDown 0.15s ease-out forwards;
+}
+.menu-close {
+    animation: selectSlideUp 0.1s ease-in forwards;
+}
+
+@keyframes selectSlideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes selectSlideUp {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}

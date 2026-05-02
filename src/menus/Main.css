@@ -37,8 +37,9 @@
     }
 }
 
-.open-anim #top-bar > #main-actions > *, .open-anim #top-bar > #accounts, .open-anim #bottom-bar > #launch-options-bar > *:not(#main-actions) {
+.open-anim #top-bar > #main-actions > *, .open-anim #top-bar > #profiles, .open-anim #bottom-bar > #launch-options-bar > *:not(#main-actions) {
 	opacity: 0;
+	will-change: transform, opacity;
 	animation: fade-expand-extras .3s linear 1.6s forwards;
 }
 
@@ -123,68 +124,21 @@
 	}
 }
 
-#instances, #accounts, #stats {
-	gap: 20px;
-	padding: 8px;
-	border-radius: 10px;
-	border: transparent 1px solid;
-	transition: border .2s ease-in-out, background .2s ease-in-out, transform .2s ease-in-out;
-}
+#stats {
+	max-width: unset;
+	width: 220px;
+	min-width: unset;
+	align-items: flex-end;
 
-#instances:hover, #accounts:hover {
-	background: #ffffff20 !important;
-	transform: scale(1.01) !important;
-}
-
-#instances:active, #accounts:active {
-	background: #ffffff34 !important;
-	border: #ffffff32 1px solid !important;
-	transform: scale(0.98) !important;
-}
-
-#instances::after, #accounts::after {
-  content: "";
-  position: relative;
-  right: 6px;
-  top: -6px;
-
-  width: 11px;
-  height: 8px;
-
-  border-right: 2px solid #fff;
-  border-bottom: 2px solid #fff;
-
-  transform: translateY(-50%) rotate(45deg);
-  filter: drop-shadow(1px 0px #000A)
-  			drop-shadow(2px 0px #000A);
-}
-
-#instance-icon, #account-icon {
-	height: 35px;
-	width: 35px;
-	image-rendering: pixelated;
-}
-
-#instance-details, #account-details, #stats {
 	font: 12px 'Minecraftia', sans-serif;
 	text-shadow: 2px 2px #000A;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	gap: 3px;
-	max-width: 100%;
-	width: 100%;
-	min-width: 0;
 }
 
-#stats {
-	max-width: unset;
-	width: 220px;
-	min-width: unset;
-	align-items: flex-end;
-}
-
-#instance-details h1, #account-details h1, #instance-details h2, #account-details h2, #stats h1, #stats h2 {
+#stats h1, #stats h2 {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -193,7 +147,7 @@
 	margin: 0;
 }
 
-#instance-details h2, #account-details h2, #stats h2 {
+#stats h2 {
 	font-size: 10px;
 	color: #e3e3e3;
 }

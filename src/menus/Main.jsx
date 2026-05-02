@@ -6,6 +6,7 @@ import { useManager } from "../utils/ManagerProvider.jsx";
 import { useSettings } from "../utils/SettingsStore.jsx";
 
 import Button from "../components/Button.jsx";
+import Dropdown from "../components/Dropdown.jsx";
 
 import accountIcon from "../assets/icons/account.png";
 import instanceIcon from "../assets/icons/instance.png";
@@ -17,7 +18,7 @@ import serversIcon from "../assets/buttons/servers.svg";
 import gameLogIcon from "../assets/buttons/gamelog.svg";
 import folderIcon from "../assets/buttons/folder.svg";
 
-export default function MainMenu({ setMenu, instance, profile, processing }) {
+export default function MainMenu({ setMenu, instance, setInstance, profile, setProfile, instancesList, profilesList, processing }) {
     const Manager = useManager();
     const { settings } = useSettings();
     
@@ -29,7 +30,7 @@ export default function MainMenu({ setMenu, instance, profile, processing }) {
         return () => window.removeEventListener('installProgress', handleProgress);
     }, []);
 
-    function parseAccountType(type) {
+    function parseProfileType(type) {
         switch (type) {
             case "OFFLINE":
                 return "Offline Account";
@@ -49,27 +50,39 @@ export default function MainMenu({ setMenu, instance, profile, processing }) {
     return (
         <>
             <div id="top-bar">
-                <div id="accounts">
-                    <img id="account-icon" src={profile?.skinRender || accountIcon} draggable={false} />
-                    <div id="account-details">
-                        <h1>{profile?.username || "No Profile"}</h1>
-                        <h2>{parseAccountType(profile?.type) || "N/A"}</h2>
-                    </div>
-                </div>
+                <Dropdown 
+                    id="profiles"
+                    selected={{
+                        icon: profile?.skinRender || accountIcon,
+                        line1: profile?.username || "No Profile",
+                        line2: parseProfileType(profile?.type) || "N/A"
+                    }}
+                    items={profilesList.map(p => ({
+                        id: p.id,
+                        icon: p.skinRender || accountIcon,
+                        line1: p.username,
+                        line2: parseProfileType(p.type)
+                    }))}
+                    onSelect={async (selectedProfile) => {
+                        const profile = await Manager.profiles.get(selectedProfile.id);
+                        setProfile(profile);
+                    }}
+                    onEdit={async (p) => {
+                        const profile = await Manager.profiles.get(p.id);
+                        setProfile(profile);
+                        setMenu("editprofile");
+                    }}
+                    onCreate={() => setMenu("createprofile")}
+                    direction="down"
+                />
                 <div id="main-actions">
                     <Button id="logs-button" disabled={!instance?.id || !processing} pushable={processing} onclick={() => setMenu('gamelog')}>
                         <img src={gameLogIcon} draggable={false} />
                     </Button>
-                    <Button id="news-button" disabled={!instance?.id} pushable={instance?.id} onclick={() => setMenu('patchnotes')}>
+                    <Button id="news-button" disabled={!instance?.id} pushable={!!instance?.id} onclick={() => setMenu('patchnotes')}>
                         <img src={newsIcon} draggable={false} />
                     </Button>
-                    <Button id="folder-button" disabled={!instance?.id} pushable={instance?.id} onclick={async() => {
-                        let cmd = `start ""`;
-                        if (NL_OS === "Linux") cmd = "xdg-open";
-                        if (NL_OS === "Darwin") cmd = "open";
-                        const instPath = await Neutralino.filesystem.getJoinedPath(settings.dataDirectory, "instances", instance.id);
-                        await Neutralino.os.execCommand(`${cmd} "${instPath}"`)
-                    }}>
+                    <Button id="folder-button" disabled={!instance?.id} pushable={!!instance?.id} onclick={async() => await Manager.instances.openFolder(instance?.id)}>
                         <img src={folderIcon} draggable={false} />
                     </Button>
                     <Button id="options-button" disabled={processing} pushable={!processing} onclick={() => setMenu('options')}>
@@ -81,7 +94,7 @@ export default function MainMenu({ setMenu, instance, profile, processing }) {
                 <img
                     id="main-logo"
                     className={progress.active ? "logo-active" : ""}
-                    src={minecraftLogo}
+                    src={instance?.logo || minecraftLogo}
                     draggable={false}
                 />
                 {progress.active && (
@@ -96,13 +109,31 @@ export default function MainMenu({ setMenu, instance, profile, processing }) {
                     </div>
                 )}
                 <div id="launch-options-bar">
-                    <div id="instances">
-                        <img id="instance-icon" src={instance?.icon || instanceIcon} draggable={false} />
-                        <div id="instance-details">
-                            <h1>{instance?.name || "No Instance"}</h1>
-                            <h2>{instance?.tag || "N/A"}</h2>
-                        </div>
-                    </div>
+                    <Dropdown 
+                        id="instances"
+                        selected={{
+                            icon: instance?.icon || instanceIcon,
+                            line1: instance?.name || "No Instance",
+                            line2: instance?.tag || "N/A"
+                        }}
+                        items={instancesList.map(i => ({
+                            id: i.id,
+                            icon: i.icon || instanceIcon,
+                            line1: i.name,
+                            line2: i.tag
+                        }))}
+                        onSelect={async (selectedInstance) => {
+                            const instance = await Manager.instances.get(selectedInstance.id);
+                            setInstance(instance);
+                        }}
+                        onEdit={async (i) => {
+                            const instance = await Manager.instances.get(i.id);
+                            setInstance(instance);
+                            setMenu("editinstance");
+                        }}
+                        onCreate={() => setMenu("createinstance")}
+                        direction="up"
+                    />
                     <div id="main-actions">
                         <Button id="worlds-button" disabled={!instance?.id || progress.active || processing} pushable={!processing}>
                             <img src={worldsIcon} draggable={false} />

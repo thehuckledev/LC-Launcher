@@ -21,7 +21,8 @@ export default defineConfig({
         rollupOptions: {
             output: {
                 manualChunks: {
-                    vendor: ['preact']
+                    vendor: ['preact'],
+                    njs: ['@neutralinojs/lib']
                 }
             }
         }

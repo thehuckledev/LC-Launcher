@@ -1,0 +1,233 @@
+.mc-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-btn {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    padding: 8px;
+    border-radius: 10px;
+    border: transparent 1px solid;
+    transition: border .2s ease-in-out, background .2s ease-in-out, transform .2s ease-in-out;
+    cursor: pointer;
+    width: 100%;
+}
+
+.dropdown-btn:hover, 
+.mc-dropdown.is-open .dropdown-btn {
+    background: #ffffff20 !important;
+    transform: scale(1.01) !important;
+}
+
+.dropdown-btn:active {
+    background: #ffffff34 !important;
+    border: #ffffff32 1px solid !important;
+    transform: scale(0.98) !important;
+}
+
+.dropdown-btn::after {
+    content: "";
+    position: relative;
+    right: 6px;
+    top: -6px;
+    width: 11px;
+    height: 8px;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: translateY(-50%) rotate(45deg);
+    filter: drop-shadow(1px 0px #000A) drop-shadow(2px 0px #000A);
+    transition: transform 0.2s ease;
+}
+
+.mc-dropdown.is-open .dropdown-btn::after {
+    transform: translateY(-20%) rotate(225deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    min-width: 260px;
+    background: #ffffff20 !important;
+    backdrop-filter: brightness(60%) blur(8px);
+    background: rgba(255, 255, 255, 0.059);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+    z-index: 100;
+    padding: 4px;
+    border-radius: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+    max-height: 60vh;
+}
+.dropdown-menu::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.dropdown-menu-open {
+    display: block;
+    pointer-events: all;
+    animation: DropdownFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.dropdown-menu-close {
+    pointer-events: none;
+    animation: DropdownFadeOut 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.dropdown-menu.down.dropdown-menu-open {
+    display: block;
+    pointer-events: all;
+    animation-name: DropdownFadeInDown !important;
+}
+
+.dropdown-menu.down.dropdown-menu-close {
+    pointer-events: none;
+    animation-name: DropdownFadeOutDown !important;
+}
+
+.dropdown-menu.up {
+    bottom: 110%;
+    transform-origin: bottom;
+}
+.dropdown-menu.down {
+    top: 110%;
+    transform-origin: top;
+}
+
+.dropdown-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    transition: background 0.3s;
+    background: transparent;
+}
+
+.dropdown-row:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-row-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    min-width: 0;
+}
+
+#dropdown-edit-btn {
+    min-height: unset;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+}
+
+#dropdown-edit-btn img {
+    width: 18px;
+}
+
+#dropdown-add-btn {
+    min-height: unset;
+    height: 32px;
+    width: -webkit-fill-available;
+    margin: 6px 10px;
+}
+#dropdown-add-btn {
+    font-size: 12px;
+}
+
+.entry-icon {
+	height: 35px;
+	width: 35px;
+	image-rendering: pixelated;
+}
+.entry-icon.rounded-icon {
+    border-radius: 5px;
+}
+
+.entry-details {
+	font: 12px 'Minecraftia', sans-serif;
+	text-shadow: 1.5px 1.5px #000A;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	/*gap: 3px;*/
+	max-width: 100%;
+	width: 100%;
+	min-width: 0;
+}
+
+.entry-details h1, .entry-details h1, .entry-details h2, .entry-details h2 {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: inherit;
+	font-weight: inherit;
+	margin: 0;
+    padding: 1.8px 0;
+}
+
+.entry-details h2, .entry-details h2 {
+	font-size: 10px;
+	color: #e3e3e3;
+}
+
+@keyframes DropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes DropdownFadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+}
+
+@keyframes DropdownFadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes DropdownFadeOutDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+}

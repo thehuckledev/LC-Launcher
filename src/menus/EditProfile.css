@@ -1,0 +1,41 @@
+#top-bar > h1 {
+    font: 20px 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+    margin: 0;
+}
+
+#edit-profile {
+    width: calc(100vw - 80px);
+    height: calc(100% - 83px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+
+    color: rgba(255, 255, 255, 0.9);
+    font: 10pt 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#edit-profile > h2 {
+    font: 14px 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+
+    color: #b6b6b6;
+}
+
+#edit-profile-action-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    justify-content: space-between;
+    width: 100%;
+}
+
+#edit-profile-action-bar>.mc-button {
+    width: 130px;
+}

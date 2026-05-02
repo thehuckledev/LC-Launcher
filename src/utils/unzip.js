@@ -75,26 +75,43 @@ export default class Unzip {
                 this.status = "counting";
                 this.emit();
 
-                const listProc = await Neutralino.os.execCommand(`unzip -l "${this.zipPath}" | tail -n 1 | awk '{print $2}'`);
+                let isTar = this.zipPath.includes(".tar")
+                let listCmd = isTar 
+                    ? `tar -tf "${this.zipPath}" | wc -l` 
+                    : `unzip -l "${this.zipPath}" | tail -n 1 | awk '{print $2}'`;
+
+                const listProc = await Neutralino.os.execCommand(listCmd);
                 this.totalFiles = parseInt(listProc.stdOut.trim());
 
                 this.status = "extracting";
                 this.emit();
 
-                const proc = await Neutralino.os.spawnProcess(`unzip -o "${this.zipPath}" -d "${this.destPath}"`);
+                const extractCmd = isTar
+                    ? `tar -xvf "${this.zipPath}" -C "${this.destPath}"`
+                    : `unzip -o "${this.zipPath}" -d "${this.destPath}"`;
+
+                const proc = await Neutralino.os.spawnProcess(extractCmd);
                 this.procId = proc.id;
 
                 await new Promise((resolve) => {
                     const handler = (evt) => {
                         if (evt.detail.id !== proc.id) return;
-                        if (evt.detail.action === "stdOut") {
+                        if (evt.detail.action === "stdOut" || evt.detail.action === "stdErr") {
                             const lines = evt.detail.data.split("\n");
                             for (const line of lines) {
-                                if (
-                                    line.includes("inflating:") ||
-                                    line.includes("extracting:") ||
-                                    line.includes("creating:")
-                                ) {
+                                const cleanLine = line.trim();
+                                if (!cleanLine) continue;
+
+                                let processed = false;
+                                if (isTar) {
+                                    processed = true; 
+                                } else {
+                                    processed = cleanLine.includes("inflating:") || 
+                                                cleanLine.includes("extracting:") || 
+                                                cleanLine.includes("creating:");
+                                };
+
+                                if (processed) {
                                     this.extracted++;
 
                                     const percent =
