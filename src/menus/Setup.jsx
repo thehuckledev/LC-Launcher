@@ -42,11 +42,12 @@ export default function SetupMenu({ setMenu, reloadData }) {
                 if (NL_OS !== "Linux" &&
                     NL_OS !== "Darwin"
                 ) return setCanInstallRuntime(false);
+                else setCanInstallRuntime(true);
 
-                const res = await Neutralino.os.execCommand("command -v wine");
+                /*const res = await Neutralino.os.execCommand("command -v wine");
 
                 if (res.exitCode === 0) setCanInstallRuntime(false);
-                else setCanInstallRuntime(true);
+                else setCanInstallRuntime(true);*/
             } catch (err) {
                 console.error(err);
                 setCanInstallRuntime(false);
@@ -93,7 +94,11 @@ export default function SetupMenu({ setMenu, reloadData }) {
                 await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
                 await Neutralino.os.execCommand(`xattr -rd com.apple.quarantine "${runtimeDir}"`);
             } else {
-                await Neutralino.os.execCommand(`cp -R "${runtimeTempDir}/." "${runtimeDir}"`);
+                const protonDirs = await Neutralino.filesystem.readDirectory(runtimeTempDir);
+                if (protonDirs.length < 1) throw new Error("No runtime found after download");
+                const protonDir = protonDirs[0].entry;
+                const internalRuntimeSource = `${runtimeTempDir}/${protonDir}/files`;
+                await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
             };
             await Neutralino.filesystem.remove(archivePath).catch(()=>{});
             await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});

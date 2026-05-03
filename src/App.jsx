@@ -35,6 +35,9 @@ import EditInstanceMenu from "./menus/EditInstance.jsx";
 // TODO make each profile have multiple skins
 // TODO add cape menu and make the profile skin be placed as a DLC rather than replacing stev
 // TODO make instances appear as games in steam
+// TODO add controller mode which is like steam big screen mode
+// TODO add change uid textbox
+//! TODO add emerald migration of account (username,skin,cape and UID)
 //! TODO instance custom icons
 export default function App() {
     const [processing, setProcessing] = useState(false);

@@ -16,7 +16,10 @@ export class Exec {
         this.preserveList = [
             "options.txt",
             "settings.dat",
-            "pfx",
+            "screenshots",
+            "profile0.dat", "profile1.dat", "profile2.dat", "profile3.dat",
+            "profile4.dat", "profile5.dat", "profile6.dat", "profile7.dat",
+            "profile8.dat", "profile9.dat", "profile10.dat",
             await Neutralino.filesystem.getJoinedPath("Windows64", "GameHDD")
         ];
     };

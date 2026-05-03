@@ -26,9 +26,13 @@ function patchConfig(on) {
     if (on) {
         const isDebug = process.argv.includes("--debug");
         if(!isDebug) cfg.modes.window.enableInspector = false;
+        if(isDebug) cfg.logging.enabled = true;
+        if(isDebug) cfg.logging.writeToLogFile = true;
         cfg.tokenSecurity = "one-time";
     } else {
         cfg.modes.window.enableInspector = true;
+        cfg.logging.enabled = false;
+        cfg.logging.writeToLogFile = false;
         cfg.tokenSecurity = "none";
     };
 
