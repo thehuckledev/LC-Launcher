@@ -80,3 +80,46 @@
 .mc-button.full { width: 100%; height: 100%; }
 .mc-button.lang img { width: 26px; height: 26px; }
 .mc-button.lang .title { padding-bottom: 0; }
+
+.mc-tooltip-text {
+    visibility: hidden;
+    position: fixed;
+    background-color: #333;
+    color: #ffffff;
+    padding: 5px 10px;
+    border: 2px solid #555555;
+    white-space: nowrap;
+    z-index: 9999;
+    font-family: 'Minecraftia', sans-serif;
+    font-size: 12px;
+    pointer-events: none;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.75);
+	text-shadow: 2px 2px #202013CC;
+}
+.mc-tooltip-text.aligned-RIGHT {
+    transform: translate(calc(-100% + 20px), -10px);
+}
+.mc-tooltip-text.aligned-LEFT {
+    transform: translate(20px, -10px);
+}
+
+.mc-button:has(.mc-tooltip-text):hover {
+	overflow: visible !important;
+}
+.mc-button:hover .mc-tooltip-text.aligned-RIGHT {
+    visibility: visible;
+    animation: TooltipFadeInRight 0.1s ease-in;
+}
+.mc-button:hover .mc-tooltip-text.aligned-LEFT {
+	visibility: visible;
+	animation: TooltipFadeInLeft 0.1s ease-in;
+}
+
+@keyframes TooltipFadeInRight {
+    from { opacity: 0; transform: translate(calc(-100% + 20px), -5px); }
+    to { opacity: 1; transform: translate(calc(-100% + 20px), -10px); }
+}
+@keyframes TooltipFadeInLeft  {
+    from { opacity: 0; transform: translate(20px, -5px); }
+    to { opacity: 1; transform: translate(20px, -10px); }
+}

@@ -43,7 +43,17 @@ export class Remotes {
         });
 
         const data = await res.json();
-        return this.normalizeReleases(instance.serviceType, data);
+        const releases = this.normalizeReleases(instance.serviceType, data);
+
+        if (releases.length > 0) {
+            const latestObj = {
+                ...releases[0],
+                tag_name: 'latest'
+            };
+            return [latestObj, ...releases];
+        };
+
+        return releases;
     };
 
     async get(instance, tag) {

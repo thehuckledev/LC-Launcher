@@ -117,16 +117,16 @@ NeutralinoJS Server: ${NL_VERSION || "Unknown"} (${NL_COMMIT || "Unknown"})
                         label="Search Logs"
                         maxlength={150}
                     />
-                    <Button id="filter-button" onclick={() => setHideWine(prev => !prev)} disabled={hideWine}>
+                    <Button id="filter-button" tooltip="Toggle Wine Logs" tooltipAlign="RIGHT" onclick={() => setHideWine(prev => !prev)} disabled={hideWine}>
                         W
                     </Button>
-                    <Button id="copy-button" onclick={copyLog}>
+                    <Button id="copy-button" tooltip="Copy Log" tooltipAlign="RIGHT" onclick={copyLog}>
                         <img id="copy-icon" src={copyIcon} draggable={false} />
                     </Button>
-                    <Button id="save-button" onclick={saveLogs}>
+                    <Button id="save-button" tooltip="Save Log" tooltipAlign="RIGHT" onclick={saveLogs}>
                         <img id="save-icon" src={saveIcon} draggable={false} />
                     </Button>
-                    <Button id="back-button" onclick={() => {
+                    <Button id="back-button" tooltip="Close" tooltipAlign="RIGHT" onclick={() => {
                         setCrashed(false);
                         setLogs([]);
                         setMenu('main');

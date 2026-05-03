@@ -76,16 +76,16 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                     direction="down"
                 />
                 <div id="main-actions">
-                    <Button id="logs-button" disabled={!instance?.id || !processing} pushable={processing} onclick={() => setMenu('gamelog')}>
+                    <Button id="logs-button" tooltip="Game Log" tooltipAlign="RIGHT" disabled={!instance?.id || !processing} pushable={processing} onclick={() => setMenu('gamelog')}>
                         <img src={gameLogIcon} draggable={false} />
                     </Button>
-                    <Button id="news-button" disabled={!instance?.id} pushable={!!instance?.id} onclick={() => setMenu('patchnotes')}>
+                    <Button id="news-button" tooltip="Release Details" tooltipAlign="RIGHT" disabled={!instance?.id} pushable={!!instance?.id} onclick={() => setMenu('patchnotes')}>
                         <img src={newsIcon} draggable={false} />
                     </Button>
-                    <Button id="folder-button" disabled={!instance?.id} pushable={!!instance?.id} onclick={async() => await Manager.instances.openFolder(instance?.id)}>
+                    <Button id="folder-button" tooltip="Open Instance Folder" tooltipAlign="RIGHT" disabled={!instance?.id} pushable={!!instance?.id} onclick={async() => await Manager.instances.openFolder(instance?.id)}>
                         <img src={folderIcon} draggable={false} />
                     </Button>
-                    <Button id="options-button" disabled={processing} pushable={!processing} onclick={() => setMenu('options')}>
+                    <Button id="options-button" tooltip="Options" tooltipAlign="RIGHT" disabled={processing} pushable={!processing} onclick={() => setMenu('options')}>
                         <img src={optionsIcon} draggable={false} />
                     </Button>
                 </div>
@@ -135,13 +135,13 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                         direction="up"
                     />
                     <div id="main-actions">
-                        <Button id="worlds-button" disabled={!instance?.id || progress.active || processing} pushable={!processing}>
+                        <Button id="worlds-button" tooltip="Worlds" tooltipAlign="LEFT" disabled={!instance?.id || progress.active || processing} pushable={!processing}>
                             <img src={worldsIcon} draggable={false} />
                         </Button>
                         <Button id="play-button" disabled={!instance?.id || !profile?.id || progress.active || processing} pushable={!processing} onclick={() => Manager.exec.launch(instance?.id, profile?.id)}>
                             Play
                         </Button>
-                        <Button id="servers-button" disabled={!instance?.id || progress.active || processing} pushable={!processing}>
+                        <Button id="servers-button" tooltip="Servers" tooltipAlign="LEFT" disabled={!instance?.id || progress.active || processing} pushable={!processing}>
                             <img src={serversIcon} draggable={false} />
                         </Button>
                     </div>

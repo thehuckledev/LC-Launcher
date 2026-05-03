@@ -82,13 +82,13 @@ Saved on: ${startName}
                         label="Search Logs"
                         maxlength={150}
                     />
-                    <Button id="filter-button" onclick={() => setHideWine(prev => !prev)} disabled={hideWine}>
+                    <Button id="filter-button" tooltip="Toggle Wine Logs" tooltipAlign="RIGHT" onclick={() => setHideWine(prev => !prev)} disabled={hideWine}>
                         W
                     </Button>
-                    <Button id="save-button" onclick={saveLogs}>
+                    <Button id="save-button" tooltip="Save Log" tooltipAlign="RIGHT" onclick={saveLogs}>
                         <img id="save-icon" src={saveIcon} draggable={false} />
                     </Button>
-                    <Button id="back-button" onclick={() => setMenu('main')}>
+                    <Button id="back-button" tooltip="Close" tooltipAlign="RIGHT" onclick={() => setMenu('main')}>
                         <img id="back-icon" src={closeIcon} draggable={false} />
                     </Button>
                 </div>
