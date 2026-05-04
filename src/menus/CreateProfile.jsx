@@ -16,6 +16,7 @@ export default function CreateProfileMenu({ setMenu, setProfile }) {
     const [ready, setReady] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [username, setUsername] = useState("");
+    const [UID, setUID] = useState("");
     const [skin, setSkin] = useState(undefined);
 
     const handleCreate = async () => {
@@ -142,6 +143,24 @@ export default function CreateProfileMenu({ setMenu, setProfile }) {
                             </Button>
                         </div>
                         <h2>Your skin will default to steve if you don't select one.</h2>
+
+                        {/*<Textbox
+                            key={UID}
+                            id="chosen-uid"
+                            onchange={async (txt) => {
+                                if (txt.trim() === "") return setUID("");
+                                if (!(/^[a-zA-Z0-9_]{3,16}$/.test(txt.trim()))) {
+                                    showToast("Your UID must only have letters, numbers");
+                                    return setReady(false);
+                                };
+                                setUID(txt.trim());
+                            }}
+                            value={UID}
+                            placeholder="0xC1B71FF5E39BB126..."
+                            label="Enter a UID (Optional)"
+                            minlength={18}
+                            maxlength={18}
+                        />*/}
                     </>
                 )}
             </div>

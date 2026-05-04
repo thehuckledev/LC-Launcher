@@ -447,14 +447,18 @@ export class Exec {
                                         parsed.from = "WINE";
                                         msg = parsed;
 
+                                        const isFine = lower.includes("apppolicygetprocessterminationmethod") || 
+                                                        lower.includes("coreaudio") || 
+                                                        lower.includes("d3dcompiler");
+
                                         const lower = parsed.message?.toLowerCase() || "";
-                                        if (
+                                        if ((
                                             lower.includes("unhandled") ||
                                             lower.includes("segmentation fault") ||
                                             lower.includes("stack overflow") ||
                                             lower.includes("crash") ||
                                             lower.includes("fault")
-                                        ) crashDetected = true;
+                                        ) && isFine !== true) crashDetected = true;
                                     } else {
                                         const lower = line.toLowerCase();
                                         if (

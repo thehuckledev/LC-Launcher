@@ -1,3 +1,23 @@
+/*
+    {
+        id: "portable-lce",
+        icon: "data:image/png;charset=utf-8;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAFJElEQVR42u3dBWzcSBQG4JcJlJmZhcfMzMxU5lZcrljHzMwgPGYuo1gF0fFtbCcpM+PIR6PLG9W/DBu1/6dwrNnx32p28jzjlbWaNWvWNORmrWYDol5j+6we3ERO0OxrGvYj9mp8jexrGowUgo6WoBk0MWgGzaArsiCagwhJrcLjkIcg9BYixJrcBKll0r3a2tpSI/aHUWJhGAYaI1QII8SgGTQxaAbNoPVZbfpK2B6PfRpBVGlEJH1d0BhTmRg0STfYVDw3gjCaTP7cqEBALRghjtEMmhg0g2bQuuTPs1v++P3nTz5U3j79SH1zjsHe/pzzg1vMnDNnznuO1atX5zdTOqjBJjmRpq6ubo0m0sx77ukHurUv4O3Fc89wu3HBBReIY/bs2ZEmKFykMUIcoxk0lSNoU1PTrF37xG/tPG/68aa6mkH/bcj1N90zf2nCt7vmLrnjx0WN39SDhy5YNuCyKxk05RZ0pQZaLOCboR/UHDhwwH5wZ8T7YuqiA99s1/awqkD2XPZrslnXkb4RqE6LPpwpkOdcOHRwjGbQxKAZNJn0hcHNf/wGVDvBt61BrSgKLYdCvJOiAFHeMukL55wexNQy6cyZM0uaMAyjxAJESeFdemqEOEYzaIJVSdZadO4iWYuLpU7LDNomctcPC7ItVnDoIICpQkhuqhC+Kl2lJr9u1GiMMfs1BgJVQQWRvhsVflBNlWXSfHCMZtDEoBk0mcx3msCNxNBSpDV27NhHHb169fo6ta80K1euPKjBIopSc8ukD/XuEpTJk08+Kfm45557Ag1UgDVCHKMZdDkw6KqWLVv16Pn3W/ceUiYtW7bsnY8OHTpIahVRFAmq/JVPoBtAuQMAt2ykGBR5NCQWhmFJU6/xXWkOU7Mt1xeuITG05KiDtsYDjwgyhQP6Jlmz/3qTYmM048aNm6AZr1m4cKEktnTp0jH5ePfdd5vixdmdO3d+++23koULL7xQEgvD0P4NLTno2LEj59HlwaAZNEUe9YktX778ZcdLL730cOwxja1nPqJ5VPPiiy++5vjuu++iWBj75JNPXnPYgx9P7DHEp59+6pvbrWmkwUOQG2zqbEzisIs8g4zcd9994hg6dGgUK8XOP/98cUydOhW/g2gqNus1jdgfskzKMZpBHxMYdKdOnY539OrVi6tJc3HDDTfcdNNN/B9Nud28qlKDriKsTMy3GV80vj1ValWvEuGr0tnGDzTi6x5WJvX1I4egwZbxBaLpg1YXsRz9Q8ecOXNmaWbMmDEd9Ouvvx4zT4a41THJws033zx48GA+GTZdDJpBczWpaKCD9RZAyRdUnHTSSaM9xoC6d++e/Us4ITvHdbZw/L8LfVEs8IhSWxO76KKLxGFnC2s0EQK6U6vv4UoaIzDiGM2gyQgx6LfeequXw95jhkHTEXjX7kF7pNRypXjk1zJQPgXtT8webDRV9p131VCkSEON1EhqV1111deOyZMnz8pIz549P3DYRafisGt0fnAMHDhwumZWah9//LGkl/n6Eu9aW5wNN9Cs0Tz77LOF7jPkq1Zw1sGgqfxXwXFt27Ydhhuq6datW/IJon0yVFu+BzFUc+aZZ0IR4S/hVKD81nyWPNLvo1eX7foYoUIwaAbNoIlBM2iKPOoQUWoBIkRAJ6gc759lQi1LhNP7UaAIAc12gRNkUQnDMZpBE4Nm0FSV/iKsrwXgnl1Ay3l2D/ghLsiN7wWV1iTm28Berilp0783KXGMZtAMmhg0g6bDMmxz/ARiDuoAAAAASUVORK5CYII=",
+        background: undefined,
+        logo: undefined,
+        name: "Portable LCE",
+        serviceType: "GITHUB",
+        serviceDomain: "github.com",
+        repo: "portable-lce/portable-lce",
+        tag: "nightly",
+        exec: "Minecraft.Client",
+        target: "minecraft-client-linux.zip",
+        compatibilityLayer: "DIRECT",
+        customArgs: "",
+        supportedPlatforms: ["Linux"],
+        supportsSlimSkins: false
+    },
+*/
+
 export const defaultInstances = [
     {
         id: "360-revived",
@@ -62,23 +82,6 @@ export const defaultInstances = [
         compatibilityLayer: "RUNTIME",
         customArgs: "",
         supportedPlatforms: ["Windows","Linux","Darwin"],
-        supportsSlimSkins: false
-    },
-    {
-        id: "portable-lce",
-        icon: "data:image/png;charset=utf-8;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2BqGFAAAFJElEQVR42u3dBWzcSBQG4JcJlJmZhcfMzMxU5lZcrljHzMwgPGYuo1gF0fFtbCcpM+PIR6PLG9W/DBu1/6dwrNnx32p28jzjlbWaNWvWNORmrWYDol5j+6we3ERO0OxrGvYj9mp8jexrGowUgo6WoBk0MWgGzaArsiCagwhJrcLjkIcg9BYixJrcBKll0r3a2tpSI/aHUWJhGAYaI1QII8SgGTQxaAbNoPVZbfpK2B6PfRpBVGlEJH1d0BhTmRg0STfYVDw3gjCaTP7cqEBALRghjtEMmhg0g2bQuuTPs1v++P3nTz5U3j79SH1zjsHe/pzzg1vMnDNnznuO1atX5zdTOqjBJjmRpq6ubo0m0sx77ukHurUv4O3Fc89wu3HBBReIY/bs2ZEmKFykMUIcoxk0lSNoU1PTrF37xG/tPG/68aa6mkH/bcj1N90zf2nCt7vmLrnjx0WN39SDhy5YNuCyKxk05RZ0pQZaLOCboR/UHDhwwH5wZ8T7YuqiA99s1/awqkD2XPZrslnXkb4RqE6LPpwpkOdcOHRwjGbQxKAZNJn0hcHNf/wGVDvBt61BrSgKLYdCvJOiAFHeMukL55wexNQy6cyZM0uaMAyjxAJESeFdemqEOEYzaIJVSdZadO4iWYuLpU7LDNomctcPC7ItVnDoIICpQkhuqhC+Kl2lJr9u1GiMMfs1BgJVQQWRvhsVflBNlWXSfHCMZtDEoBk0mcx3msCNxNBSpDV27NhHHb169fo6ta80K1euPKjBIopSc8ukD/XuEpTJk08+Kfm45557Ag1UgDVCHKMZdDkw6KqWLVv16Pn3W/ceUiYtW7bsnY8OHTpIahVRFAmq/JVPoBtAuQMAt2ykGBR5NCQWhmFJU6/xXWkOU7Mt1xeuITG05KiDtsYDjwgyhQP6Jlmz/3qTYmM048aNm6AZr1m4cKEktnTp0jH5ePfdd5vixdmdO3d+++23koULL7xQEgvD0P4NLTno2LEj59HlwaAZNEUe9YktX778ZcdLL730cOwxja1nPqJ5VPPiiy++5vjuu++iWBj75JNPXnPYgx9P7DHEp59+6pvbrWmkwUOQG2zqbEzisIs8g4zcd9994hg6dGgUK8XOP/98cUydOhW/g2gqNus1jdgfskzKMZpBHxMYdKdOnY539OrVi6tJc3HDDTfcdNNN/B9Nud28qlKDriKsTMy3GV80vj1ValWvEuGr0tnGDzTi6x5WJvX1I4egwZbxBaLpg1YXsRz9Q8ecOXNmaWbMmDEd9Ouvvx4zT4a41THJws033zx48GA+GTZdDJpBczWpaKCD9RZAyRdUnHTSSaM9xoC6d++e/Us4ITvHdbZw/L8LfVEs8IhSWxO76KKLxGFnC2s0EQK6U6vv4UoaIzDiGM2gyQgx6LfeequXw95jhkHTEXjX7kF7pNRypXjk1zJQPgXtT8webDRV9p131VCkSEON1EhqV1111deOyZMnz8pIz549P3DYRafisGt0fnAMHDhwumZWah9//LGkl/n6Eu9aW5wNN9Cs0Tz77LOF7jPkq1Zw1sGgqfxXwXFt27Ydhhuq6datW/IJon0yVFu+BzFUc+aZZ0IR4S/hVKD81nyWPNLvo1eX7foYoUIwaAbNoIlBM2iKPOoQUWoBIkRAJ6gc759lQi1LhNP7UaAIAc12gRNkUQnDMZpBE4Nm0FSV/iKsrwXgnl1Ay3l2D/ghLsiN7wWV1iTm28Berilp0783KXGMZtAMmhg0g6bDMmxz/ARiDuoAAAAASUVORK5CYII=",
-        background: undefined,
-        logo: undefined,
-        name: "Portable LCE",
-        serviceType: "GITHUB",
-        serviceDomain: "github.com",
-        repo: "portable-lce/portable-lce",
-        tag: "nightly",
-        exec: "Minecraft.Client",
-        target: "minecraft-client-linux.zip",
-        compatibilityLayer: "DIRECT",
-        customArgs: "",
-        supportedPlatforms: ["Linux"],
         supportsSlimSkins: false
     },
     {

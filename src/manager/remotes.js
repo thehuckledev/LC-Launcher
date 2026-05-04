@@ -1,5 +1,7 @@
 import nmd from 'nano-markdown';
 
+import { showToast } from '../components/Toast.jsx';
+
 export class Remotes {
     constructor(manager) {
         this.manager = manager;
@@ -43,7 +45,17 @@ export class Remotes {
         });
 
         const data = await res.json();
-        const releases = this.normalizeReleases(instance.serviceType, data);
+        if (!Array.isArray(data)) {
+            console.error("API Error or Rate Limit:", data);
+            showToast("Error: Release API Error");
+            return [];
+        };
+
+        let releases = this.normalizeReleases(instance.serviceType, data);
+        releases = releases.filter(r => { // filter out server releases
+            const tag = (r.tag_name || "").toLowerCase();
+            return !tag.includes("server");
+        });
 
         if (releases.length > 0) {
             const latestObj = {
@@ -58,6 +70,7 @@ export class Remotes {
 
     async get(instance, tag) {
         const releases = await this.list(instance);
+        if (!Array.isArray(releases)) return null;
         return releases.find(r => r.tag_name === tag);
     };
 

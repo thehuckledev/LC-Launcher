@@ -1,5 +1,7 @@
 import "./Textbox.css";
 
+import { useRef, useEffect } from "preact/hooks";
+
 export default function Textbox({ id, onchange = (txt) => { }, value = "", placeholder = "", label = "Textbox", minlength = 0, maxlength = 30 }) {
     return (
         <div class="mc-textbox">
@@ -9,7 +11,6 @@ export default function Textbox({ id, onchange = (txt) => { }, value = "", place
                 id={id}
                 value={value}
                 placeholder={placeholder}
-                minLength={minlength}
                 maxLength={maxlength}
                 spellCheck="false" 
                 autoCorrect="off"
@@ -21,15 +22,10 @@ export default function Textbox({ id, onchange = (txt) => { }, value = "", place
                         e.target.value.trim().length >= minlength &&
                         e.target.value.trim().length <= maxlength
                     ) onchange(e.target.value);
+                    else onchange("");
                 }}
                 onKeyDown={(e) => {
-                    if (e.key === 'Enter' &&
-                        e.target.value.trim().length >= minlength &&
-                        e.target.value.trim().length <= maxlength
-                    ) {
-                        e.target.blur();
-                        onchange(e.target.value);
-                    };
+                    if (e.key === 'Enter') e.target.blur();
                 }}
             />
         </div>
