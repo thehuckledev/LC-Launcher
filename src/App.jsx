@@ -37,6 +37,7 @@ import EditInstanceMenu from "./menus/EditInstance.jsx";
 // TODO make instances appear as games in steam
 // TODO add controller mode which is like steam big screen mode
 // TODO add change uid textbox
+// TODO make play button turn into stop button when running
 //! TODO add emerald migration of account (username,skin,cape and UID)
 //! TODO instance custom icons
 export default function App() {

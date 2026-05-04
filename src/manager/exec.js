@@ -364,10 +364,10 @@ export class Exec {
             }
 
             else if (compat === "WINE" || compat === "WINE64")
-                bin = `WINEPREFIX="${prefix}" ${compat.toLowerCase()}`;
+                bin = `${compat.toLowerCase()}`;
 
             else if (compat === "PROTON")
-                bin = `STEAM_COMPAT_CLIENT_INSTALL_PATH="" STEAM_COMPAT_DATA_PATH="${prefix}" proton run`;
+                bin = `proton run`;
 
             if (bin !== "") {
                 const baseCmd = bin.split(" ").pop().replace(/"/g, "");
@@ -406,7 +406,12 @@ export class Exec {
                             await Neutralino.os.execCommand(`taskkill /PID ${proc.pid} /T /F`);
                         } else {
                             try {
-                                await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" "${wineServerBin}" -k`);
+                                if (instance.compatibilityLayer === "RUNTIME")
+                                    await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" "${wineServerBin}" -k`);
+                                else if (instance.compatibilityLayer !== "DIRECT")
+                                    await Neutralino.os.execCommand(`"${wineServerBin}" -k`);
+                                else
+                                    await Neutralino.os.execCommand(`kill -9 -${proc.pid}`);
                             } catch {
                                 await Neutralino.os.execCommand(`kill -9 -${proc.pid}`);
                             };
@@ -474,15 +479,29 @@ export class Exec {
                                 const sessionSeconds = Math.floor(duration / 1000);
 
                                 if (isTranslated) (async () => {
-                                    try {
-                                        console.log("Soft shutdown wine...");
-                                        await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" "${wineServerBin}" -w`);
-                                    } catch (e) {
-                                        console.log("Force shutdown wine...");
+                                    if (instance.compatibilityLayer === "RUNTIME") {
                                         try {
-                                            await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" "${wineServerBin}" -k`);
-                                        } catch (err) {
-                                            console.error("Wineserver couldn't stop:", err);
+                                            console.log("Soft shutdown wine...");
+                                            await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" "${wineServerBin}" -w`);
+                                        } catch (e) {
+                                            console.log("Force shutdown wine...");
+                                            try {
+                                                await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" "${wineServerBin}" -k`);
+                                            } catch (err) {
+                                                console.error("Wineserver couldn't stop:", err);
+                                            };
+                                        };
+                                    } else {
+                                        try {
+                                            console.log("Soft shutdown wine...");
+                                            await Neutralino.os.execCommand(`"${wineServerBin}" -w`);
+                                        } catch (e) {
+                                            console.log("Force shutdown wine...");
+                                            try {
+                                                await Neutralino.os.execCommand(`"${wineServerBin}" -k`);
+                                            } catch (err) {
+                                                console.error("Wineserver couldn't stop:", err);
+                                            };
                                         };
                                     };
                                 })();
