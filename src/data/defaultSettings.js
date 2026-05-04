@@ -31,7 +31,7 @@ export const defaultSettings = {
                     "share",
                     NL_ARGS[0].split("/").at(-1),
                     "data"
-                ); // NL_ARGS[0].split("/").at(-1) gives you the executable's path
+                ); // NL_ARGS[0].split("/").at(-1) gives you the executable's name
 
             case "Darwin":
                 return await Neutralino.filesystem.getJoinedPath(

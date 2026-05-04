@@ -31,8 +31,10 @@ class Installer {
 
     // install functions
     async install() {
-        const res = await Neutralino.os.execCommand('which zenity'); // must do this first otherwise prompt below wont appear
-        if (res.exitCode !== 0) return "missing deps";
+        if (NL_OS === "Linux") {
+            const res = await Neutralino.os.execCommand('which zenity'); // must do this first otherwise prompt below wont appear
+            if (res.exitCode !== 0) return "missing deps";
+        };
 
         const choice = await Neutralino.os.showMessageBox('LC Launcher Installer', `Would you like to install LC Launcher?`, 'YES_NO', 'QUESTION');
         if (choice !== 'YES') return await Neutralino.app.exit();
