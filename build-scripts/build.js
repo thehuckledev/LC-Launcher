@@ -114,6 +114,7 @@ function buildMac(cfg) {
     const appMinOs = cfg.buildScript.mac.minimumOS;
     const appId = cfg.buildScript.mac.appIdentifier;
     const appBundle = cfg.buildScript.mac.appBundleName;
+    const appCredits = cfg.buildScript.mac.appCredits;
 
     for (const arch of archList) {
         const appDir = `./dist/mac_${arch}/${appName}.app`;
@@ -138,7 +139,8 @@ function buildMac(cfg) {
                 .replace(/{APP_BUNDLE}/g, appBundle)
                 .replace(/{APP_ID}/g, appId)
                 .replace(/{APP_VERSION}/g, appVersion)
-                .replace(/{APP_MIN_OS}/g, appMinOs);
+                .replace(/{APP_MIN_OS}/g, appMinOs)
+                .replace(/{APP_CREDITS}/g, appCredits);
 
             fs.writeFileSync(plistPath, plistContent);
         };
