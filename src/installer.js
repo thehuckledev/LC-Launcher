@@ -71,6 +71,7 @@ class Installer {
     async macInstall(installPath) {
         const source = await Neutralino.filesystem.getJoinedPath(NL_PATH, "../../");
         const destination = `${installPath}/LC-Launcher.app`;
+        await Neutralino.filesystem.createDirectory(installPath).catch(()=>{});
         await Neutralino.filesystem.remove(destination).catch(()=>{});
         await Neutralino.filesystem.move(source, destination);
     };

@@ -3,7 +3,7 @@ import Neutralino from "@neutralinojs/lib";
 export async function log(message, type = "INFO") {
     try {
         const msg = typeof message === 'object' ? JSON.stringify(message) : message;
-        await Neutralino.debug.log(message, type);
+        await Neutralino.debug.log(msg, type);
     } catch(e) {};
 };
 
@@ -15,29 +15,38 @@ export function startLogger() {
         debug: console.debug
     };
 
+    const formatArgs = (args) => {
+        return args.map(arg => 
+            typeof arg === 'object' && arg !== null 
+                ? JSON.stringify(arg, null, 2) 
+                : arg
+        ).join(' ');
+    };
+
     console.log = (...args) => {
         window._console.log(...args);
-        log(args.join(' '), "INFO");
+        log(formatArgs(args), "INFO");
     };
 
     console.warn = (...args) => {
         window._console.warn(...args);
-        log(args.join(' '), "WARNING");
+        log(formatArgs(args), "WARNING");
     };
 
     console.error = (...args) => {
         window._console.error(...args);
-        log(args.join(' '), "ERROR");
+        log(formatArgs(args), "ERROR");
     };
 
     console.debug = (...args) => {
         window._console.debug(...args);
-        log(args.join(' '), "INFO");
+        log(formatArgs(args), "INFO");
     };
 
     window.onerror = (message, source, lineno, colno, error) => {
         const stack = error?.stack ? `\nStack: ${error.stack}` : "";
-        log(`ERROR: ${message} at ${source}:${lineno}:${colno}${stack}`, "ERROR");
+        const fullMessage = `RUNTIME ERROR: ${message}\nFile: ${source}\nLine: ${lineno}:${colno}${stack}`;
+        log(fullMessage, "ERROR");
     };
 
     window.onunhandledrejection = (event) => {

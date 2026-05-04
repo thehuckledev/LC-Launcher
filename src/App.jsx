@@ -9,7 +9,7 @@ import { checkForUpdates } from "./utils/updater.js";
 import { startMusic, stopMusic, setVolume } from "./utils/music.js";
 import { useSettings } from "./utils/SettingsStore.jsx";
 import { useManager } from "./utils/ManagerProvider.jsx";
-import DiscordRPC from "./utils/discordRPC.js";
+//import DiscordRPC from "./utils/discordRPC.js"; // this is broken currently due to the builds being wrong arch, i also need to make this a neutralinojs ext
 
 import Window from "./components/Window.jsx";
 import Toast, { showToast } from "./components/Toast.jsx";
@@ -54,7 +54,7 @@ export default function App() {
     const { settings, loadSettings, updateSetting } = useSettings();
     const Manager = useManager();
 
-    const rpcRef = useRef(null);
+    /*const rpcRef = useRef(null);
     if (!rpcRef.current) {
         rpcRef.current = new DiscordRPC({
             clientId: config.rpcClientID,
@@ -69,7 +69,7 @@ export default function App() {
             button2Label: config.button2Label,
             button2Url: config.button2Url
         });
-    };
+    };*/
     
     async function loadData(loadedSettings = settings) {
         const profiles = await Manager.profiles.list();
@@ -146,7 +146,7 @@ export default function App() {
         return () => clearTimeout(timer);
     }, []);
 
-    useEffect(() => {
+    /*useEffect(() => {
         const rpc = rpcRef.current;
         if (!rpc) return;
 
@@ -200,19 +200,19 @@ export default function App() {
         };
 
         // cant do below because discord doesnt allow data uri :(
-        /*let smallImageText = "";
-        let smallImageKey = "";
-        if (processing && instance?.name) {
-            smallImageText = "Instance Icon";
-            smallImageKey = instance?.icon;
-        } else if (!processing && profile?.username) {
-            smallImageText = `${profile?.username}'s Skin`;
-            smallImageKey = profile?.skinRender;
-        };*/
+        //let smallImageText = "";
+        //let smallImageKey = "";
+        //if (processing && instance?.name) {
+        //    smallImageText = "Instance Icon";
+        //    smallImageKey = instance?.icon;
+        //} else if (!processing && profile?.username) {
+        //    smallImageText = `${profile?.username}'s Skin`;
+        //    smallImageKey = profile?.skinRender;
+        //};
 
         console.log("Updating RPC:", { details, state });
         rpc.edit({ details, state, largeImageText });
-    }, [menu, instance, profile, processing, settings.discordRPC]);
+    }, [menu, instance, profile, processing, settings.discordRPC]);*/
 
     useEffect(() => {
         if (openAnimPlaying.current == true) {

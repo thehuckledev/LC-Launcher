@@ -322,8 +322,8 @@ export class Exec {
             
             let bin = "";
 
-            if (compat === "WINE" || compat === "WINE64") {
-                if (NL_OS === "Darwin") {
+            if (compat === "RUNTIME") {
+                if (NL_OS === "Darwin") { // WINE RUNTIME
                     try {
                         await Neutralino.filesystem.getStats(`${runtimePath}/bin/wine64`);
                         const winePath = `${runtimePath}/bin/wine64`;
@@ -332,21 +332,17 @@ export class Exec {
                         const env = `WINEPREFIX="${prefix}" WINEESYNC=1 MTL_HUD_ENABLED=0 WINEDLLOVERRIDES="d3d11=n,b;dxgi=n,b"`;
                         bin = `${env} "${winePath}"`;
                         
-                        try { await Neutralino.filesystem.getStats(prefix); } catch {
+                        try {
+                            await Neutralino.filesystem.getStats(prefix);
+                        } catch {
                             showToast('Setting up C Drive...');
                             await Neutralino.os.execCommand(`${env} "${winePath}" wineboot --init`);
                             await this.setupDXVK();
-                        }
+                        };
                     } catch (e) {
                         bin = `WINEPREFIX="${prefix}" ${compat.toLowerCase()}`;
                     };
-                } else {
-                    bin = `WINEPREFIX="${prefix}" ${compat.toLowerCase()}`;
-                };
-            };
-
-            if (compat === "PROTON") {
-                if (NL_OS === "Linux") {
+                } else if (NL_OS === "Linux") { // PROTON GE RUNTIME
                     try {
                         await Neutralino.filesystem.getStats(`${runtimePath}/bin/wine`);
                         const winePath = `${runtimePath}/bin/wine`;
@@ -355,17 +351,23 @@ export class Exec {
                         const env = `WINEPREFIX="${prefix}" WINEESYNC=1 STEAM_COMPAT_CLIENT_INSTALL_PATH="/tmp" STEAM_COMPAT_DATA_PATH="${prefix}"`;
                         bin = `${env} "${winePath}"`;
 
-                        try { await Neutralino.filesystem.getStats(prefix); } catch {
+                        try {
+                            await Neutralino.filesystem.getStats(prefix);
+                        } catch {
                             showToast('Setting up C Drive...');
                             await Neutralino.os.execCommand(`${env} "${winePath}" wineboot --init`);
-                        }
+                        };
                     } catch (e) {
                         bin = `STEAM_COMPAT_CLIENT_INSTALL_PATH="" STEAM_COMPAT_DATA_PATH="${prefix}" proton run`;
                     };
-                } else {
-                    bin = `STEAM_COMPAT_CLIENT_INSTALL_PATH="" STEAM_COMPAT_DATA_PATH="${prefix}" proton run`;
                 };
-            };
+            }
+
+            else if (compat === "WINE" || compat === "WINE64")
+                bin = `WINEPREFIX="${prefix}" ${compat.toLowerCase()}`;
+
+            else if (compat === "PROTON")
+                bin = `STEAM_COMPAT_CLIENT_INSTALL_PATH="" STEAM_COMPAT_DATA_PATH="${prefix}" proton run`;
 
             if (bin !== "") {
                 const baseCmd = bin.split(" ").pop().replace(/"/g, "");
@@ -376,7 +378,7 @@ export class Exec {
             };
 
             if (compat === "DIRECT" && execPath.endsWith(".exe"))
-                showToast("You should have a compatibility layer on Linux and macOS", 1000);
+                showToast("You should have a compatibility layer on Linux and MacOS", 1000);
         };
 
         showToast("Launching instance...", 1000);

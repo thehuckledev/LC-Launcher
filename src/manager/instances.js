@@ -29,7 +29,7 @@ export class Instances {
         await this.manager.utils.ensureDir(await Neutralino.filesystem.getJoinedPath(path, "content"));
 
         if (data.serviceType && !["GITHUB","GITLAB","GITEA"].includes(data.serviceType)) return new Error("serviceType isn't supported yet. Only GITHUB,GITLAB,GITEA are supported at the moment.");
-        if (data.compatibilityLayer === "RUNTIME") data.compatibilityLayer = (NL_OS === "Darwin") ? "WINE64" : "PROTON";
+        //if (data.compatibilityLayer === "RUNTIME") data.compatibilityLayer = (NL_OS === "Darwin") ? "WINE64" : "PROTON";
 
         const instance = {
             icon: undefined,
@@ -62,7 +62,7 @@ export class Instances {
             if (!currentData) throw new Error("Instance not found");
 
             if (data.serviceType && !["GITHUB","GITLAB","GITEA"].includes(data.serviceType)) return new Error("serviceType isn't supported yet. Only GITHUB,GITLAB,GITEA are supported at the moment.");
-            if (data.compatibilityLayer === "RUNTIME") data.compatibilityLayer = (NL_OS === "Darwin") ? "WINE64" : "PROTON";
+            //if (data.compatibilityLayer === "RUNTIME") data.compatibilityLayer = (NL_OS === "Darwin") ? "WINE64" : "PROTON";
 
             const updatedData = {
                 ...currentData,

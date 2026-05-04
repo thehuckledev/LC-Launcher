@@ -312,6 +312,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
             </div>
             <div id="setup-action-bar">
                 <Button id="skip-button" disabled={processing} pushable={!processing} onclick={async() => {
+                    await makeDefaultInstances(); // still want instances
                     await updateSetting('hasSetup', true);
                     setMenu('main');
                 }}>
