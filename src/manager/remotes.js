@@ -13,13 +13,13 @@ export class Remotes {
 
         switch (instance.serviceType) {
             case "GITHUB":
-                return `https://api.${domain}/repos/${repo}/releases`;
+                return `https://api.${domain}/repos/${repo}/releases/?per_page=150`;
 
             case "GITLAB":
                 return `https://${domain}/api/v4/projects/${encodeURIComponent(repo)}/releases`;
 
             case "GITEA":
-                return `https://${domain}/api/v1/repos/${repo}/releases`;
+                return `https://${domain}/api/v1/repos/${repo}/releases/?limit=150`;
         };
     };
 
@@ -40,8 +40,21 @@ export class Remotes {
     };
 
     async list(instance) {
+        let headers = {
+            'User-Agent': 'LC-Launcher',
+            'Accept': 'application/json'
+        };
+        if (instance.serviceType === "GITHUB") {
+            headers = {
+                ...headers,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2026-03-10'
+            };
+        };
+
         const res = await fetch(this.getReleasesAPI(instance), {
-            cache: "no-store"
+            cache: "no-store",
+            headers
         });
 
         const data = await res.json();

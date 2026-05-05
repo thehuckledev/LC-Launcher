@@ -155,10 +155,8 @@ export default function Window({ title, showClose = true, showMinimize = true, s
             let debugKey = "Digit1";
             window.addEventListener("keydown", function(e) {
                 if (e.shiftKey && e.code === debugKey && isDebugOn === false) {
-                    (async () => {
-                        await Neutralino.os.showNotification('Debug Mode', 'You have enabled debug mode until you restart LC Launcher', 'WARNING');
-                        isDebugOn = true;
-                    })();
+                    isDebugOn = true;
+                    Neutralino.os.showNotification('Debug Mode', 'You have enabled debug mode until you restart LC Launcher', 'WARNING');
                 };
             });
             window.addEventListener("contextmenu", function(e) {

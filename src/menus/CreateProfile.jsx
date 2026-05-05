@@ -25,8 +25,8 @@ export default function CreateProfileMenu({ setMenu, setProfile }) {
         setProcessing(true);
         try {
             let newProfile;
-            if (skin) newProfile = await Manager.profiles.create(username, skin);
-            else newProfile = await Manager.profiles.create(username);
+            if (skin) newProfile = await Manager.profiles.create(username, skin, UID);
+            else newProfile = await Manager.profiles.create(username, undefined, UID);
 
             setProfile(newProfile);
             setMenu('main');
@@ -144,14 +144,13 @@ export default function CreateProfileMenu({ setMenu, setProfile }) {
                         </div>
                         <h2>Your skin will default to steve if you don't select one.</h2>
 
-                        {/*<Textbox
-                            key={UID}
+                        <Textbox
                             id="chosen-uid"
                             onchange={async (txt) => {
                                 if (txt.trim() === "") return setUID("");
-                                if (!(/^[a-zA-Z0-9_]{3,16}$/.test(txt.trim()))) {
-                                    showToast("Your UID must only have letters, numbers");
-                                    return setReady(false);
+                                if (!(/^0x[0-9A-F]{16}$/i.test(txt.trim()))) {
+                                    showToast("Invalid UID Format");
+                                    return setUID("");
                                 };
                                 setUID(txt.trim());
                             }}
@@ -160,7 +159,7 @@ export default function CreateProfileMenu({ setMenu, setProfile }) {
                             label="Enter a UID (Optional)"
                             minlength={18}
                             maxlength={18}
-                        />*/}
+                        />
                     </>
                 )}
             </div>

@@ -24,25 +24,6 @@ export class Exec {
         ];
     };
 
-    async setupDXVK() {
-        const dataDir = await getSetting("dataDirectory");
-        const dxvkLibDir = `${dataDir}/libraries/dxvk`;
-        const winePrefix = `${dataDir}/pfx`;
-
-        const system32 = `${winePrefix}/drive_c/windows/system32`;
-        const syswow64 = `${winePrefix}/drive_c/windows/syswow64`;
-
-        try {
-            await Neutralino.os.execCommand(`cp -f "${dxvkLibDir}/x64/"*.dll "${system32}"`);
-            await Neutralino.os.execCommand(`cp -f "${dxvkLibDir}/x32/"*.dll "${syswow64}"`);
-
-            showToast("DXVK Applied to Wine", 2000);
-        } catch (err) {
-            console.error("DXVK setup failed:", err);
-            showToast("Failed to apply DXVK");
-        };
-    };
-
     async backupPreserved(instancePath) {
         const backupDir = await Neutralino.filesystem.getJoinedPath(instancePath, "backup");
         await this.manager.utils.ensureDir(backupDir);
@@ -302,7 +283,7 @@ export class Exec {
         const args = [];
 
         if (profile.username) args.push("-name", profile.username);
-        if (instance.fullscreen) args.push("-fullscreen");
+        if (instance.fullscreen === true) args.push("-fullscreen");
 
         if (instance.ip) args.push("-ip", instance.ip);
         if (instance.port) args.push("-port", instance.port);
@@ -323,6 +304,73 @@ export class Exec {
             let bin = "";
 
             if (compat === "RUNTIME") {
+                async function installRuntimeHelper() {
+                    const dataDirectory = await getSetting("dataDirectory");
+                    const runtimeDir = `${dataDirectory}/libraries/runtime`;
+                    const runtimeTempDir = `${dataDirectory}/libraries/_runtime`;
+                    let archivePath = null;
+                    try {
+                        const prefix = `${dataDirectory}/pfx`;
+            
+                        let repo = "";
+                        if (NL_OS === "Darwin") repo = "Gcenx/game-porting-toolkit";
+                        else if (NL_OS === "Linux") repo = "GloriousEggroll/proton-ge-custom";
+            
+                        showToast(`Fetching latest runtime...`);
+            
+                        let apiResponse = await Neutralino.os.execCommand(`curl -H "Accept: application/vnd.github+json" -H "User-Agent: LC-Launcher" -H "X-GitHub-Api-Version: 2026-03-10" -s https://api.github.com/repos/${repo}/releases/latest`);
+                        let releaseData = JSON.parse(apiResponse.stdOut);
+            
+                        let asset = releaseData.assets.find(a => a.name.endsWith('.tar.xz') || a.name.endsWith('.tar.gz'));
+                        if (!asset) throw new Error("No archive found in runtime release");
+            
+                        const downloadUrl = asset.browser_download_url;
+                        archivePath = `${dataDirectory}/libraries/${asset.name}`;
+            
+                        await Neutralino.filesystem.createDirectory(runtimeDir).catch(()=>{});
+                        await Neutralino.filesystem.createDirectory(runtimeTempDir).catch(()=>{});
+            
+                        const runtimeDownload = new Download(downloadUrl, { label: `Downloading Runtime...` });
+                        await runtimeDownload.start(archivePath);
+            
+                        const runtimeUnzip = new Unzip(archivePath, runtimeTempDir, { label: "Extracting Runtime..." });
+                        await runtimeUnzip.start();
+            
+                        if (NL_OS === "Darwin") {
+                            const internalRuntimeSource = `${runtimeTempDir}/Game Porting Toolkit.app/Contents/Resources/wine`;
+                            await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
+                            await Neutralino.os.execCommand(`xattr -rd com.apple.quarantine "${runtimeDir}"`);
+                        } else {
+                            const protonDirs = await Neutralino.filesystem.readDirectory(runtimeTempDir);
+                            if (protonDirs.length < 1) throw new Error("No runtime found after download");
+                            const protonDir = protonDirs[0].entry;
+                            const internalRuntimeSource = `${runtimeTempDir}/${protonDir}/files`;
+                            await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
+                        };
+                        await Neutralino.filesystem.remove(archivePath).catch(()=>{});
+                        await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
+            
+                        showToast('Setting up C Drive...');
+                        await Neutralino.filesystem.createDirectory(prefix).catch(()=>{});
+            
+                        const wineBin = (NL_OS === "Darwin") ? "wine64" : "wine";
+                        const winePath = `${runtimeDir}/bin/${wineBin}`;
+            
+                        let envVars = `WINEPREFIX="${prefix}" WINEDEBUG=-all WINEESYNC=1 `;
+                        if (NL_OS === "Darwin") envVars += `MTL_HUD_ENABLED=0 `;
+                        else envVars += `STEAM_COMPAT_CLIENT_INSTALL_PATH="/tmp" STEAM_COMPAT_DATA_PATH="${prefix}" `;
+            
+                        await Neutralino.os.execCommand(`${envVars} "${winePath}" wineboot --init`);
+                    } catch (err) {
+                        console.error("Runtime download failed:", err);
+                        showToast("Runtime install failed, try manual install");
+            
+                        await Neutralino.filesystem.remove(runtimeDir).catch(()=>{});
+                        await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
+                        if(archivePath !== null) await Neutralino.filesystem.remove(archivePath).catch(()=>{});
+                    };
+                };
+                
                 if (NL_OS === "Darwin") { // WINE RUNTIME
                     try {
                         await Neutralino.filesystem.getStats(`${runtimePath}/bin/wine64`);
@@ -337,10 +385,26 @@ export class Exec {
                         } catch {
                             showToast('Setting up C Drive...');
                             await Neutralino.os.execCommand(`${env} "${winePath}" wineboot --init`);
-                            await this.setupDXVK();
                         };
-                    } catch (e) {
-                        bin = `WINEPREFIX="${prefix}" ${compat.toLowerCase()}`;
+                    } catch {
+                        try {
+                            let shouldDo = await Neutralino.os
+                                        .showMessageBox('LC Launcher Runtime',
+                                                        'This instance requires the runtime as its compatibility layer. Do you want to install the runtime?',
+                                                        'YES_NO', 'INFO');
+                            if(shouldDo == 'YES') {
+                                console.log("Installing runtime...");
+                                await installRuntimeHelper();
+
+                                const winePath = `${runtimePath}/bin/wine64`;
+                                wineServerBin = `${runtimePath}/bin/wineserver`;
+                                
+                                const env = `WINEPREFIX="${prefix}" WINEESYNC=1 MTL_HUD_ENABLED=0 WINEDLLOVERRIDES="d3d11=n,b;dxgi=n,b"`;
+                                bin = `${env} "${winePath}"`;
+                            };
+                        } catch {
+                            bin = `WINEPREFIX="${prefix}" ${compat.toLowerCase()}`;
+                        };
                     };
                 } else if (NL_OS === "Linux") { // PROTON GE RUNTIME
                     try {
@@ -358,7 +422,24 @@ export class Exec {
                             await Neutralino.os.execCommand(`${env} "${winePath}" wineboot --init`);
                         };
                     } catch (e) {
-                        bin = `STEAM_COMPAT_CLIENT_INSTALL_PATH="" STEAM_COMPAT_DATA_PATH="${prefix}" proton run`;
+                        try {
+                            let shouldDo = await Neutralino.os
+                                        .showMessageBox('LC Launcher Runtime',
+                                                        'This instance requires the runtime as its compatibility layer. Do you want to install the runtime?',
+                                                        'YES_NO', 'INFO');
+                            if(shouldDo == 'YES') {
+                                console.log("Installing runtime...");
+                                await installRuntimeHelper();
+
+                                const winePath = `${runtimePath}/bin/wine`;
+                                wineServerBin = `${runtimePath}/bin/wineserver`;
+
+                                const env = `WINEPREFIX="${prefix}" WINEESYNC=1 STEAM_COMPAT_CLIENT_INSTALL_PATH="/tmp" STEAM_COMPAT_DATA_PATH="${prefix}"`;
+                                bin = `${env} "${winePath}"`;
+                            };
+                        } catch {
+                            bin = `STEAM_COMPAT_CLIENT_INSTALL_PATH="" STEAM_COMPAT_DATA_PATH="${prefix}" proton run`;
+                        };
                     };
                 };
             }

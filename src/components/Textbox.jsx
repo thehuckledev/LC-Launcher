@@ -1,6 +1,7 @@
 import "./Textbox.css";
 
 import { useRef, useEffect } from "preact/hooks";
+import { showToast } from "./Toast";
 
 export default function Textbox({ id, onchange = (txt) => { }, value = "", placeholder = "", label = "Textbox", minlength = 0, maxlength = 30 }) {
     return (
@@ -22,7 +23,10 @@ export default function Textbox({ id, onchange = (txt) => { }, value = "", place
                         e.target.value.trim().length >= minlength &&
                         e.target.value.trim().length <= maxlength
                     ) onchange(e.target.value);
-                    else onchange("");
+                    else {
+                        showToast(`Textbox requires minimum ${minlength} characters`);
+                        onchange("");
+                    };
                 }}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter') e.target.blur();

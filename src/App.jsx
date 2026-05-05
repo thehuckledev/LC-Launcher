@@ -236,11 +236,6 @@ export default function App() {
     }, [settings.volume]);
 
     useEffect(() => {
-        if (settings.fullscreen == true) Neutralino.window.maximize();
-        else Neutralino.window.unmaximize();
-    }, [settings.fullscreen]);
-
-    useEffect(() => {
         const handler = (e) => {
             setLogs(prev => [
                 ...prev.slice(-1000),

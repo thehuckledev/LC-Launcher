@@ -16,10 +16,12 @@ export default function EditProfileMenu({ setMenu, profile, setProfile }) {
     const [ready, setReady] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [username, setUsername] = useState("");
+    const [UID, setUID] = useState("");
     const [skin, setSkin] = useState(undefined);
 
     useEffect(() => {
         if (profile) setUsername(profile.username);
+        if (profile) setUID(profile.uid);
     }, [profile]);
 
     const handleDelete = async () => {
@@ -51,7 +53,8 @@ export default function EditProfileMenu({ setMenu, profile, setProfile }) {
         setProcessing(true);
         try {
             const updatedProfile = await Manager.profiles.update(profile.id, {
-                username: username,
+                username,
+                uid: UID,
                 ...(skin && { skin: skin })
             });
 
@@ -170,6 +173,23 @@ export default function EditProfileMenu({ setMenu, profile, setProfile }) {
                             </Button>
                         </div>
                         <h2>If you don't select a new skin it will use your last skin.</h2>
+
+                        <Textbox
+                            id="chosen-uid"
+                            onchange={async (txt) => {
+                                if (txt.trim() === "") return setUID("");
+                                if (!(/^0x[0-9A-F]{16}$/i.test(txt.trim()))) {
+                                    showToast("Invalid UID Format");
+                                    return setUID("");
+                                };
+                                setUID(txt.trim());
+                            }}
+                            value={UID}
+                            placeholder="0xC1B71FF5E39BB126..."
+                            label="Enter a UID (Optional)"
+                            minlength={18}
+                            maxlength={18}
+                        />
                     </>
                 )}
             </div>

@@ -71,7 +71,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
 
             showToast(`Fetching latest runtime...`);
 
-            let apiResponse = await Neutralino.os.execCommand(`curl -s https://api.github.com/repos/${repo}/releases/latest`);
+            let apiResponse = await Neutralino.os.execCommand(`curl -H "Accept: application/vnd.github+json" -H "User-Agent: LC-Launcher" -H "X-GitHub-Api-Version: 2026-03-10" -s https://api.github.com/repos/${repo}/releases/latest`);
             let releaseData = JSON.parse(apiResponse.stdOut);
 
             let asset = releaseData.assets.find(a => a.name.endsWith('.tar.xz') || a.name.endsWith('.tar.gz'));
@@ -154,8 +154,8 @@ export default function SetupMenu({ setMenu, reloadData }) {
         joinDiscordPrompt();
         setProcessing(true);
         try {
-            if (skin) await Manager.profiles.create(username, skin);
-            else await Manager.profiles.create(username);
+            if (skin) await Manager.profiles.create(username, skin, UID);
+            else await Manager.profiles.create(username, undefined, UID);
 
             // make insts
             await makeDefaultInstances();

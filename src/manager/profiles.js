@@ -12,7 +12,7 @@ export class Profiles {
         return profiles.find(p => p.id === id);
     };
 
-    async create(username, rawSkinDataURI, type = "OFFLINE") {
+    async create(username, rawSkinDataURI, uid = this.manager.utils.generateUID(), type = "OFFLINE") {
         const profiles = await this.list();
 
         let skinDataURI, skinRenderDataURI;
@@ -23,7 +23,7 @@ export class Profiles {
         const profile = {
             id: crypto.randomUUID(),
             username,
-            uid: this.manager.utils.generateUID(),
+            uid,
             type,
             skin: skinDataURI,
             skinRender: skinRenderDataURI
@@ -58,6 +58,7 @@ export class Profiles {
             profile.skin = skinDataURI;
             profile.skinRender = skinRenderDataURI;
         };
+        if (updates.UID) profile.UID = updates.UID;
 
         profiles[index] = profile;
         await this.manager.utils.writeJSON(this.manager.profilesFile, profiles);
