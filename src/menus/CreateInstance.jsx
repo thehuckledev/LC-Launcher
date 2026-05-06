@@ -10,7 +10,7 @@ import Select from "../components/Select.jsx";
 
 import closeIcon from "../assets/buttons/close.svg";
 
-export default function CreateInstanceMenu({ setMenu, setInstance }) {
+export default function CreateInstanceMenu({ setMenu, setInstance, reloadData }) {
     const Manager = useManager();
 
     const [ready, setReady] = useState(false);
@@ -96,6 +96,7 @@ export default function CreateInstanceMenu({ setMenu, setInstance }) {
             const tempForm = form;
             if (tempForm.serviceType === "CODEBERG") tempForm.serviceType = "GITEA";
             const newInst = await Manager.instances.create(crypto.randomUUID(), tempForm);
+            await reloadData();
             setInstance(newInst);
             setMenu('main');
         } catch (err) {

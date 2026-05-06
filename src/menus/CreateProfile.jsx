@@ -10,7 +10,7 @@ import Textbox from "../components/Textbox.jsx";
 
 import closeIcon from "../assets/buttons/close.svg";
 
-export default function CreateProfileMenu({ setMenu, setProfile }) {
+export default function CreateProfileMenu({ setMenu, setProfile, reloadData }) {
     const Manager = useManager();
 
     const [ready, setReady] = useState(false);
@@ -25,9 +25,10 @@ export default function CreateProfileMenu({ setMenu, setProfile }) {
         setProcessing(true);
         try {
             let newProfile;
-            if (skin) newProfile = await Manager.profiles.create(username, skin, UID);
-            else newProfile = await Manager.profiles.create(username, undefined, UID);
+            if (skin) newProfile = await Manager.profiles.create(username, skin, UID !== "" ? UID : undefined);
+            else newProfile = await Manager.profiles.create(username, undefined, UID !== "" ? UID : undefined);
 
+            await reloadData();
             setProfile(newProfile);
             setMenu('main');
         } catch (err) {

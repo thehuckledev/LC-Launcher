@@ -348,10 +348,10 @@ export default function App() {
                     {menu === "patchnotes" &&     <PatchNotesMenu setMenu={setMenu} instance={instance} />}
                     {menu === "gamelog" &&        <GameLogMenu setMenu={setMenu} logs={logs} />}
                     {menu === "crash" &&          <CrashMenu setMenu={setMenu} setCrashed={setCrashed} setLogs={setLogs} logs={logs} />}
-                    {menu === "createprofile" &&  <CreateProfileMenu setMenu={setMenu} setProfile={setProfile} />}
-                    {menu === "createinstance" && <CreateInstanceMenu setMenu={setMenu} setInstance={setInstance} />}
-                    {menu === "editprofile" &&    <EditProfileMenu setMenu={setMenu} profile={profile} setProfile={setProfile} />}
-                    {menu === "editinstance" &&   <EditInstanceMenu setMenu={setMenu} instance={instance} setInstance={setInstance} loadData={loadData} />}
+                    {menu === "createprofile" &&  <CreateProfileMenu setMenu={setMenu} setProfile={setProfile} reloadData={loadData} />}
+                    {menu === "createinstance" && <CreateInstanceMenu setMenu={setMenu} setInstance={setInstance} reloadData={loadData} />}
+                    {menu === "editprofile" &&    <EditProfileMenu setMenu={setMenu} profile={profile} setProfile={setProfile} reloadData={loadData} />}
+                    {menu === "editinstance" &&   <EditInstanceMenu setMenu={setMenu} instance={instance} setInstance={setInstance} reloadData={loadData} />}
                 </>}
             </Window>
 

@@ -13,13 +13,13 @@ export class Remotes {
 
         switch (instance.serviceType) {
             case "GITHUB":
-                return `https://api.${domain}/repos/${repo}/releases/?per_page=150`;
+                return `https://api.${domain}/repos/${repo}/releases?per_page=150`;
 
             case "GITLAB":
                 return `https://${domain}/api/v4/projects/${encodeURIComponent(repo)}/releases`;
 
             case "GITEA":
-                return `https://${domain}/api/v1/repos/${repo}/releases/?limit=150`;
+                return `https://${domain}/api/v1/repos/${repo}/releases?limit=150`;
         };
     };
 

@@ -51,6 +51,23 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+}
+
+#setup::-webkit-scrollbar {
+    width: 8px;
+}
+
+#setup::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+
+#setup::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 #setup-action-bar {
@@ -85,7 +102,7 @@
 
 /* taken and modified from https://codepen.io/codesbyk/pen/QeQYbx. all credit given. */
 .moto {
-    margin-top: 10px;
+    margin-top: 0;
     font: 18px 'Minecraftia', sans-serif;
     text-shadow: 2px 2px #000A;
 
@@ -100,8 +117,7 @@
 }
 
 .slidingVertical span {
-    -webkit-animation: bottomToTop 9s cubic-bezier(0.6, 0.05, 0.4, 1) infinite 0s;
-    animation: bottomToTop 5.5s cubic-bezier(0.6, 0.05, 0.4, 1) infinite 0.5s;
+    animation: bottomToTop 9s cubic-bezier(0.6, 0.05, 0.4, 1) infinite 0s;
     color: #ffffff;
     opacity: 0;
     overflow: hidden;
@@ -110,17 +126,17 @@
 
 
 .slidingVertical span:nth-child(2) {
-    animation-delay: 2s;
+    animation-delay: 3s !important;
 
 }
 
 .slidingVertical span:nth-child(3) {
-    animation-delay: 4s;
+    animation-delay: 6s !important;
 }
 
 /*topToBottom Animation*/
 
-@-webkit-keyframes bottomToTop {
+@keyframes bottomToTop {
     0% {
         opacity: 0;
     }
@@ -135,12 +151,12 @@
         -webkit-transform: translateY(0px);
     }
 
-    25% {
+    35% {
         opacity: 1;
         -webkit-transform: translateY(0px);
     }
 
-    30% {
+    40% {
         opacity: 0;
         -webkit-transform: translateY(-20px);
     }

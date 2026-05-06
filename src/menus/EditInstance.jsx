@@ -10,7 +10,7 @@ import Select from "../components/Select.jsx";
 
 import closeIcon from "../assets/buttons/close.svg";
 
-export default function EditInstanceMenu({ setMenu, instance, setInstance, loadData }) {
+export default function EditInstanceMenu({ setMenu, instance, setInstance, reloadData }) {
     const Manager = useManager();
 
     const [ready, setReady] = useState(false);
@@ -106,7 +106,7 @@ export default function EditInstanceMenu({ setMenu, instance, setInstance, loadD
         try {
             const updatedInst = await Manager.instances.update(instance.id, form);
             setInstance(updatedInst);
-            await loadData();
+            await reloadData();
             setMenu('main');
         } catch (err) {
             showToast("Error: " + err.message);

@@ -27,6 +27,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
     const [ready, setReady] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [username, setUsername] = useState("");
+    const [UID, setUID] = useState("");
     const [skin, setSkin] = useState(undefined);
     const [progress, setProgress] = useState({ active: false, label: '', percent: 0 });
 
@@ -154,8 +155,8 @@ export default function SetupMenu({ setMenu, reloadData }) {
         joinDiscordPrompt();
         setProcessing(true);
         try {
-            if (skin) await Manager.profiles.create(username, skin, UID);
-            else await Manager.profiles.create(username, undefined, UID);
+            if (skin) await Manager.profiles.create(username, skin, UID !== "" ? UID : undefined);
+            else await Manager.profiles.create(username, undefined, UID !== "" ? UID : undefined);
 
             // make insts
             await makeDefaultInstances();
@@ -293,6 +294,22 @@ export default function SetupMenu({ setMenu, reloadData }) {
                                 Choose a Skin
                             </Button>
                         </div>
+                        <Textbox
+                            id="chosen-uid"
+                            onchange={async (txt) => {
+                                if (txt.trim() === "") return setUID("");
+                                if (!(/^0x[0-9A-F]{16}$/i.test(txt.trim()))) {
+                                    showToast("Invalid UID Format");
+                                    return setUID("");
+                                };
+                                setUID(txt.trim());
+                            }}
+                            value={UID}
+                            placeholder="0xC1B71FF5E39BB126..."
+                            label="Enter a UID (Optional)"
+                            minlength={18}
+                            maxlength={18}
+                        />
                         <br />
                         {canInstallRuntime === true &&
                             <Checkbox
@@ -305,8 +322,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
                             />
                         }
                         <br />
-                        <h2>A community made fork will be automatically added as an instance.</h2>
-                        <h2>If you don't want it, you can simply remove it.</h2>
+                        <h2>A set of community made forks will be automatically added as an instances.</h2>
                     </>
                 )}
             </div>

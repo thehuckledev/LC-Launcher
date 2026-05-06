@@ -10,7 +10,7 @@ import Textbox from "../components/Textbox.jsx";
 
 import closeIcon from "../assets/buttons/close.svg";
 
-export default function EditProfileMenu({ setMenu, profile, setProfile }) {
+export default function EditProfileMenu({ setMenu, profile, setProfile, reloadData }) {
     const Manager = useManager();
 
     const [ready, setReady] = useState(true);
@@ -31,6 +31,7 @@ export default function EditProfileMenu({ setMenu, profile, setProfile }) {
         setProcessing(true);
         try {
             await Manager.profiles.delete(profile.id);
+            await reloadData();
             
             const leftoverProfiles = await Manager.profiles.list();
             if (leftoverProfiles.length > 0) {
@@ -54,10 +55,11 @@ export default function EditProfileMenu({ setMenu, profile, setProfile }) {
         try {
             const updatedProfile = await Manager.profiles.update(profile.id, {
                 username,
-                uid: UID,
+                uid: UID !== "" ? UID : undefined,
                 ...(skin && { skin: skin })
             });
 
+            await reloadData();
             setProfile(updatedProfile);
             setMenu('main');
         } catch (err) {
