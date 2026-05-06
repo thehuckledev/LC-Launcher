@@ -189,4 +189,36 @@ export class Instances {
             throw err;
         };
     };
+
+    async reinstall(id) {
+        try {
+            window.dispatchEvent(new CustomEvent("execProcessing", { detail: true }));
+            const instDir = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id);
+            const contentDir = await Neutralino.filesystem.getJoinedPath(instDir, "content");
+
+            let keepData = await Neutralino.os
+                                    .showMessageBox('Reinstall Instance',
+                                                    `Do you want to keep you game data when reinstalling "${instance.name}" instance?`,
+                                                    'YES_NO', 'WARNING');
+            
+            // remove install bit
+            if (keepData == "YES") await this.manager.exec.backupPreserved(instDir);
+            try {
+                await Neutralino.filesystem.remove(contentDir);
+            } catch {
+                return showToast("Reinstall: Failed to remove existing build");
+            };
+            await this.manager.utils.ensureDir(contentDir);
+            if (keepData == "YES") await this.manager.exec.restorePreserved(instDir);
+
+            // reinstall bit
+            await this.update(id, { installed: false });
+            const inst = await this.get(id);
+            await this.manager.exec.installInstance(inst);
+        } catch(e) {
+            console.error("Reinstall failed:", e);
+        } finally {
+            window.dispatchEvent(new CustomEvent("execProcessing", { detail: false }));
+        };
+    };
 };

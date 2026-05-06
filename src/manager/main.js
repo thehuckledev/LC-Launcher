@@ -18,6 +18,7 @@ export class Manager {
         this.dataDir = null;
         this.profilesFile = null;
         this.instancesDir = null;
+        this.preserveList = [];
 
         this.utils = new Utils(this);
         this.profiles = new Profiles(this);
@@ -33,6 +34,15 @@ export class Manager {
         this.dataDir = await getSetting("dataDirectory");
         this.profilesFile = await Neutralino.filesystem.getJoinedPath(this.dataDir, "profiles.json");
         this.instancesDir = await Neutralino.filesystem.getJoinedPath(this.dataDir, "instances");
+        this.preserveList = [
+            "options.txt",
+            "settings.dat",
+            "screenshots",
+            "profile0.dat", "profile1.dat", "profile2.dat", "profile3.dat",
+            "profile4.dat", "profile5.dat", "profile6.dat", "profile7.dat",
+            "profile8.dat", "profile9.dat", "profile10.dat",
+            await Neutralino.filesystem.getJoinedPath("Windows64", "GameHDD")
+        ];
 
         await this.utils.ensureDir(this.dataDir);
         await this.utils.ensureDir(this.instancesDir);

@@ -37,7 +37,7 @@
 
 .instance-section {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 450px 450px;
     gap: 15px;
     padding-bottom: 15px;
     border-bottom: 2px solid #ffffff22;
@@ -63,6 +63,12 @@
     width: 100%;
 }
 
-#done-instance-action-bar>.mc-button {
+#done-instance-action-bar .mc-button {
     width: 130px;
+}
+
+#instance-action-bar-group {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
 }

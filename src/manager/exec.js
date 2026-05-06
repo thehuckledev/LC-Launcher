@@ -9,26 +9,13 @@ import charPng from '../assets/misc/char.png';
 export class Exec {
     constructor(manager) {
         this.manager = manager;
-        this.init();
-    };
-
-    async init() {
-        this.preserveList = [
-            "options.txt",
-            "settings.dat",
-            "screenshots",
-            "profile0.dat", "profile1.dat", "profile2.dat", "profile3.dat",
-            "profile4.dat", "profile5.dat", "profile6.dat", "profile7.dat",
-            "profile8.dat", "profile9.dat", "profile10.dat",
-            await Neutralino.filesystem.getJoinedPath("Windows64", "GameHDD")
-        ];
     };
 
     async backupPreserved(instancePath) {
         const backupDir = await Neutralino.filesystem.getJoinedPath(instancePath, "backup");
         await this.manager.utils.ensureDir(backupDir);
 
-        for (const rel of this.preserveList) {
+        for (const rel of this.manager.preserveList) {
             const src = await Neutralino.filesystem.getJoinedPath(instancePath, "content", rel);
             const dst = await Neutralino.filesystem.getJoinedPath(backupDir, rel);
 
@@ -44,7 +31,7 @@ export class Exec {
     async restorePreserved(instancePath) {
         const backupDir = await Neutralino.filesystem.getJoinedPath(instancePath, "backup");
 
-        for (const rel of this.preserveList) {
+        for (const rel of this.manager.preserveList) {
             const src = await Neutralino.filesystem.getJoinedPath(backupDir, rel);
             const dst = await Neutralino.filesystem.getJoinedPath(instancePath, "content", rel);
 
@@ -78,7 +65,6 @@ export class Exec {
             const instancePath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instance.id);
             const zipPath = await Neutralino.filesystem.getJoinedPath(instancePath, instance.target);
 
-            await this.manager.utils.ensureDir(instancePath);
             await this.manager.utils.ensureDir(await Neutralino.filesystem.getJoinedPath(instancePath, 'content'));
 
             console.log("Downloading build...");
@@ -227,8 +213,7 @@ export class Exec {
         const profile = await this.manager.profiles.get(profileId);
         if (!profile) return showToast("Error: Profile not found");
 
-        if (!instance.installed) await this.installInstance(instance);
-        if (!instance.installed) return;
+        if (!instance.installed) return await this.installInstance(instance);
 
         if (navigator.onLine === true && await this.needsUpdate(instance)) {
             let shouldDo = await Neutralino.os

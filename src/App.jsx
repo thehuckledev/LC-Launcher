@@ -84,7 +84,8 @@ export default function App() {
             const lastProfile = profiles.find(p => p.id === loadedSettings.lastProfileID);
             if (lastProfile) setProfile(lastProfile);
             else setProfile(profiles[0]);
-        };
+        } else setProfile(null);
+
         if (instances.length > 0) {
             const instancesObj = await Promise.all(instances.map(id => Manager.instances.get(id)));
             const defaultInst = instancesObj.find(i => i.id === config.defaultInstance);
@@ -93,7 +94,7 @@ export default function App() {
             if (lastInst) setInstance(lastInst);
             else if (defaultInst) setInstance(defaultInst);
             else setInstance(instancesObj[0]);
-        };
+        } else setInstance(null);
     };
 
     async function syncDefaultInstances() {

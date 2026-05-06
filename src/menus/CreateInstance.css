@@ -37,7 +37,7 @@
 
 .instance-section {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 450px 450px;
     gap: 15px;
     padding-bottom: 15px;
     border-bottom: 2px solid #ffffff22;

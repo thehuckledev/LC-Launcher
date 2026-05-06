@@ -32,15 +32,7 @@ export default function EditProfileMenu({ setMenu, profile, setProfile, reloadDa
         try {
             await Manager.profiles.delete(profile.id);
             await reloadData();
-            
-            const leftoverProfiles = await Manager.profiles.list();
-            if (leftoverProfiles.length > 0) {
-                setProfile(leftoverProfiles[0]);
-                setMenu('main');
-            } else {
-                setProfile(null);
-                setMenu('main');
-            };
+            setMenu('main');
         } catch (err) {
             showToast("Failed to delete profile: " + err.message);
         } finally {

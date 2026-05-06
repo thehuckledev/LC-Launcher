@@ -1,5 +1,6 @@
 import "./EditInstance.css";
 
+import Neutralino from "@neutralinojs/lib";
 import { useState, useEffect } from "preact/hooks";
 import { useManager } from "../utils/ManagerProvider.jsx";
 
@@ -15,6 +16,7 @@ export default function EditInstanceMenu({ setMenu, instance, setInstance, reloa
 
     const [ready, setReady] = useState(false);
     const [processing, setProcessing] = useState(false);
+    const [offline, setOffline] = useState(false);
 
     const [availableTags, setAvailableTags] = useState([]);
     const [availableAssets, setAvailableAssets] = useState([]);
@@ -32,6 +34,18 @@ export default function EditInstanceMenu({ setMenu, instance, setInstance, reloa
     });
 
     useEffect(() => {
+        function offlineSupport() {
+            if (navigator.onLine) return setOffline(false);
+            setOffline(true);
+            if (form.name && form.repo && form.tag && form.exec && form.target) setReady(true);
+        };
+
+        offlineSupport();
+    }, []);
+
+    useEffect(() => {
+        if (!navigator.onLine) return;
+
         const parts = form.repo.split('/');
         if (parts.length < 2 || !parts[0] || !parts[1]) return setAvailableTags([]);
 
@@ -65,6 +79,8 @@ export default function EditInstanceMenu({ setMenu, instance, setInstance, reloa
     }, [form.repo, form.serviceType, form.serviceDomain]);
 
     useEffect(() => {
+        if (!navigator.onLine) return;
+
         const selectedRelease = availableTags.find(t => t.value === form.tag);
         if (selectedRelease?.assets) {
             const assets = selectedRelease.assets.map(a => ({ label: a.name, value: a.name }));
@@ -91,6 +107,43 @@ export default function EditInstanceMenu({ setMenu, instance, setInstance, reloa
         });
     };
 
+    const handleDelete = async () => {
+        let confirmDelete = await Neutralino.os
+                                .showMessageBox('Delete Instance',
+                                                `Are you sure you want to delete "${instance.name}" instance?`,
+                                                'YES_NO', 'WARNING');
+        if (confirmDelete !== "YES") return;
+
+        setProcessing(true);
+        try {
+            await Manager.instances.delete(instance.id);
+            await reloadData();
+            setMenu('main');
+        } catch (err) {
+            showToast("Failed to delete instance: " + err.message);
+        } finally {
+            setProcessing(false);
+        };
+    };
+
+    const handleReinstall = async () => {
+        let confirmReinstall = await Neutralino.os
+                                .showMessageBox('Reinstall Instance',
+                                                `Are you sure you want to reinstall "${instance.name}" instance?`,
+                                                'YES_NO', 'WARNING');
+        if (confirmReinstall !== "YES") return;
+
+        setProcessing(true);
+        try {
+            setMenu('main');
+            await Manager.instances.reinstall(instance.id);
+        } catch (err) {
+            showToast("Failed to reinstall instance: " + err.message);
+        } finally {
+            setProcessing(false);
+        };
+    };
+
     const handleExport = async () => {
         try {
             const res = await Manager.instances.export(instance.id);
@@ -105,8 +158,8 @@ export default function EditInstanceMenu({ setMenu, instance, setInstance, reloa
         setProcessing(true);
         try {
             const updatedInst = await Manager.instances.update(instance.id, form);
-            setInstance(updatedInst);
             await reloadData();
+            setInstance(updatedInst);
             setMenu('main');
         } catch (err) {
             showToast("Error: " + err.message);
@@ -155,65 +208,77 @@ export default function EditInstanceMenu({ setMenu, instance, setInstance, reloa
                     />
                 </div>
 
-                <div className="instance-section">
-                    <h3>Repository</h3>
-                    <Select 
-                        label="Service Type"
-                        value={form.serviceType}
-                        options={[
-                            { label: "GitHub", value: "GITHUB" },
-                            { label: "GitLab", value: "GITLAB" },
-                            { label: "Gitea / Forgejo", value: "GITEA" },
-                            { label: "Codeberg", value: "CODEBERG" }
-                        ]}
-                        onChange={(val) => {
-                            let domain = "";
-                            if (val === "GITHUB") domain = "github.com";
-                            if (val === "GITLAB") domain = "gitlab.com";
-                            if (val === "CODEBERG") domain = "codeberg.org";
+                {!offline && 
+                    <div className="instance-section">
+                        <h3>Repository</h3>
+                        <Select 
+                            label="Service Type"
+                            value={form.serviceType}
+                            options={[
+                                { label: "GitHub", value: "GITHUB" },
+                                { label: "GitLab", value: "GITLAB" },
+                                { label: "Gitea / Forgejo", value: "GITEA" },
+                                { label: "Codeberg", value: "CODEBERG" }
+                            ]}
+                            onChange={(val) => {
+                                let domain = "";
+                                if (val === "GITHUB") domain = "github.com";
+                                if (val === "GITLAB") domain = "gitlab.com";
+                                if (val === "CODEBERG") domain = "codeberg.org";
 
-                            setForm(prev => ({ ...prev, serviceType: val, serviceDomain: domain }));
-                        }}
-                    />
-                    {(form.serviceType === "GITEA") && (
-                        <Textbox 
-                            label="Service Domain" 
-                            value={form.serviceDomain} 
-                            onchange={(v) => updateForm('serviceDomain', v)} 
-                            placeholder="gitea.com" 
+                                setForm(prev => ({ ...prev, serviceType: val, serviceDomain: domain }));
+                            }}
                         />
-                    )}
-                    <Textbox
-                        label="Repository (User/Repo)"
-                        value={form.repo}
-                        onchange={(v) => updateForm('repo', v)}
-                        placeholder="pieeebot/neoLegacy"
-                    />
-                    <Select 
-                        label="Release Tag"
-                        value={form.tag}
-                        options={availableTags}
-                        onChange={(val) => updateForm('tag', val)}
-                        disabled={availableTags.length === 0}
-                    />
+                        {(form.serviceType === "GITEA") && (
+                            <Textbox 
+                                label="Service Domain" 
+                                value={form.serviceDomain} 
+                                onchange={(v) => updateForm('serviceDomain', v)} 
+                                placeholder="gitea.com" 
+                            />
+                        )}
+                        <Textbox
+                            label="Repository (User/Repo)"
+                            value={form.repo}
+                            onchange={(v) => updateForm('repo', v)}
+                            placeholder="pieeebot/neoLegacy"
+                        />
+                        <Select 
+                            label="Release Tag"
+                            value={form.tag}
+                            options={availableTags}
+                            onChange={(val) => updateForm('tag', val)}
+                            disabled={availableTags.length === 0}
+                        />
 
-                    <Select 
-                        label="Release Asset (.zip / .tar)"
-                        value={form.target}
-                        options={availableAssets}
-                        onChange={(val) => updateForm('target', val)}
-                        disabled={availableAssets.length === 0}
-                    />
-                </div>
+                        <Select 
+                            label="Release Asset (.zip / .tar)"
+                            value={form.target}
+                            options={availableAssets}
+                            onChange={(val) => updateForm('target', val)}
+                            disabled={availableAssets.length === 0}
+                        />
+                    </div>
+                }
             </div>
 
             <div id="done-instance-action-bar">
-                <Button disabled={processing || !ready} pushable={!processing && ready} onclick={handleExport}>
-                    Export
-                </Button>
-                <Button disabled={processing || !ready} pushable={!processing && ready} onclick={handleSave}>
-                    Save
-                </Button>
+                <div id="instance-action-bar-group">
+                    <Button type="destructive" disabled={processing || !ready} pushable={!processing && ready} onclick={handleDelete}>
+                        Delete
+                    </Button>
+                    <Button type="destructive" disabled={processing || !ready} pushable={!processing && ready} onclick={handleReinstall}>
+                        Reinstall
+                    </Button>
+                </div>
+                <div id="instance-action-bar-group">
+                    <Button disabled={processing || !ready} pushable={!processing && ready} onclick={handleExport}>
+                        Export
+                    </Button>
+                    <Button disabled={processing || !ready} pushable={!processing && ready} onclick={handleSave}>
+                        Save
+                    </Button>
+                </div>
             </div>
         </>
     );
