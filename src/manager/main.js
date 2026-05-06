@@ -40,8 +40,7 @@ export class Manager {
             "screenshots",
             "profile0.dat", "profile1.dat", "profile2.dat", "profile3.dat",
             "profile4.dat", "profile5.dat", "profile6.dat", "profile7.dat",
-            "profile8.dat", "profile9.dat", "profile10.dat",
-            await Neutralino.filesystem.getJoinedPath("Windows64", "GameHDD")
+            "profile8.dat", "profile9.dat", "profile10.dat", "Windows64/GameHDD"
         ];
 
         await this.utils.ensureDir(this.dataDir);

@@ -343,7 +343,7 @@ export default function App() {
                 {loaded && <>
                     {menu === "setup" &&          <SetupMenu setMenu={setMenu} reloadData={loadData} />}
                     {menu === "setupoptions" &&   <SetupOptionsMenu setMenu={setMenu} />}
-                    {menu === "main" &&           <MainMenu setMenu={setMenu} instance={instance} setInstance={setInstance} profile={profile} setProfile={setProfile} instancesList={instancesList} profilesList={profilesList} processing={processing} />}
+                    {menu === "main" &&           <MainMenu setMenu={setMenu} instance={instance} setInstance={setInstance} profile={profile} setProfile={setProfile} instancesList={instancesList} profilesList={profilesList} processing={processing} reloadData={loadData} />}
                     {menu === "options" &&        <OptionsMenu setMenu={setMenu} />}
                     {menu === "about" &&          <AboutMenu setMenu={setMenu} />}
                     {menu === "patchnotes" &&     <PatchNotesMenu setMenu={setMenu} instance={instance} />}

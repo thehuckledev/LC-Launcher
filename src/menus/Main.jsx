@@ -18,7 +18,7 @@ import serversIcon from "../assets/buttons/servers.svg";
 import gameLogIcon from "../assets/buttons/gamelog.svg";
 import folderIcon from "../assets/buttons/folder.svg";
 
-export default function MainMenu({ setMenu, instance, setInstance, profile, setProfile, instancesList, profilesList, processing }) {
+export default function MainMenu({ setMenu, instance, setInstance, profile, setProfile, instancesList, profilesList, processing, reloadData }) {
     const Manager = useManager();
     const { settings } = useSettings();
     
@@ -138,8 +138,15 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                         <Button id="worlds-button" tooltip="Worlds" tooltipAlign="LEFT" disabled={!instance?.id || progress.active || processing} pushable={!processing}>
                             <img src={worldsIcon} draggable={false} />
                         </Button>
-                        <Button id="play-button" disabled={!instance?.id || !profile?.id || progress.active || processing} pushable={!processing} onclick={() => Manager.exec.launch(instance?.id, profile?.id)}>
-                            Play
+                        <Button id="play-button" disabled={!instance?.id || !profile?.id || progress.active || processing} pushable={!processing} onclick={async () => {
+                            const wasInstalled = instance?.installed;
+                            console.log(wasInstalled)
+                            await Manager.exec.launch(instance?.id, profile?.id);
+                            console.log(wasInstalled)
+                            if (wasInstalled === false) await reloadData();
+                            console.log(instance)
+                        }}>
+                            {instance?.installed === true ? "Play" : "Install"}
                         </Button>
                         <Button id="servers-button" tooltip="Servers" tooltipAlign="LEFT" disabled={!instance?.id || progress.active || processing} pushable={!processing}>
                             <img src={serversIcon} draggable={false} />

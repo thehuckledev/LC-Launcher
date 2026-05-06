@@ -20,11 +20,21 @@ export class Exec {
             const dst = await Neutralino.filesystem.getJoinedPath(backupDir, rel);
 
             try {
+                const stats = await Neutralino.filesystem.getStats(src);
+                if (stats.type === 'DIRECTORY') {
+                    await this.manager.utils.ensureDir(dst);
+                } else {
+                    const parentDir = dst.substring(0, dst.lastIndexOf("/"));
+                    await this.manager.utils.ensureDir(parentDir);
+                };
+
                 await Neutralino.filesystem.copy(src, dst, {
                     recursive: true,
                     overwrite: true
                 });
-            } catch {};
+            } catch(e) {
+                console.error(e);
+            };
         };
     };
 
@@ -36,6 +46,14 @@ export class Exec {
             const dst = await Neutralino.filesystem.getJoinedPath(instancePath, "content", rel);
 
             try {
+                const stats = await Neutralino.filesystem.getStats(src);
+                if (stats.type === 'DIRECTORY') {
+                    await this.manager.utils.ensureDir(dst);
+                } else {
+                    const parentDir = dst.substring(0, dst.lastIndexOf("/"));
+                    await this.manager.utils.ensureDir(parentDir);
+                };
+
                 await Neutralino.filesystem.copy(src, dst, {
                     recursive: true,
                     overwrite: true
@@ -113,7 +131,7 @@ export class Exec {
 
             await this.manager.utils.writeJSON(`${instancePath}/instance.json`, instance);
             console.log("Instance installed");
-            showToast(`Instance${isUpdate ? ' update' : ''} completed`);
+            showToast(`Instance${isUpdate ? ' update' : ''} installed`);
         } catch (err) {
             console.error(err);
             showToast(`Error: ${err.message}`);

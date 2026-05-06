@@ -267,7 +267,7 @@ export default function EditInstanceMenu({ setMenu, instance, setInstance, reloa
                     <Button type="destructive" disabled={processing || !ready} pushable={!processing && ready} onclick={handleDelete}>
                         Delete
                     </Button>
-                    <Button type="destructive" disabled={processing || !ready} pushable={!processing && ready} onclick={handleReinstall}>
+                    <Button type="destructive" disabled={processing || !ready || instance?.installed === false} pushable={!processing && ready && instance?.installed !== false} onclick={handleReinstall}>
                         Reinstall
                     </Button>
                 </div>

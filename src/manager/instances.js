@@ -195,6 +195,7 @@ export class Instances {
             window.dispatchEvent(new CustomEvent("execProcessing", { detail: true }));
             const instDir = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id);
             const contentDir = await Neutralino.filesystem.getJoinedPath(instDir, "content");
+            const instance = await this.get(id);
 
             let keepData = await Neutralino.os
                                     .showMessageBox('Reinstall Instance',
@@ -209,12 +210,11 @@ export class Instances {
                 return showToast("Reinstall: Failed to remove existing build");
             };
             await this.manager.utils.ensureDir(contentDir);
-            if (keepData == "YES") await this.manager.exec.restorePreserved(instDir);
 
             // reinstall bit
             await this.update(id, { installed: false });
-            const inst = await this.get(id);
-            await this.manager.exec.installInstance(inst);
+            await this.manager.exec.installInstance(instance);
+            if (keepData == "YES") await this.manager.exec.restorePreserved(instDir);
         } catch(e) {
             console.error("Reinstall failed:", e);
         } finally {
