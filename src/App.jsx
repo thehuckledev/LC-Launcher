@@ -108,7 +108,7 @@ export default function App() {
             const existing = installedObjects.find(i => i.id === inst.id);
             if (!existing) continue;
 
-            const { id, ...updateData } = inst; 
+            const { id, compatibilityLayer, ...updateData } = inst; 
             await Manager.instances.update(existing.id, updateData);
         };
     };
