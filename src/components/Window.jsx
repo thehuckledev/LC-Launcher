@@ -16,6 +16,22 @@ export default function Window({ title, showClose = true, showMinimize = true, s
     const lastStillBg = useRef(backgroundSrc);
     const canvasRef = useRef(null);
 
+    async function maximize() {
+        await Neutralino.window.maximize();
+        toggleMaxRestoreButtons(true);
+    };
+
+    async function unmaximize() {
+        await Neutralino.window.unmaximize();
+        toggleMaxRestoreButtons(false);
+    };
+
+    async function toggleMaxRestoreButtons(isMaximized) {
+        console.log(isMaximized)
+        if (isMaximized === true) document.body.classList.add("maximized");
+        else document.body.classList.remove("maximized");
+    };
+
     useEffect(() => {
         if (!isPanorama && typeof backgroundSrc === "string") {
             lastStillBg.current = backgroundSrc;
@@ -199,21 +215,14 @@ export default function Window({ title, showClose = true, showMinimize = true, s
 
             await Neutralino.window.setDraggableRegion("window-title");
 
-            toggleMaxRestoreButtons();
+            toggleMaxRestoreButtons(false);
 
-            Neutralino.events.on("windowMaximize", toggleMaxRestoreButtons);
-            Neutralino.events.on("windowRestore", toggleMaxRestoreButtons);
+            // this doesnt work, some neutralino bug
+            //Neutralino.events.on("windowMaximize", () => toggleMaxRestoreButtons(true));
+            //Neutralino.events.on("windowRestore", () => toggleMaxRestoreButtons(false));
 
             // remove fallback
             document.querySelector("#app").style.background = "transparent";
-        };
-
-        async function toggleMaxRestoreButtons() {
-            if (await Neutralino.window.isMaximized()) {
-                document.body.classList.add("maximized");
-            } else {
-                document.body.classList.remove("maximized");
-            };
         };
 
         setupWindow();
@@ -254,12 +263,12 @@ export default function Window({ title, showClose = true, showMinimize = true, s
                             </div>
                         }
                         {showMaximize &&
-                            <div class="button" id="max-button" onClick={() => Neutralino.window.maximize()}>
+                            <div class="button" id="max-button" onClick={() => maximize()}>
                                 <img class="icon" src={maxIcon} draggable={false} />
                             </div>
                         }
                         {showMaximize &&
-                            <div class="button" id="restore-button" onClick={() => Neutralino.window.unmaximize()}>
+                            <div class="button" id="restore-button" onClick={() => unmaximize()}>
                                 <img class="icon" src={restoreIcon} draggable={false} />
                             </div>
                         }

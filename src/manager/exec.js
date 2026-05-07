@@ -9,6 +9,7 @@ import charPng from '../assets/misc/char.png';
 export class Exec {
     constructor(manager) {
         this.manager = manager;
+        this.userStopped = false;
     };
 
     async backupPreserved(instancePath) {
@@ -245,88 +246,90 @@ export class Exec {
         };
 
         // check for runtime
-        if (instance.compatibilityLayer === "RUNTIME") {
-            async function installRuntimeHelper() {
-                const dataDirectory = await getSetting("dataDirectory");
-                const runtimeDir = `${dataDirectory}/libraries/runtime`;
-                const runtimeTempDir = `${dataDirectory}/libraries/_runtime`;
-                let archivePath = null;
-                try {
-                    const prefix = `${dataDirectory}/pfx`;
-        
-                    let repo = "";
-                    if (NL_OS === "Darwin") repo = "Gcenx/game-porting-toolkit";
-                    else if (NL_OS === "Linux") repo = "GloriousEggroll/proton-ge-custom";
-        
-                    showToast(`Fetching latest runtime...`);
-        
-                    let apiResponse = await Neutralino.os.execCommand(`curl -H "Accept: application/vnd.github+json" -H "User-Agent: LC-Launcher" -H "X-GitHub-Api-Version: 2026-03-10" -s https://api.github.com/repos/${repo}/releases/latest`);
-                    let releaseData = JSON.parse(apiResponse.stdOut);
-        
-                    let asset = releaseData.assets.find(a => a.name.endsWith('.tar.xz') || a.name.endsWith('.tar.gz'));
-                    if (!asset) throw new Error("No archive found in runtime release");
-        
-                    const downloadUrl = asset.browser_download_url;
-                    archivePath = `${dataDirectory}/libraries/${asset.name}`;
-        
-                    await Neutralino.filesystem.createDirectory(runtimeDir).catch(()=>{});
-                    await Neutralino.filesystem.createDirectory(runtimeTempDir).catch(()=>{});
-        
-                    const runtimeDownload = new Download(downloadUrl, { label: `Downloading Runtime...` });
-                    await runtimeDownload.start(archivePath);
-        
-                    const runtimeUnzip = new Unzip(archivePath, runtimeTempDir, { label: "Extracting Runtime..." });
-                    await runtimeUnzip.start();
-        
-                    if (NL_OS === "Darwin") {
-                        const internalRuntimeSource = `${runtimeTempDir}/Game Porting Toolkit.app/Contents/Resources/wine`;
-                        await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
-                        await Neutralino.os.execCommand(`xattr -rd com.apple.quarantine "${runtimeDir}"`);
-                    } else {
-                        const protonDirs = await Neutralino.filesystem.readDirectory(runtimeTempDir);
-                        if (protonDirs.length < 1) throw new Error("No runtime found after download");
-                        const protonDir = protonDirs[0].entry;
-                        const internalRuntimeSource = `${runtimeTempDir}/${protonDir}/files`;
-                        await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
+        if (NL_OS === "Linux" || NL_OS === "Darwin") {
+            if (instance.compatibilityLayer === "RUNTIME") {
+                async function installRuntimeHelper() {
+                    const dataDirectory = await getSetting("dataDirectory");
+                    const runtimeDir = `${dataDirectory}/libraries/runtime`;
+                    const runtimeTempDir = `${dataDirectory}/libraries/_runtime`;
+                    let archivePath = null;
+                    try {
+                        const prefix = `${dataDirectory}/pfx`;
+            
+                        let repo = "";
+                        if (NL_OS === "Darwin") repo = "Gcenx/game-porting-toolkit";
+                        else if (NL_OS === "Linux") repo = "GloriousEggroll/proton-ge-custom";
+            
+                        showToast(`Fetching latest runtime...`);
+            
+                        let apiResponse = await Neutralino.os.execCommand(`curl -H "Accept: application/vnd.github+json" -H "User-Agent: LC-Launcher" -H "X-GitHub-Api-Version: 2026-03-10" -s https://api.github.com/repos/${repo}/releases/latest`);
+                        let releaseData = JSON.parse(apiResponse.stdOut);
+            
+                        let asset = releaseData.assets.find(a => a.name.endsWith('.tar.xz') || a.name.endsWith('.tar.gz'));
+                        if (!asset) throw new Error("No archive found in runtime release");
+            
+                        const downloadUrl = asset.browser_download_url;
+                        archivePath = `${dataDirectory}/libraries/${asset.name}`;
+            
+                        await Neutralino.filesystem.createDirectory(runtimeDir).catch(()=>{});
+                        await Neutralino.filesystem.createDirectory(runtimeTempDir).catch(()=>{});
+            
+                        const runtimeDownload = new Download(downloadUrl, { label: `Downloading Runtime...` });
+                        await runtimeDownload.start(archivePath);
+            
+                        const runtimeUnzip = new Unzip(archivePath, runtimeTempDir, { label: "Extracting Runtime..." });
+                        await runtimeUnzip.start();
+            
+                        if (NL_OS === "Darwin") {
+                            const internalRuntimeSource = `${runtimeTempDir}/Game Porting Toolkit.app/Contents/Resources/wine`;
+                            await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
+                            await Neutralino.os.execCommand(`xattr -rd com.apple.quarantine "${runtimeDir}"`);
+                        } else {
+                            const protonDirs = await Neutralino.filesystem.readDirectory(runtimeTempDir);
+                            if (protonDirs.length < 1) throw new Error("No runtime found after download");
+                            const protonDir = protonDirs[0].entry;
+                            const internalRuntimeSource = `${runtimeTempDir}/${protonDir}/files`;
+                            await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
+                        };
+                        await Neutralino.filesystem.remove(archivePath).catch(()=>{});
+                        await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
+            
+                        showToast('Setting up C Drive...');
+                        await Neutralino.filesystem.createDirectory(prefix).catch(()=>{});
+            
+                        const wineBin = (NL_OS === "Darwin") ? "wine64" : "wine";
+                        const winePath = `${runtimeDir}/bin/${wineBin}`;
+            
+                        let envVars = `WINEPREFIX="${prefix}" WINEDEBUG=-all WINEESYNC=1 `;
+                        if (NL_OS === "Darwin") envVars += `MTL_HUD_ENABLED=0 `;
+                        else envVars += `STEAM_COMPAT_CLIENT_INSTALL_PATH="/tmp" STEAM_COMPAT_DATA_PATH="${prefix}" `;
+            
+                        await Neutralino.os.execCommand(`${envVars} "${winePath}" wineboot --init`);
+                    } catch (err) {
+                        console.error("Runtime download failed:", err);
+                        showToast("Runtime install failed, try manual install");
+            
+                        await Neutralino.filesystem.remove(runtimeDir).catch(()=>{});
+                        await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
+                        if(archivePath !== null) await Neutralino.filesystem.remove(archivePath).catch(()=>{});
                     };
-                    await Neutralino.filesystem.remove(archivePath).catch(()=>{});
-                    await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
-        
-                    showToast('Setting up C Drive...');
-                    await Neutralino.filesystem.createDirectory(prefix).catch(()=>{});
-        
-                    const wineBin = (NL_OS === "Darwin") ? "wine64" : "wine";
-                    const winePath = `${runtimeDir}/bin/${wineBin}`;
-        
-                    let envVars = `WINEPREFIX="${prefix}" WINEDEBUG=-all WINEESYNC=1 `;
-                    if (NL_OS === "Darwin") envVars += `MTL_HUD_ENABLED=0 `;
-                    else envVars += `STEAM_COMPAT_CLIENT_INSTALL_PATH="/tmp" STEAM_COMPAT_DATA_PATH="${prefix}" `;
-        
-                    await Neutralino.os.execCommand(`${envVars} "${winePath}" wineboot --init`);
-                } catch (err) {
-                    console.error("Runtime download failed:", err);
-                    showToast("Runtime install failed, try manual install");
-        
-                    await Neutralino.filesystem.remove(runtimeDir).catch(()=>{});
-                    await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
-                    if(archivePath !== null) await Neutralino.filesystem.remove(archivePath).catch(()=>{});
                 };
-            };
 
-            const dataDir = await getSetting("dataDirectory");
-            const runtimePath = `${dataDir}/libraries/runtime`;
+                const dataDir = await getSetting("dataDirectory");
+                const runtimePath = `${dataDir}/libraries/runtime`;
 
-            try {
-                await Neutralino.filesystem.getStats(`${runtimePath}/bin/${NL_OS === "Darwin" ? 'wine64' : 'wine'}`);
-            } catch {
-                let shouldDo = await Neutralino.os
-                                        .showMessageBox('LC Launcher Runtime',
-                                            'This instance requires the runtime as its compatibility layer. Do you want to install the runtime?',
-                                            'YES_NO', 'INFO');
-                if(shouldDo == 'YES') {
-                    console.log("Installing runtime...");
-                    await installRuntimeHelper();
-                } else return showToast("Launch stopped due to runtime not being installed");
+                try {
+                    await Neutralino.filesystem.getStats(`${runtimePath}/bin/${NL_OS === "Darwin" ? 'wine64' : 'wine'}`);
+                } catch {
+                    let shouldDo = await Neutralino.os
+                                            .showMessageBox('LC Launcher Runtime',
+                                                'This instance requires the runtime as its compatibility layer. Do you want to install the runtime?',
+                                                'YES_NO', 'INFO');
+                    if(shouldDo == 'YES') {
+                        console.log("Installing runtime...");
+                        await installRuntimeHelper();
+                    } else return showToast("Launch stopped due to runtime not being installed");
+                };
             };
         };
 
@@ -458,6 +461,7 @@ export class Exec {
         const isTranslated = instance.compatibilityLayer !== "DIRECT" && (NL_OS === "Linux" || NL_OS === "Darwin");
         const keepLauncherOpen = await getSetting("keepLauncherOpen");
         return new Promise(async (resolve) => {
+            this.userStopped = false;
             try {
                 if(keepLauncherOpen === false) {
                     if (NL_OS === "Windows") setTimeout(() => { Neutralino.window.hide(); }, 200);
@@ -471,6 +475,7 @@ export class Exec {
                     if (!proc?.pid) return;
                     try {
                         console.log("Killing process:", proc.pid);
+                        this.userStopped = true;
 
                         if (NL_OS === "Windows") {
                             await Neutralino.os.execCommand(`taskkill /PID ${proc.pid} /T /F`);
@@ -518,6 +523,7 @@ export class Exec {
                                         msg = parsed;
 
                                         const lower = parsed.message?.toLowerCase() || "";
+                                        const lowerFunc = parsed.func?.toLowerCase() || "";
                                         const containsCrashKeyword = (
                                             lower.includes("unhandled") ||
                                             lower.includes("segmentation fault") ||
@@ -525,12 +531,11 @@ export class Exec {
                                             lower.includes("crash") ||
                                             lower.includes("fault")
                                         );
-                                        const isCleanExitSignal = lower.includes("apppolicygetprocessterminationmethod") || 
-                                                                lower.includes("coreaudio") || 
-                                                                lower.includes("d3dcompiler");
-
-                                        if (containsCrashKeyword && !isCleanExitSignal) crashDetected = true;
-                                        if (lower.includes("apppolicygetprocessterminationmethod")) crashDetected = false; 
+                                        if (containsCrashKeyword) crashDetected = true;
+                                        if (
+                                            lowerFunc.includes("apppolicygetprocessterminationmethod") ||
+                                            lower.includes("killed:")
+                                        ) crashDetected = false;
                                     } else {
                                         const lower = line.toLowerCase();
                                         if (
@@ -589,11 +594,13 @@ export class Exec {
                                 await this.manager.utils.writeJSON(instancePath, updatedInstance);
 
                                 // crash detection
-                                if (exitCode !== 0 || crashDetected) {
+                                if (!this.userStopped && (exitCode !== 0 || crashDetected)) {
                                     console.log("CRASHED!", exitCode)
                                     window.dispatchEvent(new CustomEvent("gameCrash"));
                                     await new Promise(r => setTimeout(r, 100));
                                 };
+
+                                this.userStopped = false;
                                     
                                 /*if (exitCode !== 0 && duration < 2000) {
                                     showToast("Error: Failed to launch instance");
@@ -617,6 +624,7 @@ export class Exec {
                     };
                 };
                 Neutralino.events.on('spawnedProcess', handler);
+                window.dispatchEvent(new CustomEvent("procRunning", { detail: proc }));
             } catch(e) {
                 console.log(e);
                 if(keepLauncherOpen === false) {
@@ -630,5 +638,16 @@ export class Exec {
                 resolve();
             };
         });
+    };
+
+    async stop(pid) {
+        try {
+            showToast("Stopping instance...");
+            if(window.whenQuitting) await window.whenQuitting();
+            await Neutralino.os.updateSpawnedProcess(pid, 'exit');
+        } catch (e) {
+            this.userStopped = false;
+            console.error("Failed to stop process:", e);
+        };
     };
 };

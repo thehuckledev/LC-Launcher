@@ -1,12 +1,13 @@
 import "./Button.css";
 
-import { useState, useRef } from "preact/hooks";
+import { useState, useRef, useEffect } from "preact/hooks";
 
 import clickSfx from "../assets/sfx/minecraft_click.opus";
 
 import { useSettings } from "../utils/SettingsStore.jsx";
 
 const sound = new Audio(clickSfx);
+sound.preload = "auto";
 
 export default function Button({ id = "", type="normal", disabled = false, pushable = true, borderless = false, tooltip = "", tooltipAlign = "RIGHT", onclick = () => {}, children }) {
     const { settings } = useSettings();
@@ -16,10 +17,7 @@ export default function Button({ id = "", type="normal", disabled = false, pusha
 
     const handleMouseEnter = () => {
         if (!tooltip) return;
-
-        timeoutRef.current = setTimeout(() => {
-            setShowTooltip(true);
-        }, 800); 
+        timeoutRef.current = setTimeout(() => setShowTooltip(true), 800); 
     };
 
     const handleMouseLeave = () => {
@@ -30,9 +28,12 @@ export default function Button({ id = "", type="normal", disabled = false, pusha
     return (
         <div id={id} type={type} class={`mc-button ${borderless ? "borderless" : ""}`} disabled={disabled} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onclick={(e) => {
             if (pushable === false) return;
-            sound.volume = settings.volume / 100;
-            sound.currentTime = 0;
-            sound.play();
+
+            const click = sound.cloneNode();
+            click.volume = (settings?.volume ?? 100) / 100;
+            click.play().catch(err => console.error("Btn click sfx failed:", err));
+            click.onended = () => click.remove();
+
             onclick(e);
         }}>
             <div class="title">

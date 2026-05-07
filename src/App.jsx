@@ -42,6 +42,7 @@ import EditInstanceMenu from "./menus/EditInstance.jsx";
 //! TODO instance custom icons
 export default function App() {
     const [processing, setProcessing] = useState(false);
+    const [runningProc, setRunningProc] = useState(null);
     const [crashed, setCrashed] = useState(false);
     const [profile, setProfile] = useState(null);
     const [instance, setInstance] = useState(null);
@@ -260,15 +261,26 @@ export default function App() {
     }, [settings.menuMusic]);
 
     useEffect(() => {
+        const handleRunning = (e) => {
+            setRunningProc(e.detail);
+        };
+
         const handleProcessing = (e) => {
+            if(e.detail === false) setRunningProc(null);
             if(e.detail === false && crashed === false) {
                 setMenu("main");
                 setLogs([]);
             };
             setProcessing(e.detail);
         };
+
+        window.addEventListener('procRunning', handleRunning);
         window.addEventListener('execProcessing', handleProcessing);
-        return () => window.removeEventListener('execProcessing', handleProcessing);
+
+        return () => {
+            window.removeEventListener('procRunning', handleRunning);
+            window.removeEventListener('execProcessing', handleProcessing);
+        };
     }, [crashed]);
 
     useEffect(() => {
@@ -343,7 +355,7 @@ export default function App() {
                 {loaded && <>
                     {menu === "setup" &&          <SetupMenu setMenu={setMenu} reloadData={loadData} />}
                     {menu === "setupoptions" &&   <SetupOptionsMenu setMenu={setMenu} />}
-                    {menu === "main" &&           <MainMenu setMenu={setMenu} instance={instance} setInstance={setInstance} profile={profile} setProfile={setProfile} instancesList={instancesList} profilesList={profilesList} processing={processing} reloadData={loadData} />}
+                    {menu === "main" &&           <MainMenu setMenu={setMenu} instance={instance} setInstance={setInstance} profile={profile} setProfile={setProfile} instancesList={instancesList} profilesList={profilesList} processing={processing} reloadData={loadData} runningProc={runningProc} />}
                     {menu === "options" &&        <OptionsMenu setMenu={setMenu} />}
                     {menu === "about" &&          <AboutMenu setMenu={setMenu} />}
                     {menu === "patchnotes" &&     <PatchNotesMenu setMenu={setMenu} instance={instance} />}
