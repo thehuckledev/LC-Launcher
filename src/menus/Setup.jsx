@@ -59,72 +59,6 @@ export default function SetupMenu({ setMenu, reloadData }) {
         checkWine();
     }, []);
 
-    async function installRuntimeHelper() {
-        const runtimeDir = `${settings.dataDirectory}/libraries/runtime`;
-        const runtimeTempDir = `${settings.dataDirectory}/libraries/_runtime`;
-        let archivePath = null;
-        try {
-            const prefix = `${settings.dataDirectory}/pfx`;
-
-            let repo = "";
-            if (NL_OS === "Darwin") repo = "Gcenx/game-porting-toolkit";
-            else if (NL_OS === "Linux") repo = "GloriousEggroll/proton-ge-custom";
-
-            showToast(`Fetching latest runtime...`);
-
-            let apiResponse = await Neutralino.os.execCommand(`curl -H "Accept: application/vnd.github+json" -H "User-Agent: LC-Launcher" -H "X-GitHub-Api-Version: 2026-03-10" -s https://api.github.com/repos/${repo}/releases/latest`);
-            let releaseData = JSON.parse(apiResponse.stdOut);
-
-            let asset = releaseData.assets.find(a => a.name.endsWith('.tar.xz') || a.name.endsWith('.tar.gz'));
-            if (!asset) throw new Error("No archive found in runtime release");
-
-            const downloadUrl = asset.browser_download_url;
-            archivePath = `${settings.dataDirectory}/libraries/${asset.name}`;
-
-            await Neutralino.filesystem.createDirectory(runtimeDir).catch(()=>{});
-            await Neutralino.filesystem.createDirectory(runtimeTempDir).catch(()=>{});
-
-            const runtimeDownload = new Download(downloadUrl, { label: `Downloading Runtime...` });
-            await runtimeDownload.start(archivePath);
-
-            const runtimeUnzip = new Unzip(archivePath, runtimeTempDir, { label: "Extracting Runtime..." });
-            await runtimeUnzip.start();
-
-            if (NL_OS === "Darwin") {
-                const internalRuntimeSource = `${runtimeTempDir}/Game Porting Toolkit.app/Contents/Resources/wine`;
-                await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
-                await Neutralino.os.execCommand(`xattr -rd com.apple.quarantine "${runtimeDir}"`);
-            } else {
-                const protonDirs = await Neutralino.filesystem.readDirectory(runtimeTempDir);
-                if (protonDirs.length < 1) throw new Error("No runtime found after download");
-                const protonDir = protonDirs[0].entry;
-                const internalRuntimeSource = `${runtimeTempDir}/${protonDir}/files`;
-                await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
-            };
-            await Neutralino.filesystem.remove(archivePath).catch(()=>{});
-            await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
-
-            showToast('Setting up C Drive...');
-            await Neutralino.filesystem.createDirectory(prefix).catch(()=>{});
-
-            const wineBin = (NL_OS === "Darwin") ? "wine64" : "wine";
-            const winePath = `${runtimeDir}/bin/${wineBin}`;
-
-            let envVars = `WINEPREFIX="${prefix}" WINEDEBUG=-all WINEESYNC=1 `;
-            if (NL_OS === "Darwin") envVars += `MTL_HUD_ENABLED=0 `;
-            else envVars += `STEAM_COMPAT_CLIENT_INSTALL_PATH="/tmp" STEAM_COMPAT_DATA_PATH="${prefix}" `;
-
-            await Neutralino.os.execCommand(`${envVars} "${winePath}" wineboot --init`);
-        } catch (err) {
-            console.error("Runtime download failed:", err);
-            showToast("Runtime install failed, try manual install");
-
-            await Neutralino.filesystem.remove(runtimeDir).catch(()=>{});
-            await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
-            if(archivePath !== null) await Neutralino.filesystem.remove(archivePath).catch(()=>{});
-        };
-    };
-
     const makeDefaultInstances = async () => {
         for await (const inst of defaultInstances) {
             if (!inst.supportedPlatforms.includes(NL_OS)) continue;
@@ -162,7 +96,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
             await makeDefaultInstances();
 
             // install runtime
-            if (canInstallRuntime === true && installRuntime === true) await installRuntimeHelper();
+            if (canInstallRuntime === true && installRuntime === true) await Manager.exec.installRuntimeHelper();
 
             await updateSetting('hasSetup', true);
             await reloadData();

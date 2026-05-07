@@ -12,6 +12,52 @@ export class Exec {
         this.userStopped = false;
     };
 
+    async findProtonPath() {
+        const home = await Neutralino.os.getEnv('HOME');
+        const possiblePaths = [
+            // Steam
+            `${home}/.steam/steam/steamapps/common`,
+            `${home}/.local/share/Steam/steamapps/common`,
+            
+            // Proton GE
+            `${home}/.steam/root/compatibilitytools.d`,
+            `${home}/.steam/steam/compatibilitytools.d`
+            `${home}/.local/share/Steam/compatibilitytools.d`,
+
+            // Flatpak Steam
+            `${home}/.var/app/com.valvesoftware.Steam/data/Steam/steamapps/common`,
+            `${home}/.var/app/com.valvesoftware.Steam/data/Steam/compatibilitytools.d`
+        ];
+
+        let pathsFound = [];
+        for (const possiblePath of possiblePaths) {
+            try {
+                const entries = await Neutralino.filesystem.readDirectory(possiblePath);
+                for (const entry of entries) {
+                    if (entry.type !== 'DIRECTORY') continue;
+                    
+                    const name = entry.entry;
+                    if (name.startsWith('Proton') || name.includes('GE-Proton')) {
+                        const fullPath = await Neutralino.filesystem.getJoinedPath(possiblePath, name, "proton");
+                        try {
+                            await Neutralino.filesystem.getStats(fullPath);
+                            pathsFound.push({ name, path: fullPath });
+                        } catch(e) {};
+                    };
+                };
+            } catch (e) {};
+        };
+
+        if (pathsFound.length === 0) return null;
+        pathsFound.sort((a, b) => {
+            if (a.name.includes('Experimental')) return -1;
+            if (b.name.includes('Experimental')) return 1;
+            return b.name.localeCompare(a.name, undefined, { numeric: true, sensitivity: 'base' });
+        });
+
+        return pathsFound[0].path;
+    };
+
     async backupPreserved(instancePath) {
         const backupDir = await Neutralino.filesystem.getJoinedPath(instancePath, "backup");
         await this.manager.utils.ensureDir(backupDir);
@@ -213,6 +259,73 @@ export class Exec {
         };
     };
 
+    async installRuntimeHelper() {
+        const dataDirectory = await getSetting("dataDirectory");
+        const runtimeDir = `${dataDirectory}/libraries/runtime`;
+        const runtimeTempDir = `${dataDirectory}/libraries/_runtime`;
+        let archivePath = null;
+        try {
+            const prefix = `${dataDirectory}/pfx`;
+
+            let repo = "";
+            if (NL_OS === "Darwin") repo = "Gcenx/game-porting-toolkit";
+            else if (NL_OS === "Linux") repo = "GloriousEggroll/proton-ge-custom";
+
+            showToast(`Fetching latest runtime...`);
+
+            let apiResponse = await Neutralino.os.execCommand(`curl -H "Accept: application/vnd.github+json" -H "User-Agent: LC-Launcher" -H "X-GitHub-Api-Version: 2026-03-10" -s https://api.github.com/repos/${repo}/releases/latest`);
+            let releaseData = JSON.parse(apiResponse.stdOut);
+
+            let asset = releaseData.assets.find(a => a.name.endsWith('.tar.xz') || a.name.endsWith('.tar.gz'));
+            if (!asset) throw new Error("No archive found in runtime release");
+
+            const downloadUrl = asset.browser_download_url;
+            archivePath = `${dataDirectory}/libraries/${asset.name}`;
+
+            await Neutralino.filesystem.createDirectory(runtimeDir).catch(()=>{});
+            await Neutralino.filesystem.createDirectory(runtimeTempDir).catch(()=>{});
+
+            const runtimeDownload = new Download(downloadUrl, { label: `Downloading Runtime...` });
+            await runtimeDownload.start(archivePath);
+
+            const runtimeUnzip = new Unzip(archivePath, runtimeTempDir, { label: "Extracting Runtime..." });
+            await runtimeUnzip.start();
+
+            if (NL_OS === "Darwin") {
+                const internalRuntimeSource = `${runtimeTempDir}/Game Porting Toolkit.app/Contents/Resources/wine`;
+                await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
+                await Neutralino.os.execCommand(`xattr -rd com.apple.quarantine "${runtimeDir}"`);
+            } else {
+                const protonDirs = await Neutralino.filesystem.readDirectory(runtimeTempDir);
+                if (protonDirs.length < 1) throw new Error("No runtime found after download");
+                const protonDir = protonDirs[0].entry;
+                const internalRuntimeSource = `${runtimeTempDir}/${protonDir}/files`;
+                await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
+            };
+            await Neutralino.filesystem.remove(archivePath).catch(()=>{});
+            await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
+
+            showToast('Setting up C Drive...');
+            await Neutralino.filesystem.createDirectory(prefix).catch(()=>{});
+
+            const wineBin = (NL_OS === "Darwin") ? "wine64" : "wine";
+            const winePath = `${runtimeDir}/bin/${wineBin}`;
+
+            let envVars = `WINEPREFIX="${prefix}" WINEDEBUG=-all WINEESYNC=1 `;
+            if (NL_OS === "Darwin") envVars += `MTL_HUD_ENABLED=0 `;
+            else envVars += `STEAM_COMPAT_CLIENT_INSTALL_PATH="/tmp" STEAM_COMPAT_DATA_PATH="${prefix}" `;
+
+            await Neutralino.os.execCommand(`${envVars} "${winePath}" wineboot --init`);
+        } catch (err) {
+            console.error("Runtime download failed:", err);
+            showToast("Runtime install failed, try manual install");
+
+            await Neutralino.filesystem.remove(runtimeDir).catch(()=>{});
+            await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
+            if(archivePath !== null) await Neutralino.filesystem.remove(archivePath).catch(()=>{});
+        };
+    };
+
     async launch(instanceId, profileId) {
         try {
             window.dispatchEvent(new CustomEvent("execProcessing", { detail: true }));
@@ -248,73 +361,6 @@ export class Exec {
         // check for runtime
         if (NL_OS === "Linux" || NL_OS === "Darwin") {
             if (instance.compatibilityLayer === "RUNTIME") {
-                async function installRuntimeHelper() {
-                    const dataDirectory = await getSetting("dataDirectory");
-                    const runtimeDir = `${dataDirectory}/libraries/runtime`;
-                    const runtimeTempDir = `${dataDirectory}/libraries/_runtime`;
-                    let archivePath = null;
-                    try {
-                        const prefix = `${dataDirectory}/pfx`;
-            
-                        let repo = "";
-                        if (NL_OS === "Darwin") repo = "Gcenx/game-porting-toolkit";
-                        else if (NL_OS === "Linux") repo = "GloriousEggroll/proton-ge-custom";
-            
-                        showToast(`Fetching latest runtime...`);
-            
-                        let apiResponse = await Neutralino.os.execCommand(`curl -H "Accept: application/vnd.github+json" -H "User-Agent: LC-Launcher" -H "X-GitHub-Api-Version: 2026-03-10" -s https://api.github.com/repos/${repo}/releases/latest`);
-                        let releaseData = JSON.parse(apiResponse.stdOut);
-            
-                        let asset = releaseData.assets.find(a => a.name.endsWith('.tar.xz') || a.name.endsWith('.tar.gz'));
-                        if (!asset) throw new Error("No archive found in runtime release");
-            
-                        const downloadUrl = asset.browser_download_url;
-                        archivePath = `${dataDirectory}/libraries/${asset.name}`;
-            
-                        await Neutralino.filesystem.createDirectory(runtimeDir).catch(()=>{});
-                        await Neutralino.filesystem.createDirectory(runtimeTempDir).catch(()=>{});
-            
-                        const runtimeDownload = new Download(downloadUrl, { label: `Downloading Runtime...` });
-                        await runtimeDownload.start(archivePath);
-            
-                        const runtimeUnzip = new Unzip(archivePath, runtimeTempDir, { label: "Extracting Runtime..." });
-                        await runtimeUnzip.start();
-            
-                        if (NL_OS === "Darwin") {
-                            const internalRuntimeSource = `${runtimeTempDir}/Game Porting Toolkit.app/Contents/Resources/wine`;
-                            await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
-                            await Neutralino.os.execCommand(`xattr -rd com.apple.quarantine "${runtimeDir}"`);
-                        } else {
-                            const protonDirs = await Neutralino.filesystem.readDirectory(runtimeTempDir);
-                            if (protonDirs.length < 1) throw new Error("No runtime found after download");
-                            const protonDir = protonDirs[0].entry;
-                            const internalRuntimeSource = `${runtimeTempDir}/${protonDir}/files`;
-                            await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
-                        };
-                        await Neutralino.filesystem.remove(archivePath).catch(()=>{});
-                        await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
-            
-                        showToast('Setting up C Drive...');
-                        await Neutralino.filesystem.createDirectory(prefix).catch(()=>{});
-            
-                        const wineBin = (NL_OS === "Darwin") ? "wine64" : "wine";
-                        const winePath = `${runtimeDir}/bin/${wineBin}`;
-            
-                        let envVars = `WINEPREFIX="${prefix}" WINEDEBUG=-all WINEESYNC=1 `;
-                        if (NL_OS === "Darwin") envVars += `MTL_HUD_ENABLED=0 `;
-                        else envVars += `STEAM_COMPAT_CLIENT_INSTALL_PATH="/tmp" STEAM_COMPAT_DATA_PATH="${prefix}" `;
-            
-                        await Neutralino.os.execCommand(`${envVars} "${winePath}" wineboot --init`);
-                    } catch (err) {
-                        console.error("Runtime download failed:", err);
-                        showToast("Runtime install failed, try manual install");
-            
-                        await Neutralino.filesystem.remove(runtimeDir).catch(()=>{});
-                        await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
-                        if(archivePath !== null) await Neutralino.filesystem.remove(archivePath).catch(()=>{});
-                    };
-                };
-
                 const dataDir = await getSetting("dataDirectory");
                 const runtimePath = `${dataDir}/libraries/runtime`;
 
@@ -327,7 +373,7 @@ export class Exec {
                                                 'YES_NO', 'INFO');
                     if(shouldDo == 'YES') {
                         console.log("Installing runtime...");
-                        await installRuntimeHelper();
+                        await this.installRuntimeHelper();
                     } else return showToast("Launch stopped due to runtime not being installed");
                 };
             };
@@ -439,11 +485,18 @@ export class Exec {
             else if (compat === "WINE" || compat === "WINE64")
                 bin = `${compat.toLowerCase()}`;
 
-            else if (compat === "PROTON")
-                bin = `proton run`;
+            else if (compat === "PROTON") {
+                const protonPath = await this.findProtonPath();
+                const env = `STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}"`;
+                
+                if (protonPath) bin = `${env} "${protonPath}" run`;
+                else bin = `${env} proton run`;
+            };
 
             if (bin !== "") {
-                const baseCmd = bin.split(" ").pop().replace(/"/g, "");
+                const parts = bin.split(" ");
+                const actualExecutable = parts.find(p => !p.includes("=") && p !== "run");
+                const baseCmd = actualExecutable ? actualExecutable.replace(/"/g, "") : "";
                 if (baseCmd.includes("/") || await this.manager.utils.cmdExists(baseCmd)) {
                     const debug = "WINEDEBUG=err+all,warn+d3d,warn+msvcrt,fixme+d3d,fixme+ntdll,+timestamp";
                     cmd = `${instance.customArgs ? `${instance.customArgs} ` : ""}${debug} ${bin} "${execPath}" ${joinedArgs}`;
