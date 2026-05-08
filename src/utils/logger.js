@@ -23,25 +23,22 @@ export function startLogger() {
         ).join(' ');
     };
 
-    console.log = (...args) => {
-        window._console.log(...args);
-        log(formatArgs(args), "INFO");
+    const handler = {
+        get(target, prop) {
+            const originalMethod = target[prop];
+            if (typeof originalMethod === 'function') {
+                return (...args) => {
+                    const typeMap = { error: "ERROR", warn: "WARNING" };
+                    log(formatArgs(args), typeMap[prop] || "INFO");
+
+                    return originalMethod.apply(target, args);
+                };
+            };
+            return originalMethod;
+        }
     };
 
-    console.warn = (...args) => {
-        window._console.warn(...args);
-        log(formatArgs(args), "WARNING");
-    };
-
-    console.error = (...args) => {
-        window._console.error(...args);
-        log(formatArgs(args), "ERROR");
-    };
-
-    console.debug = (...args) => {
-        window._console.debug(...args);
-        log(formatArgs(args), "INFO");
-    };
+    window.console = new Proxy(window.console, handler);
 
     window.onerror = (message, source, lineno, colno, error) => {
         const stack = error?.stack ? `\nStack: ${error.stack}` : "";

@@ -21,7 +21,7 @@ export class Exec {
             
             // Proton GE
             `${home}/.steam/root/compatibilitytools.d`,
-            `${home}/.steam/steam/compatibilitytools.d`
+            `${home}/.steam/steam/compatibilitytools.d`,
             `${home}/.local/share/Steam/compatibilitytools.d`,
 
             // Flatpak Steam
@@ -494,7 +494,7 @@ export class Exec {
             };
 
             if (bin !== "") {
-                const parts = bin.split(" ");
+                const parts = bin.match(/(?:[^\s"]+|"[^"]*")+/g) || []; // stops quoted spaces from being split
                 const actualExecutable = parts.find(p => !p.includes("=") && p !== "run");
                 const baseCmd = actualExecutable ? actualExecutable.replace(/"/g, "") : "";
                 if (baseCmd.includes("/") || await this.manager.utils.cmdExists(baseCmd)) {
