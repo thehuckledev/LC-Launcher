@@ -22,7 +22,7 @@
 	box-shadow: none !important;
 }
 .mc-button[type="destructive"] {
-	filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(-50deg);
+	background: #AB3C3C url('/assets/ui/button_destructive.png') center / cover;
 }
 
 .mc-button[disabled="true"] {
@@ -32,6 +32,11 @@
 /* Mouse over */
 .mc-button:not([disabled="true"]):hover .title {
 	background-color: rgba(100, 100, 255, .45);
+	text-shadow: 2px 2px #202013CC;
+	color: #FFFFA0;
+}
+.mc-button[type="destructive"]:hover .title {
+	background-color: rgba(101, 9, 9, 0.523) !important;
 	text-shadow: 2px 2px #202013CC;
 	color: #FFFFA0;
 }
@@ -62,9 +67,6 @@
 .mc-button.borderless .title {
 	box-shadow: none !important;
 	transition: transform ease 0.2s;
-}
-.mc-button[type="destructive"] .title {
-	filter: sepia(0%) saturate(33%) brightness(143%) hue-rotate(50deg);
 }
 .mc-button[disabled="true"] .title {
 	color: #b2b2b2;

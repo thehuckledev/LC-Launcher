@@ -7,6 +7,7 @@ import { showToast } from "../components/Toast.jsx";
 
 import Textbox from "../components/Textbox.jsx";
 import Button from "../components/Button.jsx";
+import Slider from "../components/Slider.jsx";
 
 import closeIcon from "../assets/buttons/close.svg";
 
@@ -72,9 +73,14 @@ export default function OptionsMenu({ setMenu }) {
                 <Button onclick={() => updateSetting('menuMusic', !settings.menuMusic)}>
                     {settings.menuMusic == false ? 'Menu Music: Disabled' : 'Menu Music: Enabled'}
                 </Button>
-                <Button onclick={() => incrementVolume()}>
-                    Volume: {settings.volume}%
-                </Button>
+                <Slider
+                    label={`Volume: ${settings.volume}%`}
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={settings.volume}
+                    onInput={(e) => updateSetting('volume', parseInt(e.target.value))}
+                />
                 <Textbox
                     id="data-path"
                     onchange={async (txt) => {

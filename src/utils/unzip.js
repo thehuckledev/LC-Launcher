@@ -33,7 +33,14 @@ export default class Unzip {
                 this.progress = 0;
                 this.emit();
 
-                const proc = await Neutralino.os.spawnProcess(`powershell -NoProfile -Command "Expand-Archive -LiteralPath '${this.zipPath}' -DestinationPath '${this.destPath}' -Force"`);
+                const psCommand = `powershell -NoProfile -Command "
+                    Add-Type -AssemblyName 'System.IO.Compression.FileSystem';
+                    [System.IO.Compression.ZipFile]::ExtractToDirectory('${this.zipPath}', '${this.destPath}');
+                "`;
+
+                const proc = await Neutralino.os.spawnProcess(psCommand);
+                // this has issues below with .exe and .dlls being blocked
+                //const proc = await Neutralino.os.spawnProcess(`powershell -NoProfile -Command "Expand-Archive -LiteralPath '${this.zipPath}' -DestinationPath '${this.destPath}' -Force"`);
                 this.procId = proc.id;
 
                 let fakingProgress = true;

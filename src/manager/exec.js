@@ -148,6 +148,10 @@ export class Exec {
             try {
                 await unzipContent.start();
 
+                // unlock files before moving
+                if (NL_OS === "Windows")
+                    await Neutralino.os.execCommand(`powershell -NoProfile -Command "Get-ChildItem -Path '${contentDir}' -Recurse | Unblock-File"`);
+
                 // fix some zips having folders but some using root
                 const entries = await Neutralino.filesystem.readDirectory(contentDir);
                 if (entries.length === 1 && entries[0].type === 'DIRECTORY') {
@@ -159,8 +163,7 @@ export class Exec {
                         const srcPath = await Neutralino.filesystem.getJoinedPath(rootDirPath, file.entry);
                         const destPath = await Neutralino.filesystem.getJoinedPath(contentDir, file.entry);
                         
-                        if (NL_OS === "Windows") await Neutralino.os.execCommand(`move "${srcPath}" "${destPath}"`);
-                        else await Neutralino.os.execCommand(`mv "${srcPath}" "${destPath}"`);
+                        await Neutralino.filesystem.move(srcPath, destPath);
                     };
                     await Neutralino.filesystem.remove(rootDirPath);
                 };

@@ -1,0 +1,72 @@
+.mc-slider-container {
+    position: relative;
+    height: var(--btn-size);
+    width: calc(var(--btn-size) * 10);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.mc-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: var(--btn-size);
+    width: calc(var(--btn-size) * 10);
+    background: #000 url('/assets/ui/textbox.png') center / cover;
+    image-rendering: pixelated;
+    border: 2px solid #000;
+    outline: none;
+    cursor: pointer;
+}
+
+.mc-slider-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    
+    font: 12pt 'Minecraftia', sans-serif;
+    color: #DDD;
+    text-shadow: 2px 2px #000A;
+    padding-bottom: .3em;
+}
+
+.mc-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: calc(var(--btn-size) - 4px);
+    background: #999 url('/assets/ui/button.png') center / cover;
+    image-rendering: pixelated;
+    border: 2px solid #000;
+    box-shadow: inset -2px -2px #0006, inset 2px 2px #FFF7;
+}
+
+.mc-slider::-moz-range-thumb {
+    width: 16px;
+    height: calc(var(--btn-size) - 4px);
+    background: #999 url('/assets/ui/button.png') center / cover;
+    image-rendering: pixelated;
+    border: 2px solid #000;
+    box-shadow: inset -2px -2px #0006, inset 2px 2px #FFF7;
+    border-radius: 0;
+}
+
+.mc-slider:hover::-webkit-slider-thumb {
+    filter: brightness(120%);
+    box-shadow: inset -2px -2px #0004, inset 2px 2px #FFF5;
+}
+
+.mc-slider:hover::-moz-range-thumb {
+    filter: brightness(120%);
+    box-shadow: inset -2px -2px #0004, inset 2px 2px #FFF5;
+}
+
+.mc-slider:focus {
+    border-color: #d0d0d0;
+}
