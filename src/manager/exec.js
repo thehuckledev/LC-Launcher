@@ -313,7 +313,7 @@ export class Exec {
 
             let envVars = `WINEPREFIX="${prefix}" WINEDEBUG=-all WINEESYNC=1 `;
             if (NL_OS === "Darwin") envVars += `MTL_HUD_ENABLED=0 `;
-            else envVars += `STEAM_COMPAT_CLIENT_INSTALL_PATH="/tmp" STEAM_COMPAT_DATA_PATH="${prefix}" `;
+            else envVars += `STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}" `;
 
             await Neutralino.os.execCommand(`${envVars} "${winePath}" wineboot --init`);
         } catch (err) {
@@ -358,6 +358,13 @@ export class Exec {
             };
         };
 
+        // do proton runtime check for steam os
+        let hasProton = false;
+        if (NL_OS === "Linux") {
+            const protonPath = await this.findProtonPath();
+            if (protonPath) hasProton = true;
+        };
+
         // check for runtime
         if (NL_OS === "Linux" || NL_OS === "Darwin") {
             if (instance.compatibilityLayer === "RUNTIME") {
@@ -367,14 +374,16 @@ export class Exec {
                 try {
                     await Neutralino.filesystem.getStats(`${runtimePath}/bin/${NL_OS === "Darwin" ? 'wine64' : 'wine'}`);
                 } catch {
-                    let shouldDo = await Neutralino.os
-                                            .showMessageBox('LC Launcher Runtime',
-                                                'This instance requires the runtime as its compatibility layer. Do you want to install the runtime?',
-                                                'YES_NO', 'INFO');
-                    if(shouldDo == 'YES') {
-                        console.log("Installing runtime...");
-                        await this.installRuntimeHelper();
-                    } else return showToast("Launch stopped due to runtime not being installed");
+                    if (!hasProton) {
+                        let shouldDo = await Neutralino.os
+                                                .showMessageBox('LC Launcher Runtime',
+                                                    'This instance requires the runtime as its compatibility layer. Do you want to install the runtime?',
+                                                    'YES_NO', 'INFO');
+                        if(shouldDo == 'YES') {
+                            console.log("Installing runtime...");
+                            await this.installRuntimeHelper();
+                        } else return showToast("Launch stopped due to runtime not being installed");
+                    };
                 };
             };
         };
@@ -467,7 +476,7 @@ export class Exec {
                         const winePath = `${runtimePath}/bin/wine`;
                         wineServerBin = `${runtimePath}/bin/wineserver`;
 
-                        const env = `WINEPREFIX="${prefix}" WINEESYNC=1 STEAM_COMPAT_CLIENT_INSTALL_PATH="/tmp" STEAM_COMPAT_DATA_PATH="${prefix}"`;
+                        const env = `WINEPREFIX="${prefix}" WINEESYNC=1 STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}"`;
                         bin = `${env} "${winePath}"`;
 
                         try {
@@ -477,7 +486,14 @@ export class Exec {
                             await Neutralino.os.execCommand(`${env} "${winePath}" wineboot --init`);
                         };
                     } catch (e) {
-                        bin = `STEAM_COMPAT_CLIENT_INSTALL_PATH="" STEAM_COMPAT_DATA_PATH="${prefix}" proton run`;
+                        if (!!hasProton) {
+                            const protonPath = await this.findProtonPath();
+                            const env = `STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}"`;
+                            
+                            if (protonPath) bin = `${env} "${protonPath}" run`;
+                            else bin = `${env} proton run`;
+                        }
+                        else bin = `STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}" proton run`;
                     };
                 };
             }

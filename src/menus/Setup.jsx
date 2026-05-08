@@ -38,12 +38,18 @@ export default function SetupMenu({ setMenu, reloadData }) {
     }, []);
 
     useEffect(() => {
-        async function checkWine() {
+        async function checkRuntime() {
             try {
                 if (NL_OS !== "Linux" &&
                     NL_OS !== "Darwin"
                 ) return setCanInstallRuntime(false);
-                else setCanInstallRuntime(true);
+
+                if (NL_OS === "Linux") {
+                    const protonPath = await Manager.exec.findProtonPath();
+                    if (protonPath) return setCanInstallRuntime(false);
+                };
+
+                setCanInstallRuntime(true);
 
                 /*const res = await Neutralino.os.execCommand("command -v wine");
 
@@ -56,7 +62,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
             };
         };
 
-        checkWine();
+        checkRuntime();
     }, []);
 
     const makeDefaultInstances = async () => {
