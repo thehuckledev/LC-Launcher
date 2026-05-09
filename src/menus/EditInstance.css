@@ -4,7 +4,7 @@
     margin: 0;
 }
 
-#create-instance {
+#edit-instance {
     width: calc(100vw - 80px);
     height: calc(100% - 83px);
     overflow-y: auto;
@@ -15,23 +15,23 @@
     color: rgba(255, 255, 255, 0.9);
     font: 10pt 'Minecraftia', sans-serif;
     text-shadow: 2px 2px #000A;
-    padding-right: 10px;
+    padding-right: 5px;
 
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
-#create-instance::-webkit-scrollbar {
+#edit-instance::-webkit-scrollbar {
     width: 8px;
 }
 
-#create-instance::-webkit-scrollbar-thumb {
+#edit-instance::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.12);
     border-radius: 4px;
 }
 
-#create-instance::-webkit-scrollbar-thumb:hover {
+#edit-instance::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
 }
 

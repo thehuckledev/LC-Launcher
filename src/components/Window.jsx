@@ -61,6 +61,7 @@ export default function Window({ title, showClose = true, showMinimize = true, s
             });
 
             const panoramaBox = new THREE.Mesh(panorGeo, panorMaterials);
+            panoramaBox.scale.x = -1;
 
             panoramaBox.onBeforeRender = () => {
                 time += 0.01;
@@ -145,18 +146,44 @@ export default function Window({ title, showClose = true, showMinimize = true, s
                     id: 'app', text: 'LC Launcher',
                     menuItems: [
                         { id: 'about', text: 'About LC Launcher' },
-                        { id: 'quit', text: 'Quit LC Launcher', shortcut: 'Q' },
+                        { id: 'quit', text: 'Quit LC Launcher', shortcut: 'q' },
+                    ]
+                },
+                {
+                    id: 'edit',
+                    text: 'Edit',
+                    menuItems: [
+                        { id: 'cut', text: 'Cut', shortcut: 'x' },
+                        { id: 'copy', text: 'Copy', shortcut: 'c' },
+                        { id: 'paste', text: 'Paste', shortcut: 'v' },
+                        { id: 'selectAll', text: 'Select All', shortcut: 'a' }
                     ]
                 }
             ];
         
             await Neutralino.window.setMainMenu(menu);
             await Neutralino.events.on('mainMenuItemClicked', async (evt) => {
-                if (evt.detail.id == "about") setMenu('about');
-                if (evt.detail.id == "quit") {
-                    if (window.whenQuitting) await window.whenQuitting();
-                    if (window.beforeExitRPC) await window.beforeExitRPC();
-                    await Neutralino.app.exit();
+                switch(evt.detail.id) {
+                    case 'about':
+                        setMenu('about');
+                        break;
+                    case 'quit':
+                        if (window.whenQuitting) await window.whenQuitting();
+                        if (window.beforeExitRPC) await window.beforeExitRPC();
+                        await Neutralino.app.exit();
+                        break;
+                    case 'copy':
+                        document.execCommand('copy');
+                        break;
+                    case 'paste':
+                        document.execCommand('paste');
+                        break;
+                    case 'cut':
+                        document.execCommand('cut');
+                        break;
+                    case 'selectAll':
+                        document.execCommand('selectAll');
+                        break;
                 };
             });
             console.log("Set Main Menu");

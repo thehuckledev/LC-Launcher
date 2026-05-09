@@ -48,6 +48,8 @@ function startMovement() {
     if (animationId) return;
 
     const moveSound = (time) => {
+        if (!panner) return animationId = null;
+
         angle += 0.02;
 
         const x = Math.sin(angle) * 5;

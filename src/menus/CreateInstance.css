@@ -15,7 +15,7 @@
     color: rgba(255, 255, 255, 0.9);
     font: 10pt 'Minecraftia', sans-serif;
     text-shadow: 2px 2px #000A;
-    padding-right: 10px;
+    padding-right: 5px;
 
     display: flex;
     flex-direction: column;

@@ -18,9 +18,13 @@ export default function CreateInstanceMenu({ setMenu, setInstance, reloadData })
 
     const [availableTags, setAvailableTags] = useState([]);
     const [availableAssets, setAvailableAssets] = useState([]);
+    const [backgroundMode, setBackgroundMode] = useState("SINGLE");
     
     const [form, setForm] = useState({
         name: "",
+        icon: "",
+        logo: "",
+        background: "",
         repo: "",
         tag: "",
         exec: "Minecraft.Client.exe",
@@ -79,6 +83,17 @@ export default function CreateInstanceMenu({ setMenu, setInstance, reloadData })
         };
     }, [form.tag, availableTags]);
 
+    const updatePanorama = (index, value) => {
+        setForm(prev => {
+            const currentBackground = Array.isArray(prev.background) 
+                ? [...prev.background] 
+                : ["", "", "", "", "", ""];
+            
+            currentBackground[index] = value;
+            return { ...prev, background: currentBackground };
+        });
+    };
+
     const updateForm = (key, val) => {
         setForm(prev => {
             const mod = { ...prev, [key]: val };
@@ -94,7 +109,16 @@ export default function CreateInstanceMenu({ setMenu, setInstance, reloadData })
         setProcessing(true);
         try {
             const tempForm = form;
+
             if (tempForm.serviceType === "CODEBERG") tempForm.serviceType = "GITEA";
+            if (tempForm.icon?.trim() === "") tempForm.icon = null;
+            if (tempForm.logo?.trim() === "") tempForm.logo = null;
+
+            if (Array.isArray(tempForm.background)) {
+                tempForm.background = tempForm.background.map(uri => uri?.trim() || null);
+                if (tempForm.background.every(item => item === null)) tempForm.background = null;
+            } else tempForm.background = tempForm.background?.trim() || null;
+
             const newInst = await Manager.instances.create(crypto.randomUUID(), tempForm);
             await reloadData();
             setInstance(newInst);
@@ -195,6 +219,58 @@ export default function CreateInstanceMenu({ setMenu, setInstance, reloadData })
                         onChange={(val) => updateForm('target', val)}
                         disabled={availableAssets.length === 0}
                     />
+                </div>
+                
+                <div className="instance-section">
+                    <h3>Assets</h3>
+                    <Textbox
+                        label="Icon Data URI"
+                        value={form.icon}
+                        onchange={(v) => updateForm('icon', v)}
+                        maxlength={99999}
+                        placeholder="data:image/png;base64..."
+                    />
+                    <Textbox
+                        label="Logo Data URI"
+                        value={form.logo}
+                        onchange={(v) => updateForm('logo', v)}
+                        maxlength={99999}
+                        placeholder="data:image/png;base64..."
+                    />
+                    <Select
+                        label="Background Mode"
+                        value={backgroundMode}
+                        options={[
+                            { label: "Single Image", value: "SINGLE" },
+                            { label: "Panorama (6 Images)", value: "PANORAMA" }
+                        ]}
+                        onChange={(val) => {
+                            setBackgroundMode(val);
+                            updateForm('background', val === "PANORAMA" ? ["", "", "", "", "", ""] : "");
+                        }}
+                    />
+                    {backgroundMode === "SINGLE" ? (
+                        <Textbox
+                            label="Background Data URI"
+                            value={form.background}
+                            onchange={(v) => updateForm('background', v)}
+                            maxlength={99999}
+                            placeholder="data:image/png;base64..."
+                        />
+                    ) : (
+                        <>
+                            {["Front (0)", "Right  (1)", "Back (2)", "Left (3)", "Up (4)", "Down (5)"].map((label, i) => (
+                                <Textbox
+                                    key={i}
+                                    label={`Panorama ${label} Data URI`}
+                                    value={Array.isArray(form.background) ? form.background[i] : ""}
+                                    onchange={(v) => updatePanorama(i, v)}
+                                    maxlength={99999}
+                                    placeholder="data:image/png;base64..."
+                                />
+                            ))}
+                        </>
+                    )}
                 </div>
             </div>
 

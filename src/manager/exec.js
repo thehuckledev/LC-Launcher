@@ -474,7 +474,30 @@ export class Exec {
                         bin = `WINEPREFIX="${prefix}" ${compat.toLowerCase()}`;
                     };
                 } else if (NL_OS === "Linux") { // PROTON GE RUNTIME
+                    const protonPath = await this.findProtonPath();
+                    const env = `WINEPREFIX="${prefix}" WINEESYNC=1 STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}"`;
+                    
+                    if (protonPath) bin = `${env} "${protonPath}" run`;
+                    else {
+                        try {
+                            await Neutralino.filesystem.getStats(`${runtimePath}/bin/wine`);
+                            const winePath = `${runtimePath}/bin/wine`;
+                            wineServerBin = `${runtimePath}/bin/wineserver`;
+                            bin = `${env} "${winePath}"`;
+                        } catch (e) {
+                            bin = `${env} proton run`;
+                        };
+                    };
+
                     try {
+                        await Neutralino.filesystem.getStats(prefix);
+                    } catch {
+                        showToast('Setting up C Drive...');
+                        const initCmd = protonPath ? `"${protonPath}" run wineboot --init` : `proton run wineboot --init`;
+                        await Neutralino.os.execCommand(`${env} ${initCmd}`);
+                    };
+                    // below is a runtime first priority version
+                    /*try {
                         await Neutralino.filesystem.getStats(`${runtimePath}/bin/wine`);
                         const winePath = `${runtimePath}/bin/wine`;
                         wineServerBin = `${runtimePath}/bin/wineserver`;
@@ -497,7 +520,7 @@ export class Exec {
                             else bin = `${env} proton run`;
                         }
                         else bin = `STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}" proton run`;
-                    };
+                    };*/
                 };
             }
 
