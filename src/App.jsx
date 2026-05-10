@@ -44,7 +44,6 @@ import EditInstanceMenu from "./menus/EditInstance.jsx";
 // TODO convert LCE world to Java worlds. https://je2be.app
 // TODO make the skin save a slim and non slim version so that LegacyEvolved can use slim skin
 // TODO add profile import and export
-//! TODO add emerald migration of account (username,skin,cape and UID)
 export default function App() {
     const [processing, setProcessing] = useState(false);
     const [runningProc, setRunningProc] = useState(null);
@@ -305,14 +304,25 @@ export default function App() {
             setDropHighlight(false);
 
             const file = e.dataTransfer.files[0];
-            if (!file || !file.name.endsWith(".lceinstance.json")) return showToast("The instance file must end with .lceinstance.json");
+            const isInstance = file.name.endsWith(".lceinstance.json");
+            const isProfile = file.name.endsWith(".lceprofile.json");
+
+            if (!isInstance && !isProfile) return showToast("Invalid, must be a .lceinstance.json or .lceprofile.json file.");
 
             try {
                 const text = await file.text();
-                const newInst = await Manager.instances.import(text);
-                
-                await loadData();
-                setInstance(newInst);
+
+                if (isInstance) {
+                    const newInst = await Manager.instances.import(text);
+
+                    await loadData();
+                    setInstance(newInst);
+                } else if (isProfile) {
+                    const newProfile = await Manager.profiles.import(text);
+                    await loadData();
+
+                    setProfile(newProfile);
+                };
             } catch (err) {
                 console.error(err);
             };
@@ -352,7 +362,7 @@ export default function App() {
                     <div id="instance-drop-area">
                         <div className="instance-drop-inner">
                             <h2>Drop Instance File Here</h2>
-                            <p>.lceinstance.json</p>
+                            <p>.lceinstance.json / .lceprofile.json</p>
                         </div>
                     </div>
                 )}

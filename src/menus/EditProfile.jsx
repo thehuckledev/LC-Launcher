@@ -26,6 +26,22 @@ export default function EditProfileMenu({ setMenu, profile, setProfile, reloadDa
         if (profile) setUID(profile.uid);
     }, [profile]);
 
+    const handleNewUID = () => {
+        const newUid = Manager.utils.generateUID(); 
+        setUID(newUid);
+        showToast("Generated new UID");
+    };
+
+    const handleExport = async () => {
+        try {
+            const res = await Manager.profiles.export(profile.id);
+            if(res === true) showToast("Exported successfully");
+        } catch(e) {
+            showToast("Export failed");
+            console.error(e);
+        };
+    };
+
     const handleDelete = async () => {
         const confirmDelete = await Neutralino.os.showMessageBox("Delete Profile", `Are you sure you want to delete "${profile.username}" profile?`, "YES_NO", "WARNING");
         if (confirmDelete !== "YES") return;
@@ -257,12 +273,22 @@ export default function EditProfileMenu({ setMenu, profile, setProfile, reloadDa
                 )}
             </div>
             <div id="edit-profile-action-bar">
-                <Button id="delete-button" type="destructive" disabled={processing} pushable={!processing} onclick={handleDelete}>
-                    Delete
-                </Button>
-                <Button id="save-button" disabled={!ready || processing} pushable={ready && !processing} onclick={handleCreate}>
-                    Save
-                </Button>
+                <div id="profile-action-bar-group">
+                    <Button id="delete-button" type="destructive" disabled={processing} pushable={!processing} onclick={handleDelete}>
+                        Delete
+                    </Button>
+                    <Button type="destructive" disabled={processing} pushable={!processing} onclick={handleNewUID}>
+                        New UID
+                    </Button>
+                </div>
+                <div id="profile-action-bar-group">
+                    <Button disabled={processing || !ready} pushable={!processing && ready} onclick={handleExport}>
+                        Export
+                    </Button>
+                    <Button id="save-button" disabled={!ready || processing} pushable={ready && !processing} onclick={handleCreate}>
+                        Save
+                    </Button>
+                </div>
             </div>
         </>
     );

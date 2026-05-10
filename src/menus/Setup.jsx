@@ -95,8 +95,11 @@ export default function SetupMenu({ setMenu, reloadData }) {
         joinDiscordPrompt();
         setProcessing(true);
         try {
-            if (skin) await Manager.profiles.create(username, skin, UID !== "" ? UID : undefined);
-            else await Manager.profiles.create(username, undefined, UID !== "" ? UID : undefined);
+            await Manager.profiles.create({
+                username,
+                skin: skin || undefined,
+                uid: UID !== "" ? UID : undefined
+            });
 
             // make insts
             await makeDefaultInstances();

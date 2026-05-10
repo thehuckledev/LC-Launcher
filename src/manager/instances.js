@@ -183,7 +183,7 @@ export class Instances {
 
             const inst = await this.create(id, instanceData);
             showToast(`Imported ${inst.name}`);
-            return await inst;
+            return inst;
         } catch (err) {
             console.error("Import failed:", err);
             throw err;

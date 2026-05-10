@@ -136,6 +136,10 @@ export class Exec {
             const download = new Download(asset.browser_download_url, { label: `Downloading instance${isUpdate ? ' update' : ''}...` });
             try {
                 await download.start(zipPath);
+
+                // unlock files before unzip
+                if (NL_OS === "Windows")
+                    await Neutralino.os.execCommand(`powershell -NoProfile -Command "Get-ChildItem -Path '${zipPath}' | Unblock-File"`);
             } catch(e) {
                 console.error(e);
                 return showToast("Error: Asset download failed");

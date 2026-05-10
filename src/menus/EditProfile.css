@@ -36,6 +36,12 @@
     width: 100%;
 }
 
-#edit-profile-action-bar>.mc-button {
+#edit-profile-action-bar .mc-button {
     width: 130px;
+}
+
+#profile-action-bar-group {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
 }

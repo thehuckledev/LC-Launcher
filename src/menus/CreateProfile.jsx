@@ -74,10 +74,12 @@ export default function CreateProfileMenu({ setMenu, setProfile, reloadData }) {
                     skinData = undefined;
                 };
             } else if (skin) skinDataURI = skin;
-
-            let newProfile;
-            if (skinDataURI) newProfile = await Manager.profiles.create(username, skinDataURI, UID !== "" ? UID : undefined);
-            else newProfile = await Manager.profiles.create(username, undefined, UID !== "" ? UID : undefined);
+            
+            const newProfile = await Manager.profiles.create({
+                username,
+                skin: skinDataURI || undefined,
+                uid: UID !== "" ? UID : undefined
+            });
 
             await reloadData();
             setProfile(newProfile);
