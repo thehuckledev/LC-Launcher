@@ -27,7 +27,6 @@ export default function Window({ title, showClose = true, showMinimize = true, s
     };
 
     async function toggleMaxRestoreButtons(isMaximized) {
-        console.log(isMaximized)
         if (isMaximized === true) document.body.classList.add("maximized");
         else document.body.classList.remove("maximized");
     };

@@ -73,6 +73,9 @@ export default function OptionsMenu({ setMenu }) {
                 <Button onclick={() => updateSetting('menuMusic', !settings.menuMusic)}>
                     {settings.menuMusic == false ? 'Menu Music: Disabled' : 'Menu Music: Enabled'}
                 </Button>
+                <Button onclick={() => updateSetting('menuMusicPanning', !settings.menuMusicPanning)}>
+                    {settings.menuMusicPanning == false ? 'Menu Music Panning: Disabled' : 'Menu Music Panning: Enabled'}
+                </Button>
                 <Slider
                     label={`Volume: ${settings.volume}%`}
                     min={0}

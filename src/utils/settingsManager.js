@@ -2,13 +2,17 @@ import Neutralino from "@neutralinojs/lib";
 import { defaultSettings } from "../data/defaultSettings.js";
 
 let cache = null;
+let dataDirCache = localStorage.getItem("dataDirectory");
 
 const getDataDirectory = async () => {
+    if (dataDirCache) return dataDirCache;
+
     try {
         const res = localStorage.getItem("dataDirectory");
         if (!res) throw new Error();
         const stats = await Neutralino.filesystem.getStats(res);
         if (!stats.isDirectory) throw new Error();
+        dataDirCache = res;
         return res;
     } catch {
         const path = await resolveDefault("dataDirectory");
@@ -19,6 +23,7 @@ const getDataDirectory = async () => {
         } catch {
             await Neutralino.filesystem.createDirectory(path);
         };
+        dataDirCache = path;
         return path;
     };
 };
@@ -48,8 +53,7 @@ async function writeConfig(config) {
     cache = config;
 
     const path = await getConfigPath();
-    await getDataDirectory();
-    await Neutralino.filesystem.writeFile(path, JSON.stringify(config, null, 2));
+    Neutralino.filesystem.writeFile(path, JSON.stringify(config, null, 2));
 };
 
 async function resolveDefault(name) {
@@ -60,6 +64,7 @@ async function resolveDefault(name) {
 };
 
 export async function loadSettings() {
+    dataDirCache = await getDataDirectory();
     const config = await readConfig();
 
     for (const key in defaultSettings) {
@@ -91,8 +96,14 @@ export async function getSetting(name) {
     return config[name];
 };
 
+export function getSettingSync(name) {
+    if (name === "dataDirectory") return dataDirCache;
+    return cache ? cache[name] : defaultSettings[name];
+};
+
 export async function setSetting(name, value) {
     if (name === "dataDirectory") {
+        dataDirCache = value;
         return localStorage.setItem("dataDirectory", value);
     };
 
@@ -105,11 +116,12 @@ export async function setSetting(name, value) {
 export async function defaultSetting(name) {
     if (name === "dataDirectory") {
         const path = await resolveDefault("dataDirectory");
+        dataDirCache = path;
         return localStorage.setItem("dataDirectory", path);
     };
 
     const config = await readConfig();
-    const value = await resolveDefault("dataDirectory");
+    const value = await resolveDefault(name);
     config[name] = value;
     await writeConfig(config);
     return value;

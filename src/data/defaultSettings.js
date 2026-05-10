@@ -5,6 +5,7 @@ export const defaultSettings = {
     keepLauncherOpen: false,
     volume: 80,
     menuMusic: true,
+    menuMusicPanning: true,
     fullscreen: false,
     discordRPC: true,
     lastProfileID: null,

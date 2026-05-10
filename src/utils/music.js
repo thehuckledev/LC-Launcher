@@ -1,4 +1,5 @@
 import { showToast } from "../components/Toast.jsx";
+import { getSettingSync } from "./settingsManager.js";
 
 const audioCtx = new AudioContext();
 const audioElement = new Audio();
@@ -50,13 +51,19 @@ function startMovement() {
     const moveSound = (time) => {
         if (!panner) return animationId = null;
 
-        angle += 0.02;
+        const isPanningEnabled = getSettingSync("menuMusicPanning");
+        if (isPanningEnabled === false) {
+            panner.positionX.value = 0;
+            panner.positionZ.value = 1;
+        } else {
+            angle += 0.02;
 
-        const x = Math.sin(angle) * 5;
-        const z = Math.cos(angle) * 5;
+            const x = Math.sin(angle) * 5;
+            const z = Math.cos(angle) * 5;
 
-        panner.positionX.value = x;
-        panner.positionZ.value = z;
+            panner.positionX.value = x;
+            panner.positionZ.value = z;
+        };
 
         animationId = requestAnimationFrame(moveSound);
     };
@@ -82,6 +89,8 @@ function getNextIndex() {
 };
 
 async function playSong() {
+    if (!audioElement.paused) return;
+    
     await setupAudio();
 
     const index = getNextIndex();
