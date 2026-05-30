@@ -13,17 +13,33 @@
     "url": "/",
     "enableServer": true,
     "enableNativeAPI": true,
+    "enableExtensions": true,
     "tokenSecurity": "none",
     "logging": {
         "enabled": false,
         "writeToLogFile": false
     },
-    "permissions": [
-        "filesystem",
-        "os",
-        "window",
-        "resources",
-        "updater"
+    "nativeAllowList": [
+        "app.*",
+        "clipboard.*",
+        "computer.*",
+        "custom.*",
+        "debug.*",
+        "events.*",
+        "extensions.*",
+        "filesystem.*",
+        "os.*",
+        "updater.*",
+        "window.*",
+        "resources.*"
+    ],
+    "extensions": [
+        {
+            "id": "lcLib",
+            "commandDarwin": "sh \"${NL_PATH}/libs/lcLib-osx-no-arch.sh\" \"${NL_PATH}\"",
+            "commandLinux": "sh \"${NL_PATH}/libs/lcLib-linux-no-arch.sh\" \"${NL_PATH}\"",
+            "commandWindows": "\"${NL_PATH}\\libs\\lcLib-windows-x64.exe\""
+        }
     ],
     "modes": {
         "window": {
@@ -58,7 +74,7 @@
             "devUrl": "http://localhost:3000",
             "projectPath": "/",
             "initCommand": "npm i",
-            "devCommand": "BROWSER=none npx vite",
+            "devCommand": "cross-env BROWSER=none npx vite",
             "buildCommand": "npx vite build",
             "waitTimeout": 20000
         },

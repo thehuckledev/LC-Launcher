@@ -14,6 +14,8 @@
 // TODO convert LCE world to Java worlds. https://je2be.app
 // TODO make the skin save a slim and non slim version so that LegacyEvolved can use slim skins
 // TODO add multiplayer overlays to show notifications when playing lce
+// TODO add realms which basically uses multiplayer system BUT if someone hosting u join their game otherwise u download world from server and host it, then u save to server when u exit.
+// TODO add world backups online, dont add until 20th march cause neo will kill u.
 
 //+ TODO add maxmimise and minimize back to windows build
 //+ TODO stop crash log from appearing on windows when it didn't crash

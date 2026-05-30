@@ -60,6 +60,11 @@ p {
     width: 100vw;
 }
 
+.windowsOS #app {
+    border-radius: 0;
+    border: none;
+}
+
 .maximized #app {
     border-radius: 0;
 }
@@ -81,7 +86,7 @@ p {
     transition: opacity 0.2s ease;
 }
 
-.maximized #window-background {
+.windowsOS #window-background, .maximized #window-background {
     border-radius: 0;
 }
 
@@ -141,9 +146,13 @@ p {
     width: calc(100% - 2px);
 }
 
-.maximized #titlebar {
-    padding: 0;
+.windowsOS #titlebar {
+    width: 100%;
 }
+
+/*.maximized #titlebar {
+    padding: 0;
+}*/
 
 #main {
     display: flex;
@@ -158,9 +167,9 @@ p {
     overscroll-behavior: none;
 }
 
-#titlebar {
+/*#titlebar {
     padding: 4px;
-}
+}*/
 
 #titlebar #drag-region {
     width: 100%;
@@ -244,7 +253,7 @@ p {
     background: #E81123 !important;
 }
 
-.maximized #close-button:hover {
+.maximized #close-button:hover, .windowsOS #close-button:hover {
     border-radius: 0;
 }
 

@@ -1,4 +1,5 @@
 import Neutralino from "@neutralinojs/lib";
+import Net from "../lib/net";
 
 export default class Download {
     constructor(url, {
@@ -13,14 +14,12 @@ export default class Download {
         this.progress = 0;
         this.status = "idle";
         this.error = null;
-        this.procId = null;
 
         this.eta = 0;
         this.speed = 0;
-        this.lastPercent = -1;
 
-        this.controller = new AbortController();
-        this.blob = null;
+        this.lastTime = Date.now();
+        this.lastDownloadedBytes = 0;
     };
 
     async start(savePath) {
@@ -28,92 +27,63 @@ export default class Download {
         this.emit();
 
         return new Promise(async (resolve, reject) => {
-            try {
-                this.status = "downloading";
-                this.emit();
+            this.status = "downloading";
+            this.emit();
 
-                const cmd = `curl -L --progress-bar "${this.url}" -o "${savePath}"`;
+            const onProgressEvent = (event) => {
+                const packet = event.detail;
+                
+                if (packet.callID !== this.id) return;
 
-                const proc = await Neutralino.os.spawnProcess(cmd);
-                this.procId = proc.id;
+                const now = Date.now();
+                const timeDiff = (now - this.lastTime) / 1000;
 
-                let lastTime = Date.now();
-                let lastPercent = 0;
+                this.progress = packet.percent;
 
-                const onData = async (evt) => {
-                    if (evt.detail.id !== proc.id) return;
-
-                    switch(evt.detail.action) {
-                        case 'stdOut':
-                        case 'stdErr':
-                            console.log(evt.detail.data)
-                            const output = evt.detail.data;
-                            const match = output.match(/[\d.]+/g);
-                            if (match && output.includes("%")) {
-                                const raw = match[match.length - 1];
-                                const percent = parseFloat(raw);
-                                if (!isNaN(percent) && percent <= 100 && percent > this.lastPercent) {
-                                    this.lastPercent = percent;
-                                    this.progress = Math.floor(percent);
-
-                                    const now = Date.now();
-                                    const timeDiff = (now - lastTime) / 1000;
-
-                                    if (timeDiff >= 0.5) {
-                                        const percentDiff = percent - lastPercent;
-                                        this.speed = percentDiff / timeDiff;
-
-                                        if (this.speed > 0) {
-                                            const remaining = 100 - percent;
-                                            this.eta = remaining / this.speed;
-                                        };
-
-                                        lastTime = now;
-                                        lastPercent = percent;
-                                    };
-
-                                    this.emit();
-                                };
-                            };
-                            break;
-                        case 'exit':
-                            await onExit(evt);
-                            break;
+                if (timeDiff >= 0.5) {
+                    const bytesDiff = packet.downloadedBytes - this.lastDownloadedBytes;
+                    const byteSpeed = bytesDiff / timeDiff;
+                    
+                    if (byteSpeed > 0) {
+                        const remaining = packet.totalBytes - packet.downloadedBytes;
+                        this.eta = remaining / byteSpeed;
                     };
+
+                    this.lastTime = now;
+                    this.lastDownloadedBytes = packet.downloadedBytes;
                 };
 
-                const onExit = async (evt) => {
-                    await Neutralino.events.off("spawnedProcess", onData);
+                this.emit();
+            };
 
-                    this.progress = 100;
-                    this.status = "finished";
-                    resolve();
+            Neutralino.events.on("downloadProgress", onProgressEvent);
 
-                    this.speed = 0;
-                    this.eta = 0;
-                    this.lastPercent = -1;
-                    this.emit();
-                };
+            try {
+                const response = await Net.download(this.url, savePath, {}, this.id);
 
-                Neutralino.events.on("spawnedProcess", onData);
+                Neutralino.events.off("downloadProgress", onProgressEvent);
+
+                this.progress = 100;
+                this.status = "finished";
+                this.speed = 0;
+                this.eta = 0;
+                this.emit();
+                resolve(response);
             } catch (err) {
+                Neutralino.events.off('downloadProgress', onProgressEvent);
+                
                 this.status = "error";
                 this.error = err.message;
                 this.speed = 0;
                 this.eta = 0;
-                this.lastPercent = -1;
 
                 this.emit();
-                await this.cancel();
                 reject(err);
             };
         });
     };
 
     async cancel() {
-        if (!this.procId) return;
-        
-        await Neutralino.os.updateSpawnedProcess(this.procId, 'exit');
         this.status = "cancelled";
         this.speed = 0;
         this.eta = 0;

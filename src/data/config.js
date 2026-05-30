@@ -6,7 +6,7 @@ export default {
     updateURL: "https://update.lclauncher.huckle.dev/req/v1/?m=true",
 
     rpcClientID: "1493892302312050789",
-    rpcIcon: "https://git.huckle.dev/TheHuckle/LegacyCommunityLauncher/raw/branch/main/assets/icon_padding.png",
+    rpcIcon: "icon",
 
     button1Label: "Download Launcher",
     button1Url: "https://lce-launcher.com",

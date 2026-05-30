@@ -9,3 +9,10 @@ bin
 public
 .storage
 neutralinojs.log
+_junk
+src-lib/build*
+libs/lcLib-linux-arm64
+libs/lcLib-linux-x64
+libs/lcLib-osx-arm64
+libs/lcLib-osx-x64
+libs/lcLib-windows-x64.exe

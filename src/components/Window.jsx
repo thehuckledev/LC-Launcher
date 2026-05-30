@@ -243,6 +243,8 @@ export default function Window({ title, showClose = true, showMinimize = true, s
 
             toggleMaxRestoreButtons(false);
 
+            if (NL_OS === "Windows") document.body.classList.add("windowsOS");
+
             // this doesnt work, some neutralino bug
             //Neutralino.events.on("windowMaximize", () => toggleMaxRestoreButtons(true));
             //Neutralino.events.on("windowRestore", () => toggleMaxRestoreButtons(false));

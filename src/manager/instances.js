@@ -208,31 +208,9 @@ export class Instances {
                                                     'YES_NO', 'WARNING');
             };
             
-            // remove install bit
-            if (keepData == "YES") await this.manager.exec.backupPreserved(instDir);
-            try {
-                await Neutralino.filesystem.remove(contentDir); // this doesn't work for symlinks
-                try {
-                    if (NL_OS === "Windows") {
-                        const winLink = contentDir.replace(/\//g, '\\');
-                        console.log(`rmdir "${winLink}"`)
-                        await Neutralino.os.execCommand(`rmdir "${winLink}"`);
-                        await new Promise(r => setTimeout(r, 2000));
-                    } else {
-                        await Neutralino.os.execCommand(`rm "${contentDir}"`);
-                    };
-                } catch (e) {
-                    await Neutralino.filesystem.remove(contentDir);
-                };
-            } catch {
-                return showToast("Reinstall: Failed to remove existing build");
-            };
-            await this.manager.utils.ensureDir(contentDir);
-
             // reinstall bit
             await this.update(id, { installed: false });
-            await this.manager.exec.installInstance(instance);
-            if (keepData == "YES") await this.manager.exec.restorePreserved(instDir);
+            await this.manager.exec.installInstance(instance, false, keepData === "YES");
         } catch(e) {
             console.error("Reinstall failed:", e);
         } finally {

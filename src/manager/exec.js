@@ -1,4 +1,8 @@
 import Neutralino from "@neutralinojs/lib";
+
+import Net from '../lib/net.js';
+import Filesystem from "../lib/filesystem.js";
+
 import { showToast } from "../components/Toast";
 import { getSetting } from "../utils/settingsManager.js";
 import Download from "../utils/download.js";
@@ -112,43 +116,21 @@ export class Exec {
         await Neutralino.filesystem.remove(backupDir);
     };
 
-    async installInstance(instance, isUpdate = false) {
+    async installInstance(instance, isUpdate = false, keepData = true) {
         try {
             const instancePath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instance.id);
             //const contentDir = await Neutralino.filesystem.getJoinedPath(instancePath, 'content'); // this resolves to symlink dest which causes issues when deleting
             const contentDir = `${instancePath}/content`;
 
             //await Neutralino.filesystem.remove(contentDir).catch(e=>{}); // this doesn't work for symlinks
-            try {
-                if (NL_OS === "Windows") {
-                    const winLink = contentDir.replace(/\//g, '\\');
-                    console.log(`rmdir "${winLink}"`)
-                    await Neutralino.os.execCommand(`rmdir "${winLink}"`);
-                    await new Promise(r => setTimeout(r, 2000));
-                } else {
-                    await Neutralino.os.execCommand(`rm "${contentDir}"`);
-                };
-            } catch (e) {
-                await Neutralino.filesystem.remove(contentDir).catch(e => {});
-            };
 
             if (instance.serviceType === "LOCAL") {
-                const targetFolder = instance.repo.trim();
-
-                if (NL_OS === "Windows") {
-                    const winLink = contentDir.replace(/\//g, '\\');
-                    const winTarget = targetFolder.replace(/\//g, '\\');
-                    
-                    const cmd = `mklink /J "${winLink}" "${winTarget}"`;
-                    const res = await Neutralino.os.execCommand(cmd);
-                    
-                    if (res.stdErr && res.stdErr.trim().length > 0) {
-                        console.error("Junction error output:", res.stdErr);
-                        return showToast(`Failed to link folder: ${res.stdErr}`);
-                    };
-                } else {
-                    await Neutralino.os.execCommand(`ln -s "${targetFolder}" "${contentDir}"`);
+                try {
+                    await Filesystem.unlink(contentDir).catch(e => {});
+                } catch(e) {
+                    await Neutralino.filesystem.remove(contentDir).catch(e => {});
                 };
+                await Filesystem.symlink(contentDir, instance.repo.trim());
                 
                 instance.installed = true;
                 await this.manager.utils.writeJSON(`${instancePath}/instance.json`, instance);
@@ -156,6 +138,10 @@ export class Exec {
             };
 
             if (!navigator.onLine) return showToast("Error: You must be online to install an instance");
+
+            if (keepData === true) await this.backupPreserved(instancePath);
+
+            await Neutralino.filesystem.remove(contentDir).catch(e => {});
 
             let downloadUrl = "";
             let archiveName = "";
@@ -188,40 +174,15 @@ export class Exec {
             const download = new Download(downloadUrl, { label: `Downloading instance${isUpdate ? ' update' : ''}...` });
             try {
                 await download.start(zipPath);
-
-                // unlock files before unzip
-                if (NL_OS === "Windows")
-                    await Neutralino.os.execCommand(`powershell -NoProfile -Command "Get-ChildItem -Path '${zipPath}' | Unblock-File"`);
             } catch(e) {
                 console.error(e);
                 return showToast("Error: Asset download failed");
             };
 
             console.log("Extracting build...");
-            await this.backupPreserved(instancePath);
             const unzipContent = new Unzip(zipPath, contentDir, { label: `Extracting instance${isUpdate ? ' update' : ''}...` });
             try {
                 await unzipContent.start();
-
-                // unlock files before moving
-                if (NL_OS === "Windows")
-                    await Neutralino.os.execCommand(`powershell -NoProfile -Command "Get-ChildItem -Path '${contentDir}' -Recurse | Unblock-File"`);
-
-                // fix some zips having folders but some using root
-                const entries = await Neutralino.filesystem.readDirectory(contentDir);
-                if (entries.length === 1 && entries[0].type === 'DIRECTORY') {
-                    const rootDirName = entries[0].entry;
-                    const rootDirPath = await Neutralino.filesystem.getJoinedPath(contentDir, rootDirName);
-                    
-                    const rootFiles = await Neutralino.filesystem.readDirectory(rootDirPath);
-                    for (const file of rootFiles) {
-                        const srcPath = await Neutralino.filesystem.getJoinedPath(rootDirPath, file.entry);
-                        const destPath = await Neutralino.filesystem.getJoinedPath(contentDir, file.entry);
-                        
-                        await Neutralino.filesystem.move(srcPath, destPath);
-                    };
-                    await Neutralino.filesystem.remove(rootDirPath);
-                };
             } catch(e) {
                 console.error(e);
                 try { // remove zip
@@ -229,86 +190,13 @@ export class Exec {
                 } catch { }
                 return showToast("Error: Asset unzip failed");
             };
-            await this.restorePreserved(instancePath);
+            if (keepData === true) await this.restorePreserved(instancePath);
 
             instance.installed = true;
 
             await this.manager.utils.writeJSON(`${instancePath}/instance.json`, instance);
             console.log("Instance installed");
             showToast(`Instance${isUpdate ? ' update' : ''} installed`);
-            
-            /*if (!navigator.onLine) return showToast("Error: You must be online to install an instance");
-
-            const release = await this.manager.remotes.get(instance, instance.tag);
-            if (!release) return showToast("Error: Release not found");
-
-            if (!release.assets || release.assets.length === 0)
-                return showToast("Error: No assets found in this release");
-
-            const asset = instance.target
-                ? release.assets.find(a => a.name === instance.target)
-                : release.assets[0];
-            if (!asset) return showToast("Error: Required asset not found in release");
-
-            const instancePath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instance.id);
-            const zipPath = await Neutralino.filesystem.getJoinedPath(instancePath, instance.target);
-
-            await this.manager.utils.ensureDir(await Neutralino.filesystem.getJoinedPath(instancePath, 'content'));
-
-            console.log("Downloading build...");
-            const download = new Download(asset.browser_download_url, { label: `Downloading instance${isUpdate ? ' update' : ''}...` });
-            try {
-                await download.start(zipPath);
-
-                // unlock files before unzip
-                if (NL_OS === "Windows")
-                    await Neutralino.os.execCommand(`powershell -NoProfile -Command "Get-ChildItem -Path '${zipPath}' | Unblock-File"`);
-            } catch(e) {
-                console.error(e);
-                return showToast("Error: Asset download failed");
-            };
-
-            console.log("Extracting build...");
-            await this.backupPreserved(instancePath);
-            const contentDir = `${instancePath}/content`;
-            const unzipContent = new Unzip(zipPath, contentDir, { label: `Extracting instance${isUpdate ? ' update' : ''}...` });
-            try {
-                await unzipContent.start();
-
-                // unlock files before moving
-                if (NL_OS === "Windows")
-                    await Neutralino.os.execCommand(`powershell -NoProfile -Command "Get-ChildItem -Path '${contentDir}' -Recurse | Unblock-File"`);
-
-                // fix some zips having folders but some using root
-                const entries = await Neutralino.filesystem.readDirectory(contentDir);
-                if (entries.length === 1 && entries[0].type === 'DIRECTORY') {
-                    const rootDirName = entries[0].entry;
-                    const rootDirPath = await Neutralino.filesystem.getJoinedPath(contentDir, rootDirName);
-                    
-                    const rootFiles = await Neutralino.filesystem.readDirectory(rootDirPath);
-                    for (const file of rootFiles) {
-                        const srcPath = await Neutralino.filesystem.getJoinedPath(rootDirPath, file.entry);
-                        const destPath = await Neutralino.filesystem.getJoinedPath(contentDir, file.entry);
-                        
-                        await Neutralino.filesystem.move(srcPath, destPath);
-                    };
-                    await Neutralino.filesystem.remove(rootDirPath);
-                };
-            } catch(e) {
-                console.error(e);
-                try { // remove zip
-                    await Neutralino.filesystem.remove(`${this.manager.instancesDir}/${instance.id}/${instance.target}`);
-                } catch { }
-                return showToast("Error: Asset unzip failed");
-            };
-            await this.restorePreserved(instancePath);
-
-            instance.assetId = asset.id;
-            instance.installed = true;
-
-            await this.manager.utils.writeJSON(`${instancePath}/instance.json`, instance);
-            console.log("Instance installed");
-            showToast(`Instance${isUpdate ? ' update' : ''} installed`);*/
         } catch (err) {
             console.error(err);
             showToast(`Error: ${err.message}`);
@@ -317,7 +205,7 @@ export class Exec {
                 const targetArchive = instance.target || "download.zip";
                 const archivePath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instance.id, targetArchive);
                 await Neutralino.filesystem.remove(archivePath);
-            } catch {}
+            } catch {};
         };
     };
 
@@ -346,7 +234,8 @@ export class Exec {
             if (!dataURI) {
                 await this.manager.utils.ensureDir(`${baseDir}/Common/res/mob`);
                 await Neutralino.filesystem.remove(filePath).catch((e)=>{});
-                await Neutralino.resources.extractFile(`/public${charPng}`, filePath);
+                if(NL_ARGS.includes("--neu-dev-extension")) await Neutralino.resources.extractFile(`/src${charPng}`, filePath); // dev mode acts differently as the resources path is different due to vite bundling
+                else await Neutralino.resources.extractFile(`/public${charPng}`, filePath);
                 return console.log("Skin written to:", filePath);
             };
             
@@ -407,8 +296,15 @@ export class Exec {
 
             showToast(`Fetching latest runtime...`);
 
-            let apiResponse = await Neutralino.os.execCommand(`curl -H "Accept: application/vnd.github+json" -H "User-Agent: LC-Launcher" -H "X-GitHub-Api-Version: 2026-03-10" -s https://api.github.com/repos/${repo}/releases/latest`);
-            let releaseData = JSON.parse(apiResponse.stdOut);
+            let apiResponse = await Net.get(`https://api.github.com/repos/${repo}/releases/latest`, {
+                headers: {
+                    "Accept": "application/vnd.github+json",
+                    "User-Agent": "LC-Launcher",
+                    "X-GitHub-Api-Version": "2026-03-10"
+                }
+            });
+            if (!apiResponse.ok) throw new Error("Releases API not reachable");
+            let releaseData = apiResponse.data;
 
             let asset = releaseData.assets.find(a => a.name.endsWith('.tar.xz') || a.name.endsWith('.tar.gz'));
             if (!asset) throw new Error("No archive found in runtime release");
@@ -426,16 +322,12 @@ export class Exec {
             await runtimeUnzip.start();
 
             if (NL_OS === "Darwin") {
-                const internalRuntimeSource = `${runtimeTempDir}/Game Porting Toolkit.app/Contents/Resources/wine`;
+                const internalRuntimeSource = `${runtimeTempDir}/Contents/Resources/wine`;
                 await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
                 await Neutralino.os.execCommand(`xattr -rd com.apple.quarantine "${runtimeDir}"`);
-            } else {
-                const protonDirs = await Neutralino.filesystem.readDirectory(runtimeTempDir);
-                if (protonDirs.length < 1) throw new Error("No runtime found after download");
-                const protonDir = protonDirs[0].entry;
-                const internalRuntimeSource = `${runtimeTempDir}/${protonDir}/files`;
-                await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
             };
+            await Neutralino.os.execCommand(`chmod -R 755 "${runtimeDir}"`);
+
             await Neutralino.filesystem.remove(archivePath).catch(()=>{});
             await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
 
@@ -603,7 +495,7 @@ export class Exec {
                         const winePath = `${runtimePath}/bin/wine64`;
                         wineServerBin = `${runtimePath}/bin/wineserver`;
                         
-                        const env = `WINEPREFIX="${prefix}" WINEESYNC=1 MTL_HUD_ENABLED=0 WINEDLLOVERRIDES="d3d11=n,b;dxgi=n,b"`;
+                        const env = `WINEPREFIX="${prefix}" WINEESYNC=1 MTL_HUD_ENABLED=0`;
                         bin = `${env} "${winePath}"`;
                         
                         try {

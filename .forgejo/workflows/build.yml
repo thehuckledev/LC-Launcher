@@ -32,7 +32,7 @@ jobs:
               with:
                   tag: "nightly"
                   name: "Nightly Build"
-                  body: "This is generated at 00:00 UTC every day from the main branch"
+                  body: "If you have any issues with the builds below, please contact an LC Launcher dev in our discord!"
                   prerelease: true
                   allowUpdates: true
                   replacesArtifacts: true

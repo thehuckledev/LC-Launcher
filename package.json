@@ -29,10 +29,12 @@
     "scripts": {
         "dev": "node ./build-scripts/dev.js",
         "build": "node ./build-scripts/build.js",
-        "build-debug": "node ./build-scripts/build.js --debug"
+        "build-debug": "node ./build-scripts/build.js --debug",
+        "build-lib": "bun run ./build-scripts/build-lib.js"
     },
     "dependencies": {
         "@neutralinojs/lib": "^6.5.0",
+        "cross-env": "^10.1.0",
         "motion": "^12.38.0",
         "nano-markdown": "^1.2.2",
         "preact": "^10.29.0",

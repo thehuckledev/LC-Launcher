@@ -1,5 +1,6 @@
 import nmd from 'nano-markdown';
 
+import Net from '../lib/net.js';
 import { showToast } from '../components/Toast.jsx';
 
 export class Remotes {
@@ -52,13 +53,12 @@ export class Remotes {
             };
         };
 
-        const res = await fetch(this.getReleasesAPI(instance), {
-            cache: "no-store",
+        const res = await Net.get(this.getReleasesAPI(instance), {
             headers
         });
-
-        const data = await res.json();
-        if (!Array.isArray(data)) {
+        
+        const data = res?.data;
+        if (!Array.isArray(data) || res.ok !== true) {
             console.error("API Error or Rate Limit:", data);
             showToast("Error: Release API Error");
             return [];

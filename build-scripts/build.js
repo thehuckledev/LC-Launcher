@@ -20,6 +20,15 @@ function loadConfig() {
     return cfg;
 };
 
+function toggleTransparency(on) {
+    const cfg = JSON.parse(fs.readFileSync(CONF, "utf-8"));
+
+    if (on) cfg.modes.window.transparent = true;
+    else cfg.modes.window.transparent = false;
+
+    fs.writeFileSync(CONF, JSON.stringify(cfg, null, 4));
+};
+
 function patchConfig(on) {
     const cfg = JSON.parse(fs.readFileSync(CONF, "utf-8"));
 
@@ -96,7 +105,7 @@ function buildLinux(cfg) {
         run(`cp "./dist/${binary}/resources.neu" "${outDir}/"`);
 
         copyIfExists(`./dist/${binary}/extensions`, outDir);
-        copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.endsWith("linux"));
+        copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.includes("linux") && (f.includes(arch) || f.includes("no-arch")));
 
         const tarName = `./dist/${appName}-linux-${arch}.tar.gz`;
         run(`tar -cJf "${tarName}" -C ./dist/linux_${arch} "${appName}"`);
@@ -154,7 +163,7 @@ function buildMac(cfg) {
         if (appIcon && exists(appIcon)) run(`cp "${appIcon}" "${appDir}/Contents/Resources/"`);
 
         copyIfExists(`./dist/${binary}/extensions`, `${appDir}/Contents/Resources/`);
-        copyLibs(`./libs`, `${appDir}/Contents/Resources/libs/`, (f) => f.endsWith("osx"));
+        copyLibs(`./libs`, `${appDir}/Contents/Resources/libs/`, (f) => f.includes("osx") && (f.includes(arch) || f.includes("no-arch")));
 
         const zipName = `./dist/${appName}-mac-${arch}.zip`;
         run(`cd ./dist && zip -9 -rq "${path.basename(zipName)}" "mac_${arch}"`);
@@ -187,7 +196,7 @@ function buildWin(cfg) {
         run(`cp "./dist/${binary}/resources.neu" "${outDir}/"`);
 
         copyIfExists(`./dist/${binary}/extensions`, outDir);
-        copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.endsWith(".exe"));
+        copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.includes("windows") && (f.includes(arch) || f.includes("no-arch")));
 
         const zipName = `./dist/${appName.replace(".exe", "")}-win-${arch}.zip`;
         run(`cd ./dist && zip -9 -rq "${path.basename(zipName)}" "win_${arch}"`);
@@ -205,7 +214,12 @@ patchConfig(true);
 buildBase();
 buildLinux(cfg);
 buildMac(cfg);
+
+toggleTransparency(false);
+buildBase();
 buildWin(cfg);
+toggleTransparency(true);
+
 patchConfig(false);
 
 console.log("\nAll platforms built.\n");
