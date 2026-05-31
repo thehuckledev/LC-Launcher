@@ -12,7 +12,6 @@
         exec: "Minecraft.Client",
         target: "minecraft-client-linux.zip",
         compatibilityLayer: "DIRECT",
-        customArgs: "",
         supportedPlatforms: ["Linux"],
         supportsSlimSkins: false
     },
@@ -41,7 +40,6 @@
         exec: "Minecraft.Client.exe",
         target: "LCEWindows64.zip",
         compatibilityLayer: "RUNTIME",
-        customArgs: "",
         supportedPlatforms: ["Windows","Linux","Darwin"],
         supportsSlimSkins: false
     },
@@ -65,7 +63,6 @@
         exec: "Minecraft.Client.exe",
         target: "LCEWindows64.zip",
         compatibilityLayer: "RUNTIME",
-        customArgs: "",
         supportedPlatforms: ["Windows","Linux","Darwin"],
         supportsSlimSkins: false
     },
@@ -85,7 +82,6 @@ export const defaultInstances = [
         exec: "Minecraft.Client.exe",
         target: "LCE-Revelations-Client-Win64.zip",
         compatibilityLayer: "RUNTIME",
-        customArgs: "",
         supportedPlatforms: ["Windows","Linux","Darwin"],
         supportsSlimSkins: false
     },
@@ -109,7 +105,6 @@ export const defaultInstances = [
         exec: "Minecraft.Client.exe",
         target: "neoLegacyWindows64.zip",
         compatibilityLayer: "RUNTIME",
-        customArgs: "",
         supportedPlatforms: ["Windows","Linux","Darwin"],
         supportsSlimSkins: true
     },
@@ -133,7 +128,6 @@ export const defaultInstances = [
         exec: "Minecraft.Client.exe",
         target: "LCEWindows64.zip",
         compatibilityLayer: "RUNTIME",
-        customArgs: "",
         supportedPlatforms: ["Windows","Linux","Darwin"],
         supportsSlimSkins: false
     }
