@@ -60,9 +60,9 @@ function ensureDependencies() {
     };
 };
 
-function buildBase() {
+function buildBase(wipe = true) {
     console.log("\nBuilding Neutralino app...");
-    run(`rm -rf ./dist/`);
+    if (!!wipe) run(`rm -rf ./dist/`);
     run("npx neu build");
 };
 
@@ -108,7 +108,8 @@ function buildLinux(cfg) {
         copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.includes("linux") && (f.includes(arch) || f.includes("no-arch")));
 
         const tarName = `./dist/${appName}-linux-${arch}.tar.gz`;
-        run(`tar -cJf "${tarName}" -C ./dist/linux_${arch} "${appName}"`);
+        const envPrefix = process.platform === 'darwin' ? 'export COPYFILE_DISABLE=1 && ' : '';
+        run(`${envPrefix}tar --exclude="._*" --exclude=".DS_Store" --exclude="__MACOSX" -cJf "${tarName}" -C ./dist/linux_${arch} "${appName}"`);
 
         console.log(`Created ${tarName}`);
     };
@@ -166,7 +167,7 @@ function buildMac(cfg) {
         copyLibs(`./libs`, `${appDir}/Contents/Resources/libs/`, (f) => f.includes("osx") && (f.includes(arch) || f.includes("no-arch")));
 
         const zipName = `./dist/${appName}-mac-${arch}.zip`;
-        run(`cd ./dist && zip -9 -rq "${path.basename(zipName)}" "mac_${arch}"`);
+        run(`cd ./dist && zip -9 -rq "${path.basename(zipName)}" "mac_${arch}" -x "**/._*" -x "**/.DS_Store" -x "**/__MACOSX"`);
 
         console.log(`Created ${zipName}`);
     };
@@ -199,7 +200,7 @@ function buildWin(cfg) {
         copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.includes("windows") && (f.includes(arch) || f.includes("no-arch")));
 
         const zipName = `./dist/${appName.replace(".exe", "")}-win-${arch}.zip`;
-        run(`cd ./dist && zip -9 -rq "${path.basename(zipName)}" "win_${arch}"`);
+        run(`cd ./dist && zip -9 -rq "${path.basename(zipName)}" "win_${arch}" -x "**/._*" -x "**/.DS_Store" -x "**/__MACOSX"`);
 
         console.log(`Created ${zipName}`);
     };
@@ -216,7 +217,7 @@ buildLinux(cfg);
 buildMac(cfg);
 
 toggleTransparency(false);
-buildBase();
+buildBase(false);
 buildWin(cfg);
 toggleTransparency(true);
 

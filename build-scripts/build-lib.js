@@ -45,14 +45,15 @@ for (const [target, fileName] of TARGETS) {
         }
     });
 
-    if (target.includes("linux")) {
+    // this just breaks bun for every os :/
+    /*if (target.includes("linux")) {
         try {
             console.log(`Compressing ${target} with UPX...`);
             execSync(`upx --best --lzma "${outfile}"`, { stdio: "ignore" });
         } catch (e) {
             console.log(`Make sure you have UPX installed on your system for smaller builds`);
         };
-    };
+    };*/
 
     if (target.includes("darwin"))
         execSync(`codesign --sign - --force --preserve-metadata=entitlements,requirements,flags,runtime "${outfile}"`, { stdio: "ignore" });
