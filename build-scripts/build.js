@@ -199,8 +199,12 @@ function buildWin(cfg) {
         copyIfExists(`./dist/${binary}/extensions`, outDir);
         copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.includes("windows") && (f.includes(arch) || f.includes("no-arch")));
 
+        const zipParent = path.join("./dist", `win_${arch}`);
         const zipName = `./dist/${appName.replace(".exe", "")}-win-${arch}.zip`;
-        run(`cd ./dist && zip -9 -rq "${path.basename(zipName)}" "win_${arch}" -x "**/._*" -x "**/.DS_Store" -x "**/__MACOSX"`);
+        if (process.platform === "win32")
+            run(`powershell Compress-Archive -Path "${zipParent}\\*" -DestinationPath "${zipName}" -Force`);
+        else
+            run(`cd ./dist && zip -9 -rq "${path.basename(zipName)}" "win_${arch}" -x "**/._*" -x "**/.DS_Store" -x "**/__MACOSX"`);
 
         console.log(`Created ${zipName}`);
     };
