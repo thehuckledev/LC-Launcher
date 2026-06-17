@@ -19,6 +19,17 @@ const TARGETS = [
 
 (async() => {
 
+const targetArg = process.argv[2];
+
+const buildList = targetArg
+    ? TARGETS.filter(([target]) => target.includes(targetArg))
+    : TARGETS;
+
+if (buildList.length === 0) {
+    console.error(`Error: Target '${targetArg}' not found`);
+    process.exit(1);
+};
+
 const cwd = join(__dirname, "../src-lib");
 if (!fs.existsSync(join(cwd, "node_modules"))) {
     console.log("\nInstalling Node Modules...");

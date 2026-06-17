@@ -7,9 +7,15 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: windows-latest
+            target: windows
+          - os: ubuntu-latest
+            target: linux
+          - os: macos-latest
+            target: darwin
     runs-on: ${{ matrix.os }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,11 +31,8 @@ jobs:
           node-version: 24
 
       - name: Build lib
-        working-directory: src-lib
         run: |
-          bun install
-          cd ../
-          npm run build-lib
+          node ./build-scripts/build-lib.js ${{ matrix.target }}
           
       - name: Install dependencies
         run: npm install
