@@ -44,7 +44,7 @@ jobs:
                   name: Dev Build ${{ github.run_id }}
                   generate_release_notes: true
                   files: |
-                      dist/**/*.exe
-                      **/*.tar.gz
+                      dist/*.tar.gz
+                      dist/*.zip
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
