@@ -24,8 +24,8 @@ BrandingText "${APPNAME}"
 !include "Sections.nsh"
 
 !define MUI_ABORTWARNING
-!define MUI_ICON "./assets/nsis/icon_small.ico"
-!define MUI_UNICON "./assets/nsis/icon_uninstall.ico"
+!define MUI_ICON "../assets/nsis/icon_small.ico"
+!define MUI_UNICON "../assets/nsis/icon_uninstall.ico"
 
 !define MUI_WELCOMEPAGE_TITLE "Install ${APPNAME} ${VERSION}"
 !define MUI_WELCOMEPAGE_TEXT "This will install ${APPNAME} ${VERSION} on your computer.$\r$\n$\r$\nClick Next to continue."
