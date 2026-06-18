@@ -46,7 +46,7 @@ BrandingText "${APPNAME}"
 
 Function .onGUIInit
     SetCtlColors $HWNDPARENT "FFFFFF" "2D2D2D"
-FunctionEnds
+FunctionEnd
 
 Function .onGuiPageChange
     SetCtlColors $HWNDPARENT "FFFFFF" "2D2D2D"
