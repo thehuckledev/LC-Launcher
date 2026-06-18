@@ -57,6 +57,7 @@ export class Manager {
             await Neutralino.filesystem.writeFile(this.profilesFile, JSON.stringify([], null, 2));
         };
 
-        window.manager = this;
+        // this causes crash
+        //window.manager = this;
     };
 };

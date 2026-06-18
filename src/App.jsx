@@ -47,44 +47,28 @@ export default function App() {
     const Manager = useManager();
 
     async function loadData(loadedSettings = settings) {
-        console.log(101);
         const profiles = await Manager.profiles.list();
-        console.log(102);
         const instances = await Manager.instances.list();
-        console.log(103);
         const instancesData = await Promise.all(instances.map(id => Manager.instances.get(id)));
-        console.log(104);
+        
         setProfilesList(profiles);
-        console.log(105);
         setInstancesList(instancesData);
-        console.log(106);
 
         if (profiles.length > 0) {
-            console.log(107);
             const lastProfile = profiles.find(p => p.id === loadedSettings.lastProfileID);
-            console.log(108);
             if (lastProfile) setProfile(lastProfile);
             else setProfile(profiles[0]);
-            console.log(109);
         } else setProfile(null);
 
-        console.log(110);
-
         if (instances.length > 0) {
-            console.log(111);
             const instancesObj = await Promise.all(instances.map(id => Manager.instances.get(id)));
-            console.log(112);
             const defaultInst = instancesObj.find(i => i.id === config.defaultInstance);
-            console.log(113);
             const lastInst = instancesObj.find(i => i.id === loadedSettings.lastInstanceID);
-            console.log(114);
 
             if (lastInst) setInstance(lastInst);
             else if (defaultInst) setInstance(defaultInst);
             else setInstance(instancesObj[0]);
         } else setInstance(null);
-
-        console.log(115);
     };
 
     async function syncDefaultInstances() {

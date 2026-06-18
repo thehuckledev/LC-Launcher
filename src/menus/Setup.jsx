@@ -107,23 +107,15 @@ export default function SetupMenu({ setMenu, reloadData }) {
             // install runtime
             if (canInstallRuntime === true && installRuntime === true) await Manager.exec.installRuntimeHelper();
 
-            console.log(7);
             await updateSetting('hasSetup', true);
-            console.log(8);
             await reloadData();
 
-            console.log(9);
             showToast("Setup saved and completed");
-            console.log(10);
             setMenu('setupoptions');
-            console.log("SETUP optiONSS PAGEEEE LOADEEE :DDD HECK YEAH MAN");
         } catch (err) {
-            console.log(11);
             console.error(err);
-            console.log(12);
             showToast("Failed to save setup: " + err.message);
         } finally {
-            console.log(13);
             setProcessing(false);
         };
     };
