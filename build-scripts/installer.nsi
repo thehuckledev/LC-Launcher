@@ -35,7 +35,7 @@ BrandingText "${APPNAME}"
 !define MUI_FINISHPAGE_LINK "Visit GitHub"
 !define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/thehuckledev/LC-Launcher"
 
-!define MUI_WELCOMEFINISHPAGE_BITMAP "./assets/nsis/mui_sidebar.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "../assets/nsis/mui_sidebar.bmp"
 
 ; Installer pages
 !insertmacro MUI_PAGE_WELCOME
