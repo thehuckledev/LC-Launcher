@@ -44,6 +44,14 @@ BrandingText "${APPNAME}"
 
 !define MUI_BGCOLOR "2D2D2D"
 
+Function .onGUIInit
+    SetCtlColors $HWNDPARENT "FFFFFF" "2D2D2D"
+FunctionEnds
+
+Function .onGuiPageChange
+    SetCtlColors $HWNDPARENT "FFFFFF" "2D2D2D"
+FunctionEnd
+
 ; Installer pages
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "..\LICENSE"
@@ -57,16 +65,6 @@ BrandingText "${APPNAME}"
 !insertmacro MUI_UNPAGE_INSTFILES
 
 !insertmacro MUI_LANGUAGE "English"
-
-
-
-Function .onGUIInit
-    SetCtlColors $HWNDPARENT "FFFFFF" "2D2D2D"
-FunctionEnds
-
-Function .onGuiPageChange
-    SetCtlColors $HWNDPARENT "FFFFFF" "2D2D2D"
-FunctionEnd
 
 
 
