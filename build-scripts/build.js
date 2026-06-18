@@ -115,6 +115,11 @@ if [ -z $APPDIR ]; then
     APPDIR=$(readlink -f $(dirname "$0"))
 fi
 
+# stops double window titlebar
+if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+    export GDK_BACKEND=x11
+fi
+
 exec $APPDIR/usr/bin/${safeAppName} "$@"`;
         fs.writeFileSync(`${outDir}/AppRun`, appRun, { mode: 0o755 });
 
