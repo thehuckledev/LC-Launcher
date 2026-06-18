@@ -49,7 +49,30 @@ BrandingText "${APPNAME}"
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 
+; Dark mode
+!define MUI_INSTFILESPAGE_COLORS "FFFFFF 2D2D2D"
+!define MUI_LICENSEPAGE_BGCOLOR "2D2D2D"
+!define MUI_LICENSEPAGE_TEXTCOLOR "FFFFFF"
+
+!define MUI_BGCOLOR "2D2D2D"
+
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_LICENSE "License.txt"
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+
 !insertmacro MUI_LANGUAGE "English"
+
+
+
+Function .onGUIInit
+    SetCtlColors $HWNDPARENT "FFFFFF" "2D2D2D"
+FunctionEnds
+
+Function .onGuiPageChange
+    SetCtlColors $HWNDPARENT "FFFFFF" "2D2D2D"
+FunctionEnd
 
 
 
