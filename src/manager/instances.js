@@ -219,77 +219,50 @@ export class Instances {
     };
 
     async getScreenshots(id) {
-        const screenshotPath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id, "content/screenshots");
-
-        try {
-            const entries = await Neutralino.filesystem.readDirectory(screenshotPath);
-            return entries
-                    .filter(e => {
-                        const dashDateParts = e.entry?.split("_");
-                        if (dashDateParts.length < 2) return false;
-
-                        return e.type === 'FILE' && e.entry.endsWith('.png');
-                    })
-                    .map(e => {
-                        const dashDateParts = e.entry?.split("_");
-                        const dashDate = dashDateParts[0]?.replaceAll("-", "/");
-
-                        return {
-                            name: e.entry,
-                            time: dashDate,
-                            path: `${screenshotPath}/${e.entry}`
-                        };
-                    });
-        } catch (e) {
-            return [];
-        };
-    };
-
-    async getScreenshots(id) {
         const screenshotPaths = [
             await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id, "content/screenshots"),
             await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id, "content/Windows64/GameHDD")
         ];
 
-        try {
-            const allDirScreenshots = await Promise.all(
-                screenshotPaths.map(async (screenshotPath) => {
-                    try {
-                        const entries = await Neutralino.filesystem.readDirectory(screenshotPath);
-                        return entries.flatMap(e => {
-                            if (e.type !== 'FILE' || !e.entry.endsWith('.png')) return [];
+        const results = [];
+        for (const screenshotPath of screenshotPaths) {
+            try {
+                const stats = await Neutralino.filesystem.getStats(screenshotPath);
+                if (!stats.isDirectory) continue; 
+                
+                const entries = await Neutralino.filesystem.readDirectory(screenshotPath);
+                const screenshotObj = entries.flatMap(e => {
+                    if (e.type !== 'FILE' || !e.entry.endsWith('.png')) return [];
 
-                            const dashDateAndTimeParts = e.entry.split("_");
-                            if (dashDateAndTimeParts.length < 2) return [];
+                    const dashDateAndTimeParts = e.entry.split("_");
+                    if (dashDateAndTimeParts.length < 2) return [];
 
-                            const [datePart, timePart] = dashDateAndTimeParts;
-                            const dashDateParts = datePart.split("-");
-                            if (dashDateParts.length < 3) return [];
+                    const [datePart, timePart] = dashDateAndTimeParts;
+                    const dashDateParts = datePart.split("-");
+                    if (dashDateParts.length < 3) return [];
 
-                            const [YYYY, MM, DD] = dashDateParts;
-                            const dashDate = `${DD}/${MM}/${YYYY}`;
-                            
-                            const strippedTime = timePart.replace(".png", "").replaceAll(".", ":");
-                            const dashDateAndTime = `${dashDate} at ${strippedTime}`;
+                    const [YYYY, MM, DD] = dashDateParts;
+                    const dashDate = `${DD}/${MM}/${YYYY}`;
+                    
+                    const strippedTime = timePart.replace(".png", "").replaceAll(".", ":");
+                    const dashDateAndTime = `${dashDate} at ${strippedTime}`;
 
-                            return [{
-                                name: e.entry,
-                                date: dashDate,
-                                dateAndTime: dashDateAndTime,
-                                path: `${screenshotPath}/${e.entry}`
-                            }];
-                        });
-                    } catch (e) {
-                        return [];
-                    };
-                })
-            );
+                    return [{
+                        name: e.entry,
+                        date: dashDate,
+                        dateAndTime: dashDateAndTime,
+                        path: `${screenshotPath}/${e.entry}`
+                    }];
+                });
 
-            return allDirScreenshots.flat();
-        } catch (e) {
-            return [];
-        }
-    }
+                results.push(...screenshotObj);
+            } catch (e) {
+                continue; 
+            };
+        };
+
+        return results;
+    };
 
     async openScreenshot(path) {
         await Neutralino.os.execCommand(NL_OS === "Windows" ? `start "" "${path}"` : `open "${path}"`);

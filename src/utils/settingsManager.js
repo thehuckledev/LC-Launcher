@@ -53,7 +53,7 @@ async function writeConfig(config) {
     cache = config;
 
     const path = await getConfigPath();
-    Neutralino.filesystem.writeFile(path, JSON.stringify(config, null, 2));
+    await Neutralino.filesystem.writeFile(path, JSON.stringify(config, null, 2));
 };
 
 async function resolveDefault(name) {

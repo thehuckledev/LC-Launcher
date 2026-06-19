@@ -49,7 +49,9 @@ export default function App() {
     async function loadData(loadedSettings = settings) {
         const profiles = await Manager.profiles.list();
         const instances = await Manager.instances.list();
-        const instancesData = await Promise.all(instances.map(id => Manager.instances.get(id)));
+        const instancesData = (await Promise.all(
+            instances.map(id => Manager.instances.get(id))
+        )).filter(i => i !== undefined);
         
         setProfilesList(profiles);
         setInstancesList(instancesData);
@@ -61,19 +63,20 @@ export default function App() {
         } else setProfile(null);
 
         if (instances.length > 0) {
-            const instancesObj = await Promise.all(instances.map(id => Manager.instances.get(id)));
-            const defaultInst = instancesObj.find(i => i.id === config.defaultInstance);
-            const lastInst = instancesObj.find(i => i.id === loadedSettings.lastInstanceID);
+            const defaultInst = instancesData.find(i => i.id === config.defaultInstance);
+            const lastInst = instancesData.find(i => i.id === loadedSettings.lastInstanceID);
 
             if (lastInst) setInstance(lastInst);
             else if (defaultInst) setInstance(defaultInst);
-            else setInstance(instancesObj[0]);
+            else setInstance(instancesData[0]);
         } else setInstance(null);
     };
 
     async function syncDefaultInstances() {
         const installedInstances = await Manager.instances.list();
-        const installedObjects = await Promise.all(installedInstances.map(id => Manager.instances.get(id)));
+        const installedObjects = (await Promise.all(
+            installedInstances.map(id => Manager.instances.get(id))
+        )).filter(i => i !== undefined);
 
         for await (const inst of defaultInstances) {
             if (!inst.supportedPlatforms.includes(NL_OS)) continue;
