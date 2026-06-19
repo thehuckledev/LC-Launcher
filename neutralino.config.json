@@ -33,6 +33,9 @@
         "window.*",
         "resources.*"
     ],
+    "globalVariables": {
+        "portable": false
+    },
     "extensions": [
         {
             "id": "lcLib",

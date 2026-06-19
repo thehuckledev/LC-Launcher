@@ -412,7 +412,7 @@ export default function App() {
 
     return (
         <>
-            <Window title="" setMenu={setMenu} isPanorama={Array.isArray(instance?.background)} backgroundSrc={instance?.background}>
+            <Window title="" menu={menu} setMenu={setMenu} isPanorama={Array.isArray(instance?.background)} backgroundSrc={instance?.background}>
                 {dropHighlight && (
                     <div id="instance-drop-area">
                         <div className="instance-drop-inner">

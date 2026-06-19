@@ -11,10 +11,15 @@ import restoreIcon from "../assets/window/restore.png";
 import closeIcon from "../assets/window/close.png";
 import defaultBG from "../assets/ui/background.jpeg";
 
-export default function Window({ title, showClose = true, showMinimize = true, showMaximize = true, isPanorama = false, backgroundSrc = defaultBG, backgroundFade = true, backgroundAnimated = true, setMenu, children }) {
+export default function Window({ title, showClose = true, showMinimize = true, showMaximize = true, isPanorama = false, backgroundSrc = defaultBG, backgroundFade = true, backgroundAnimated = true, menu, setMenu, children }) {
     const [openAnim, setOpenAnim] = useState(true);
     const lastStillBg = useRef(backgroundSrc);
     const canvasRef = useRef(null);
+    const menuRef = useRef(menu);
+
+    useEffect(() => {
+        menuRef.current = menu;
+    }, [menu]);
 
     async function maximize() {
         await Neutralino.window.maximize();
@@ -232,12 +237,26 @@ export default function Window({ title, showClose = true, showMinimize = true, s
             console.log("Prevented Scroll Bounce");
         };
 
+        async function globalBackBtn() {
+            window.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    const currentMenu = menuRef.current;
+                    if (
+                        currentMenu !== "main" &&
+                        currentMenu !== "setup" &&
+                        currentMenu !== "setupoptions"
+                    ) setMenu("main");
+                };
+            }); 
+        };
+
         async function setupWindow() {
             createMenuBar();
             preventInspect();
             preventScrollBounce();
             stopKeybinds();
             WINDOWS_resizeRatio();
+            globalBackBtn();
 
             await Neutralino.window.setDraggableRegion("window-title");
 

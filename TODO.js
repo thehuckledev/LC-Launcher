@@ -7,8 +7,6 @@
 //* TODO add friend, chat and join game system (maybe compatible with emerald launcher)
 //* TODO add LCE Workshop and make a good website for it
 //* TODO make all the popups browser based to reduce need on zenity (also fits in theme more)
-// TODO make discord rpc work and maybe make it an actual neutralinojs extension
-// TODO redo launcher to include portable mode if they want it all on usb drive for example, also make it a custom ui rather than multiple popups
 // TODO make worlds and servers menu work
 // TODO add a corrupted installation fix menu
 // TODO convert LCE world to Java worlds. https://je2be.app
@@ -18,8 +16,7 @@
 // TODO add world backups online, dont add until 20th march cause neo will kill u.
 // TODO add a extension system to the launcher itself so u can add stuff.
 
+//+ TODO finish the portable mode using the global custom neutralino var
 //+ TODO add maxmimise and minimize back to windows build
 //+ TODO stop crash log from appearing on windows when it didn't crash
-//+ TODO make the uninstaller batch window close after completion on windows
-//+ TODO add key escape to go back and play lce exit sound
 //+ TODO add more detailed playtime so when u click on it in bottom corner it opens up and shows usage sessions, eg. 50 mins here 20 mins there.

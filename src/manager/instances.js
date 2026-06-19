@@ -102,6 +102,7 @@ export class Instances {
         const sterilisedData = {
             ...data,
             playtime: 0,
+            playtimeSessions: [],
             assetId: null,
             installed: false,
         };
@@ -179,6 +180,7 @@ export class Instances {
                 ...data,
                 id,
                 playtime: 0,
+                playtimeSessions: [],
                 installed: false,
                 assetId: null,
             };

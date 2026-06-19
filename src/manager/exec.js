@@ -719,8 +719,19 @@ export class Exec {
                                 const instancePath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instanceId, "instance.json");
                                 const updatedInstance = await this.manager.instances.get(instanceId);
 
-                                updatedInstance.playtime = (updatedInstance.playtime || 0) + sessionSeconds;
-                                await this.manager.utils.writeJSON(instancePath, updatedInstance);
+                                const newPlaytime = (updatedInstance.playtime || 0) + sessionSeconds;
+                                const newPlaytimeSessions = [
+                                    ...(updatedInstance.playtimeSessions || []),
+                                    {
+                                        date: Date.now(),
+                                        duration: sessionSeconds
+                                    }
+                                ];
+
+                                await this.manager.instances.update(updatedInstance.id, {
+                                    playtime: newPlaytime,
+                                    playtimeSessions: newPlaytimeSessions
+                                });
 
                                 // crash detection
                                 if (!this.userStopped && (exitCode !== 0 || crashDetected)) {

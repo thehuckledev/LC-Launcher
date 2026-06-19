@@ -282,19 +282,26 @@ ensureDependencies();
 
 const shouldBuild = (platform) => !targetArg || platform.includes(targetArg);
 
-patchConfig(true);
+try {
+    patchConfig(true);
 
-if (shouldBuild('linux') || shouldBuild('darwin')) buildBase();
-if (shouldBuild('linux')) buildLinux(cfg);
-if (shouldBuild('darwin')) buildMac(cfg);
+    if (shouldBuild('linux') || shouldBuild('darwin')) buildBase();
+    if (shouldBuild('linux')) buildLinux(cfg);
+    if (shouldBuild('darwin')) buildMac(cfg);
 
-if (shouldBuild('windows')) {
-    toggleTransparency(false);
-    buildBase(false);
-    buildWin(cfg);
+    if (shouldBuild('windows')) {
+        toggleTransparency(false);
+        buildBase(false);
+        buildWin(cfg);
+        toggleTransparency(true);
+    };
+
+    patchConfig(false);
+} catch(e) {
+    console.error(e);
+
     toggleTransparency(true);
+    patchConfig(false);
 };
-
-patchConfig(false);
 
 console.log("\nAll platforms built.\n");
