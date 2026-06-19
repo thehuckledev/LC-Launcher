@@ -73,7 +73,7 @@ export default function App() {
     };
 
     async function syncDefaultInstances() {
-        /*const installedInstances = await Manager.instances.list();
+        const installedInstances = await Manager.instances.list();
         const installedObjects = (await Promise.all(
             installedInstances.map(id => Manager.instances.get(id))
         )).filter(i => i !== undefined);
@@ -86,7 +86,7 @@ export default function App() {
 
             const { id, compatibilityLayer, ...updateData } = inst; 
             await Manager.instances.update(existing.id, updateData);
-        };*/
+        };
     };
 
     useEffect(() => {
