@@ -49,6 +49,7 @@ export default function Window({ title, showClose = true, showMinimize = true, s
         // https://github.com/PrismarineJS/prismarine-web-client/blob/master/index.js
 
         let scene, camera, renderer, animationFrameId;
+        let disposed = false;
 
         function addPanoramaCubeMap() {
             let time = 0;
@@ -95,6 +96,7 @@ export default function Window({ title, showClose = true, showMinimize = true, s
         };
 
         function animate() {
+            if (disposed) return;
             animationFrameId = window.requestAnimationFrame(animate);
             renderer.render(scene, camera);
         };
@@ -104,9 +106,14 @@ export default function Window({ title, showClose = true, showMinimize = true, s
         window.addEventListener('resize', onWindowResize, false);
 
         return () => {
+            disposed = true;
             cancelAnimationFrame(animationFrameId);
             window.removeEventListener('resize', onWindowResize);
-            if (renderer) renderer.dispose();
+
+            if (renderer) {
+                renderer.renderLists.dispose();
+                renderer.dispose();
+            };
         };
     }, [isPanorama, backgroundSrc]);
 
