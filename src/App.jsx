@@ -86,6 +86,7 @@ export default function App() {
 
             const { id, compatibilityLayer, ...updateData } = inst; 
             await Manager.instances.update(existing.id, updateData);
+            await new Promise(r => setTimeout(r, 2000));
         };
     };
 
