@@ -1,0 +1,50 @@
+#add-server {
+    width: calc(100vw - 80px);
+    height: calc(100% - 83px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+
+    color: rgba(255, 255, 255, 0.9);
+    font: 10pt 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+    padding-right: 5px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#add-server-title {
+    width: 500px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+#add-server::-webkit-scrollbar {
+    width: 8px;
+}
+
+#add-server::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+
+#add-server::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#add-server-action-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    justify-content: space-between;
+    width: 100%;
+}
+
+#add-server-action-bar .mc-button {
+    width: 130px;
+}

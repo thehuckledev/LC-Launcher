@@ -27,6 +27,9 @@ import CreateInstanceMenu from "./menus/CreateInstance.jsx";
 import EditProfileMenu from "./menus/EditProfile.jsx";
 import EditInstanceMenu from "./menus/EditInstance.jsx";
 import ScreenshotMenu from "./menus/Screenshots.jsx";
+import ServersMenu from "./menus/Servers.jsx";
+import AddServerMenu from "./menus/AddServer.jsx";
+import EditServerMenu from "./menus/EditServer.jsx";
 
 export default function App() {
     const [processing, setProcessing] = useState(false);
@@ -34,6 +37,7 @@ export default function App() {
     const [crashed, setCrashed] = useState(false);
     const [profile, setProfile] = useState(null);
     const [instance, setInstance] = useState(null);
+    const [server, setServer] = useState(null);
     const [profilesList, setProfilesList] = useState([]);
     const [instancesList, setInstancesList] = useState([]);
     const [loaded, setLoaded] = useState(false);
@@ -160,6 +164,7 @@ export default function App() {
                     details = "Editing Options";
                     break;
                 case menu === "setup":
+                case menu === "setupoptions":
                     details = "Setting up launcher";
                     break;
                 case menu === "patchnotes":
@@ -182,6 +187,18 @@ export default function App() {
                     break;
                 case menu === "screenshots":
                     details = "Viewing Screenshots";
+                    break;
+                case menu === "servers":
+                    details = "Viewing Server List";
+                    break;
+                case menu === "about":
+                    details = "In About Menu";
+                    break;
+                case menu === "addserver":
+                    details = "Adding a Server";
+                    break;
+                case menu === "editserver":
+                    details = "Editing a Server";
                     break;
             };
 
@@ -436,6 +453,9 @@ export default function App() {
                     {menu === "editprofile" &&    <EditProfileMenu setMenu={setMenu} profile={profile} setProfile={setProfile} reloadData={loadData} />}
                     {menu === "editinstance" &&   <EditInstanceMenu setMenu={setMenu} instance={instance} setInstance={setInstance} reloadData={loadData} />}
                     {menu === "screenshots" &&    <ScreenshotMenu setMenu={setMenu} />}
+                    {menu === "servers" &&        <ServersMenu setMenu={setMenu} instance={instance} profile={profile} setServer={setServer} />}
+                    {menu === "addserver" &&      <AddServerMenu setMenu={setMenu} instance={instance} />}
+                    {menu === "editserver" &&     <EditServerMenu setMenu={setMenu} instance={instance} server={server} />}
                 </>}
             </Window>
 

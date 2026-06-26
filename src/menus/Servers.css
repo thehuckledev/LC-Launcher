@@ -1,0 +1,74 @@
+#servers-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 83px);
+    padding: 10px;
+    gap: 12px;
+}
+
+#servers-title {
+    width: 500px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+#server-list {
+    height: 100%;
+
+    scroll-snap-type: y proximity;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#server-list > * {
+    scroll-snap-align: start; 
+    scroll-snap-stop: always; 
+}
+
+#server-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+#server-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+
+#server-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#servers-empty {
+    height: 100%;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+
+    padding-top: 10px;
+    display: flex;
+    justify-content: center;
+
+    font: 14px 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+    text-align: center;
+    color: #fff;
+}
+
+#servers-footer-actions {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}

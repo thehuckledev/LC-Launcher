@@ -252,7 +252,10 @@ export default function Window({ title, showClose = true, showMinimize = true, s
                         currentMenu !== "main" &&
                         currentMenu !== "setup" &&
                         currentMenu !== "setupoptions"
-                    ) setMenu("main");
+                    ) {
+                        if (currentMenu === "addserver" || currentMenu === "editserver") setMenu("servers");
+                        else setMenu("main");
+                    }
                 };
             }); 
         };

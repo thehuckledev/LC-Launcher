@@ -118,85 +118,7 @@ export class Exec {
 
     async installInstance(instance, isUpdate = false, keepData = true) {
         try {
-            const instancePath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instance.id);
-            //const contentDir = await Neutralino.filesystem.getJoinedPath(instancePath, 'content'); // this resolves to symlink dest which causes issues when deleting
-            const contentDir = `${instancePath}/content`;
-
-            //await Neutralino.filesystem.remove(contentDir).catch(e=>{}); // this doesn't work for symlinks
-
-            if (instance.serviceType === "LOCAL") {
-                try {
-                    await Filesystem.unlink(contentDir).catch(e => {});
-                } catch(e) {
-                    await Neutralino.filesystem.remove(contentDir).catch(e => {});
-                };
-                await Filesystem.symlink(contentDir, instance.repo.trim());
-                
-                instance.installed = true;
-                await this.manager.utils.writeJSON(`${instancePath}/instance.json`, instance);
-                return showToast("Linked local build path");
-            };
-
-            if (!navigator.onLine) return showToast("Error: You must be online to install an instance");
-
-            if (keepData === true) await this.backupPreserved(instancePath);
-
-            await Neutralino.filesystem.remove(contentDir).catch(e => {});
-
-            let downloadUrl = "";
-            let archiveName = "";
-
-            if (instance.serviceType === "URL") {
-                downloadUrl = instance.repo;
-                archiveName = "download.zip";
-            } else {
-                const release = await this.manager.remotes.get(instance, instance.tag);
-                if (!release) return showToast("Error: Release not found");
-
-                if (!release.assets || release.assets.length === 0)
-                    return showToast("Error: No assets found in this release");
-
-                const asset = instance.target
-                    ? release.assets.find(a => a.name === instance.target)
-                    : release.assets[0];
-                if (!asset) return showToast("Error: Required asset not found in release");
-                
-                downloadUrl = asset.browser_download_url;
-                archiveName = instance.target;
-                instance.assetId = asset.id;
-            };
-
-            const zipPath = await Neutralino.filesystem.getJoinedPath(instancePath, archiveName);
-
-            await this.manager.utils.ensureDir(contentDir);
-
-            console.log("Downloading build...");
-            const download = new Download(downloadUrl, { label: `Downloading instance${isUpdate ? ' update' : ''}...` });
-            try {
-                await download.start(zipPath);
-            } catch(e) {
-                console.error(e);
-                return showToast("Error: Asset download failed");
-            };
-
-            console.log("Extracting build...");
-            const unzipContent = new Unzip(zipPath, contentDir, { label: `Extracting instance${isUpdate ? ' update' : ''}...` });
-            try {
-                await unzipContent.start();
-            } catch(e) {
-                console.error(e);
-                try { // remove zip
-                    await Neutralino.filesystem.remove(zipPath);
-                } catch { }
-                return showToast("Error: Asset unzip failed");
-            };
-            if (keepData === true) await this.restorePreserved(instancePath);
-
-            instance.installed = true;
-
-            await this.manager.utils.writeJSON(`${instancePath}/instance.json`, instance);
-            console.log("Instance installed");
-            showToast(`Instance${isUpdate ? ' update' : ''} installed`);
+            await this._installInstance(instance, isUpdate, keepData);
         } catch (err) {
             console.error(err);
             showToast(`Error: ${err.message}`);
@@ -209,9 +131,122 @@ export class Exec {
         };
     };
 
+    async _installInstance(instance, isUpdate = false, keepData = true) {
+        const instancePath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instance.id);
+        //const contentDir = await Neutralino.filesystem.getJoinedPath(instancePath, 'content'); // this resolves to symlink dest which causes issues when deleting
+        const contentDir = `${instancePath}/content`;
+
+        //await Neutralino.filesystem.remove(contentDir).catch(e=>{}); // this doesn't work for symlinks
+
+        if (instance.serviceType === "LOCAL") {
+            try {
+                await Filesystem.unlink(contentDir).catch(e => {});
+            } catch(e) {
+                await Neutralino.filesystem.remove(contentDir).catch(e => {});
+            };
+            await Filesystem.symlink(contentDir, instance.repo.trim());
+            
+            instance.installed = true;
+            await this.manager.utils.writeJSON(`${instancePath}/instance.json`, instance);
+            return showToast("Linked local build path");
+        };
+
+        if (!navigator.onLine) return showToast("Error: You must be online to install an instance");
+
+        if (isUpdate === false) {
+            // read servers.db
+            await this.manager.servers.read(instance.id);
+        };
+
+        if (keepData === false) await Neutralino.filesystem.remove(`${instancePath}/servers.json`).catch(e=>{}); // delete all servers
+        if (keepData === true) await this.backupPreserved(instancePath);
+
+        await Neutralino.filesystem.remove(contentDir).catch(e => {});
+
+        let downloadUrl = "";
+        let archiveName = "";
+
+        if (instance.serviceType === "URL") {
+            downloadUrl = instance.repo;
+            archiveName = instance.target || "download.zip"; // if people had the old neolegacy where it was a git server, then it will still have target, as it doesnt update!
+
+            try {
+                const head = await Net.head(instance.repo);
+                const LastModified = head.headers['last-modified'];
+                if (LastModified) instance.assetId = LastModified;
+                else {
+                    const ETag = head.headers['etag'];
+                    if (ETag) instance.assetId = ETag;
+                };
+            } catch {};
+        } else {
+            const release = await this.manager.remotes.get(instance, instance.tag);
+            if (!release) return showToast("Error: Release not found");
+
+            if (!release.assets || release.assets.length === 0)
+                return showToast("Error: No assets found in this release");
+
+            const asset = instance.target
+                ? release.assets.find(a => a.name === instance.target)
+                : release.assets[0];
+            if (!asset) return showToast("Error: Required asset not found in release");
+            
+            downloadUrl = asset.browser_download_url;
+            archiveName = instance.target;
+            instance.assetId = asset.id;
+        };
+
+        const zipPath = await Neutralino.filesystem.getJoinedPath(instancePath, archiveName);
+
+        await this.manager.utils.ensureDir(contentDir);
+
+        console.log("Downloading build...");
+        const download = new Download(downloadUrl, { label: `Downloading instance${isUpdate ? ' update' : ''}...` });
+        try {
+            await download.start(zipPath);
+        } catch(e) {
+            console.error(e);
+            return showToast("Error: Asset download failed");
+        };
+
+        console.log("Extracting build...");
+        const unzipContent = new Unzip(zipPath, contentDir, { label: `Extracting instance${isUpdate ? ' update' : ''}...` });
+        try {
+            await unzipContent.start();
+        } catch(e) {
+            console.error(e);
+            try { // remove zip
+                await Neutralino.filesystem.remove(zipPath);
+            } catch { }
+            return showToast("Error: Asset unzip failed");
+        };
+        if (keepData === true) await this.restorePreserved(instancePath);
+
+        instance.installed = true;
+
+        await this.manager.utils.writeJSON(`${instancePath}/instance.json`, instance);
+        console.log("Instance installed");
+        showToast(`Instance${isUpdate ? ' update' : ''} installed`);
+    };
+
     async needsUpdate(instance) {
         try {
-            if (instance.serviceType === "URL" || instance.serviceType === "LOCAL") return false;
+            if (instance.serviceType === "LOCAL") return false;
+
+            if (instance.serviceType === "URL") {
+                if (!instance.assetId) return false;
+
+                const head = await Net.head(instance.repo);
+                const serverLastModified = head.headers['last-modified'];
+                if (!serverLastModified) {
+                    const serverETag = head.headers['etag'];
+                    if (!serverETag) return false;
+
+                    return serverETag !== instance.assetId;
+                };
+
+                return serverLastModified !== instance.assetId;
+            };
 
             const release = await this.manager.remotes.get(instance, instance.tag);
             if (!release) return false;
@@ -352,16 +387,16 @@ export class Exec {
         };
     };
 
-    async launch(instanceId, profileId) {
+    async launch(instanceId, profileId, ip, port = "25565") {
         try {
             window.dispatchEvent(new CustomEvent("execProcessing", { detail: true }));
-            await this._launch(instanceId, profileId);
+            await this._launch(instanceId, profileId, ip, port);
         } catch {} finally {
             window.dispatchEvent(new CustomEvent("execProcessing", { detail: false }));
         };
     };
 
-    async _launch(instanceId, profileId) {
+    async _launch(instanceId, profileId, ip, port) {
         if (!instanceId) return showToast("You need to create an instance");
         if (!profileId) return showToast("You need to create a profile");
 
@@ -392,25 +427,25 @@ export class Exec {
         };
 
         // check for runtime
-        if (NL_OS === "Linux" || NL_OS === "Darwin") {
-            if (instance.compatibilityLayer === "RUNTIME") {
-                const dataDir = await getSetting("dataDirectory");
-                const runtimePath = `${dataDir}/libraries/runtime`;
+        if (
+            (NL_OS === "Linux" || NL_OS === "Darwin") &&
+            instance.compatibilityLayer === "RUNTIME" &&
+            !hasProton
+        ) {
+            const dataDir = await getSetting("dataDirectory");
+            const runtimePath = `${dataDir}/libraries/runtime`;
 
-                try {
-                    await Neutralino.filesystem.getStats(`${runtimePath}/bin/${NL_OS === "Darwin" ? 'wine64' : 'wine'}`);
-                } catch {
-                    if (!hasProton) {
-                        let shouldDo = await Neutralino.os
-                                                .showMessageBox('LC Launcher Runtime',
-                                                    'This instance requires the runtime as its compatibility layer. Do you want to install the runtime?',
-                                                    'YES_NO', 'INFO');
-                        if(shouldDo == 'YES') {
-                            console.log("Installing runtime...");
-                            await this.installRuntimeHelper();
-                        } else return showToast("Launch stopped due to runtime not being installed");
-                    };
-                };
+            try {
+                await Neutralino.filesystem.getStats(`${runtimePath}/bin/${NL_OS === "Darwin" ? 'wine64' : 'wine'}`);
+            } catch {
+                let shouldDo = await Neutralino.os
+                                        .showMessageBox('LC Launcher Runtime',
+                                            'This instance requires the runtime as its compatibility layer. Do you want to install the runtime?',
+                                            'YES_NO', 'INFO');
+                if(shouldDo == 'YES') {
+                    console.log("Installing runtime...");
+                    await this.installRuntimeHelper();
+                } else return showToast("Launch stopped due to runtime not being installed");
             };
         };
 
@@ -435,21 +470,8 @@ export class Exec {
         await Neutralino.filesystem.writeFile(uidPath, `${profile.uid}\n`);
         console.log("UID written to:", uidPath, profile.uid);
 
-        // write servers.txt
-        const servers = await this.manager.servers.list(instanceId);
-
-        const content = servers
-            .map(s => `${s.ip}\n${s.port}\n${s.name}`)
-            .join("\n") + (servers.length ? "\n" : "");
-        const serversPath = await Neutralino.filesystem.getJoinedPath(
-            this.manager.instancesDir,
-            instanceId,
-            "content",
-            "servers.txt"
-        );
-
-        await Neutralino.filesystem.writeFile(serversPath, content);
-        console.log("Servers written to:", serversPath, content);
+        // write servers.db
+        await this.manager.servers.write(instanceId);
 
 
         try {
@@ -470,15 +492,16 @@ export class Exec {
         if (instance.fullscreen === true) args.push("-fullscreen");
         if (instance.quitOnDisconnect === true) args.push("-quitondisconnect");
 
-        if (instance.ip) args.push("-ip", instance.ip);
-        if (instance.port) args.push("-port", instance.port);
+        if (instance.ip && !ip) args.push("-ip", instance.ip);
+        if (instance.port && !port) args.push("-port", instance.port);
+        if (ip) args.push("-ip", ip);
+        if (port) args.push("-port", port);
 
         const joinedArgs = args.map(a => `"${a}"`).join(" ");
         let cmd = `"${execPath}" ${joinedArgs}`;
 
         const dataDir = await getSetting("dataDirectory");
         const prefix = `${dataDir}/pfx`;
-        let wineServerBin = "wineserver";
 
         // compatibility layers
         if (NL_OS === "Linux" || NL_OS === "Darwin") {
@@ -493,7 +516,6 @@ export class Exec {
                     try {
                         await Neutralino.filesystem.getStats(`${runtimePath}/bin/wine64`);
                         const winePath = `${runtimePath}/bin/wine64`;
-                        wineServerBin = `${runtimePath}/bin/wineserver`;
                         
                         const env = `WINEPREFIX="${prefix}" WINEESYNC=1 MTL_HUD_ENABLED=0`;
                         bin = `${env} "${winePath}"`;
@@ -509,61 +531,31 @@ export class Exec {
                     };
                 } else if (NL_OS === "Linux") { // PROTON GE RUNTIME
                     const protonPath = await this.findProtonPath();
-                    const env = `WINEPREFIX="${prefix}" WINEESYNC=1 STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}"`;
+                    const env = `PROTON_USE_NTSYNC=1 STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}"`;
                     
                     if (protonPath) bin = `${env} "${protonPath}" run`;
                     else {
                         try {
-                            await Neutralino.filesystem.getStats(`${runtimePath}/bin/wine`);
-                            const winePath = `${runtimePath}/bin/wine`;
-                            wineServerBin = `${runtimePath}/bin/wineserver`;
-                            bin = `${env} "${winePath}"`;
+                            await Neutralino.filesystem.getStats(`${runtimePath}/proton`);
+                            const runtimeProtonPath = `${runtimePath}/proton`;
+                            bin = `${env} "${runtimeProtonPath}" run`;
                         } catch (e) {
                             bin = `${env} proton run`;
                         };
                     };
 
-                    try {
-                        await Neutralino.filesystem.getStats(prefix);
-                    } catch {
-                        showToast('Setting up C Drive...');
-                        const initCmd = protonPath ? `"${protonPath}" run wineboot --init` : `proton run wineboot --init`;
-                        await Neutralino.os.execCommand(`${env} ${initCmd}`);
-                    };
-                    // below is a runtime first priority version
-                    /*try {
-                        await Neutralino.filesystem.getStats(`${runtimePath}/bin/wine`);
-                        const winePath = `${runtimePath}/bin/wine`;
-                        wineServerBin = `${runtimePath}/bin/wineserver`;
-
-                        const env = `WINEPREFIX="${prefix}" WINEESYNC=1 STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}"`;
-                        bin = `${env} "${winePath}"`;
-
-                        try {
-                            await Neutralino.filesystem.getStats(prefix);
-                        } catch {
-                            showToast('Setting up C Drive...');
-                            await Neutralino.os.execCommand(`${env} "${winePath}" wineboot --init`);
-                        };
-                    } catch (e) {
-                        if (!!hasProton) {
-                            const protonPath = await this.findProtonPath();
-                            const env = `STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}"`;
-                            
-                            if (protonPath) bin = `${env} "${protonPath}" run`;
-                            else bin = `${env} proton run`;
-                        }
-                        else bin = `STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}" proton run`;
-                    };*/
+                    await this.manager.utils.ensureDir(prefix);
                 };
             }
 
             else if (compat === "WINE" || compat === "WINE64")
-                bin = `${compat.toLowerCase()}`;
+                bin = compat.toLowerCase();
 
             else if (compat === "PROTON") {
                 const protonPath = await this.findProtonPath();
-                const env = `STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}"`;
+                const env = `PROTON_USE_NTSYNC=1 STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}"`;
+
+                await this.manager.utils.ensureDir(prefix);
                 
                 if (protonPath) bin = `${env} "${protonPath}" run`;
                 else bin = `${env} proton run`;
@@ -609,16 +601,9 @@ export class Exec {
                         if (NL_OS === "Windows") {
                             await Neutralino.os.execCommand(`taskkill /PID ${proc.pid} /T /F`);
                         } else {
-                            try {
-                                if (instance.compatibilityLayer === "RUNTIME")
-                                    await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" "${wineServerBin}" -k`);
-                                else if (instance.compatibilityLayer !== "DIRECT")
-                                    await Neutralino.os.execCommand(`"${wineServerBin}" -k`);
-                                else
-                                    await Neutralino.os.execCommand(`kill -9 -${proc.pid}`);
-                            } catch {
-                                await Neutralino.os.execCommand(`kill -9 -${proc.pid}`);
-                            };
+                            await Neutralino.os.execCommand(`kill -15 -${proc.pid}`).catch(e=>{});
+                            await new Promise(r => setTimeout(r, 500));
+                            await Neutralino.os.execCommand(`kill -9 -${proc.pid}`).catch(e=>{});
                         };
                     } catch (e) {
                         console.error("Failed to kill process tree:", e);
@@ -653,28 +638,21 @@ export class Exec {
 
                                         const lower = parsed.message?.toLowerCase() || "";
                                         const lowerFunc = parsed.func?.toLowerCase() || "";
+                                        const level = parsed.level;
+
                                         const containsCrashKeyword = (
-                                            lower.includes("unhandled") ||
+                                            lower.includes("unhandled exception") ||
                                             lower.includes("segmentation fault") ||
                                             lower.includes("stack overflow") ||
                                             lower.includes("crash") ||
                                             lower.includes("fault")
                                         );
-                                        if (containsCrashKeyword) crashDetected = true;
+
+                                        if (containsCrashKeyword && level !== "fixme" && level !== "warn") crashDetected = true;
                                         if (
                                             lowerFunc.includes("apppolicygetprocessterminationmethod") ||
                                             lower.includes("killed:")
                                         ) crashDetected = false;
-                                    } else {
-                                        const lower = line.toLowerCase();
-                                        if (
-                                            lower.includes("exception") ||
-                                            lower.includes("fatal") ||
-                                            lower.includes("segmentation fault") ||
-                                            lower.includes("crash") ||
-                                            lower.includes("failed") ||
-                                            lower.includes("panic")
-                                        ) crashDetected = true;
                                     };
 
                                     window.dispatchEvent(new CustomEvent("gameLog", {
@@ -688,34 +666,7 @@ export class Exec {
                                 const duration = Date.now() - startTime;
                                 const sessionSeconds = Math.floor(duration / 1000);
 
-                                if (isTranslated) (async () => {
-                                    if (instance.compatibilityLayer === "RUNTIME") {
-                                        try {
-                                            console.log("Soft shutdown wine...");
-                                            await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" "${wineServerBin}" -w`);
-                                        } catch (e) {
-                                            console.log("Force shutdown wine...");
-                                            try {
-                                                await Neutralino.os.execCommand(`WINEPREFIX="${prefix}" "${wineServerBin}" -k`);
-                                            } catch (err) {
-                                                console.error("Wineserver couldn't stop:", err);
-                                            };
-                                        };
-                                    } else {
-                                        try {
-                                            console.log("Soft shutdown wine...");
-                                            await Neutralino.os.execCommand(`"${wineServerBin}" -w`);
-                                        } catch (e) {
-                                            console.log("Force shutdown wine...");
-                                            try {
-                                                await Neutralino.os.execCommand(`"${wineServerBin}" -k`);
-                                            } catch (err) {
-                                                console.error("Wineserver couldn't stop:", err);
-                                            };
-                                        };
-                                    };
-                                })();
-
+                                // update playtime
                                 const instancePath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instanceId, "instance.json");
                                 const updatedInstance = await this.manager.instances.get(instanceId);
 
@@ -730,8 +681,11 @@ export class Exec {
 
                                 await this.manager.instances.update(updatedInstance.id, {
                                     playtime: newPlaytime,
-                                    playtimeSessions: newPlaytimeSessions
+                                    playtimeSessions: sessionSeconds > 60 ? newPlaytimeSessions : updatedInstance.playtimeSessions
                                 });
+
+                                // read servers.db
+                                await this.manager.servers.read(instanceId);
 
                                 // crash detection
                                 if (!this.userStopped && (exitCode !== 0 || crashDetected)) {

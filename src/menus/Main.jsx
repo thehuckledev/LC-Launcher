@@ -123,13 +123,15 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                         selected={{
                             icon: instance?.icon || instanceIcon,
                             line1: instance?.name || "No Instance",
-                            line2: instance?.tag || "N/A"
+                            line2: instance?.serviceType == "URL" ? "DDL" :
+                                   instance?.serviceType == "LOCAL" ? "Local Build" :
+                                   instance?.tag ? instance.tag : "N/A"
                         }}
                         items={instancesList.map(i => ({
                             id: i.id,
                             icon: i.icon || instanceIcon,
                             line1: i.name,
-                            line2: i.tag
+                            line2: i?.serviceType == "URL" ? "Direct Download Link" : i?.serviceType == "LOCAL" ? "Local Build Directory" : i?.tag ? i.tag : "N/A"
                         }))}
                         onSelect={async (selectedInstance) => {
                             const instance = await Manager.instances.get(selectedInstance.id);
@@ -144,10 +146,10 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                         direction="up"
                     />
                     <div id="main-actions">
-                        <Button id="worlds-button" tooltip="Worlds" tooltipAlign="LEFT" disabled={!instance?.id || progress.active || processing} pushable={!processing}>
+                        <Button id="worlds-button" tooltip="Worlds" tooltipAlign="LEFT" disabled={!instance?.id || progress.active || processing} pushable={!progress.active && !processing}>
                             <img src={worldsIcon} draggable={false} />
                         </Button>
-                        <Button id="play-button" type={runningProc !== null ? "destructive" : "primary"} disabled={!instance?.id || !profile?.id || progress.active || (processing && runningProc === null)} pushable={!processing || runningProc !== null} onclick={async () => {
+                        <Button id="play-button" type={runningProc !== null ? "destructive" : "primary"} disabled={!instance?.id || !profile?.id || progress.active || (processing && runningProc === null)} pushable={!progress.active || !processing || runningProc !== null} onclick={async () => {
                             if (runningProc !== null) {
                                 await Manager.exec.stop(runningProc);
                             } else {
@@ -160,7 +162,7 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                                 instance?.installed === true ? "Play" : "Install"
                             ) : "Stop"}
                         </Button>
-                        <Button id="servers-button" tooltip="Servers" tooltipAlign="LEFT" disabled={!instance?.id || progress.active || processing} pushable={!processing}>
+                        <Button id="servers-button" tooltip="Servers" tooltipAlign="LEFT" disabled={!instance?.id || progress.active || processing} pushable={!progress.active && !processing} onclick={() => setMenu('servers')}>
                             <img src={serversIcon} draggable={false} />
                         </Button>
                     </div>

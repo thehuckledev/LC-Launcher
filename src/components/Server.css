@@ -1,0 +1,71 @@
+.mc-server {
+    width: 500px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border: 2px solid #000;
+    padding: 8px;
+    gap: 12px;
+    background: #ffffff20;
+    backdrop-filter: brightness(60%) blur(8px);
+}
+
+.mc-server:hover {
+    border-color: #fff;
+    background: #4e4e4e20;
+}
+
+.mc-server-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+    min-width: 0;
+    font-family: 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+}
+
+.mc-server-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.mc-server-name {
+    font-size: 14px;
+    color: #fff;
+    margin: 0;
+    width: 100%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.mc-server-address {
+    font-size: 9px;
+    color: #c6c6c6;
+    text-shadow: 1.5px 1.5px #000A;
+    width: 100%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.mc-server-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+#mc-server-join-btn {
+    width: 80px;
+}
+
+#mc-server-delete-btn, #mc-server-edit-btn {
+    width: 40px;
+}
