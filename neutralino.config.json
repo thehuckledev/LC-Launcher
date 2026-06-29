@@ -14,7 +14,7 @@
     "enableServer": true,
     "enableNativeAPI": true,
     "enableExtensions": true,
-    "tokenSecurity": "none",
+    "tokenSecurity": "one-time",
     "logging": {
         "enabled": false,
         "writeToLogFile": false
@@ -34,7 +34,7 @@
         "resources.*"
     ],
     "globalVariables": {
-        "portable": false
+        "PORTABLE": false
     },
     "extensions": [
         {
@@ -55,7 +55,7 @@
             "center": true,
             "fullScreen": false,
             "alwaysOnTop": false,
-            "enableInspector": true,
+            "enableInspector": false,
             "openInspectorOnStartup": false,
             "transparent": true,
             "borderless": true,

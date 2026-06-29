@@ -131,7 +131,8 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                             id: i.id,
                             icon: i.icon || instanceIcon,
                             line1: i.name,
-                            line2: i?.serviceType == "URL" ? "Direct Download Link" : i?.serviceType == "LOCAL" ? "Local Build Directory" : i?.tag ? i.tag : "N/A"
+                            line2: i?.serviceType == "URL" ? "Direct Download Link" : i?.serviceType == "LOCAL" ? "Local Build Directory" : i?.tag ? i.tag : "N/A",
+                            editable: !((processing || progress.active) && i.id === instance?.id)
                         }))}
                         onSelect={async (selectedInstance) => {
                             const instance = await Manager.instances.get(selectedInstance.id);

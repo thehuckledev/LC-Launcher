@@ -473,6 +473,9 @@ export class Exec {
         // write servers.db
         await this.manager.servers.write(instanceId);
 
+        // write profile instance files
+        await this.manager.profiles.writeInstanceFiles(profileId, instanceId);
+
 
         try {
             await Neutralino.filesystem.getStats(execPath);
@@ -686,6 +689,9 @@ export class Exec {
 
                                 // read servers.db
                                 await this.manager.servers.read(instanceId);
+
+                                // read profile instance files
+                                await this.manager.profiles.readInstanceFiles(profileId, instanceId);
 
                                 // crash detection
                                 if (!this.userStopped && (exitCode !== 0 || crashDetected)) {

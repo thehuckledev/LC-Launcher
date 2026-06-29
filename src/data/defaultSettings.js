@@ -12,6 +12,8 @@ export const defaultSettings = {
     lastProfileID: null,
     lastInstanceID: null,
     dataDirectory: async () => {
+        if(NL_PORTABLE === true) return "./data";
+
         const homeDir =
             (await Neutralino.os.getEnv("HOME")) ||
             (await Neutralino.os.getEnv("USERPROFILE"));
@@ -46,6 +48,6 @@ export const defaultSettings = {
 
             default:
                 return await Neutralino.filesystem.getJoinedPath(homeDir, "LegacyCommunityLauncher");
-        }
+        };
     }
 };

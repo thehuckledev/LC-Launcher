@@ -78,7 +78,7 @@ export class Profiles {
 
     async export(id) {
         const data = await this.get(id);
-        if (!data) throw new Error("ID isn't valid");
+        if (!data) throw new Error("Profile not found");
 
         const sterilisedData = {
             ...data,
@@ -160,5 +160,69 @@ export class Profiles {
             console.error("Import failed:", err);
             throw err;
         };
+    };
+
+    async readInstanceFiles(id, instanceId) {
+        const profiles = await this.list();
+        const index = profiles.findIndex(p => p.id === id);
+        if (index === -1) throw new Error("Profile not found");
+
+        const contentDir = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instanceId, "content");
+
+        async function readProfileRead(filename) {
+            try {
+                const data = await Neutralino.filesystem.readBinaryFile(`${contentDir}/${filename}`);
+                return btoa(String.fromCharCode(...new Uint8Array(data)));
+            } catch {
+                return null;
+            };
+        };
+
+        if (!profiles[index].instanceFiles) profiles[index].instanceFiles = {};
+    
+        const files = {};
+        for (const filename of this.manager.profileInstanceFiles)
+            files[filename] = await readProfileRead(filename);
+
+        profiles[index].instanceFiles[instanceId] = files;
+
+        await this.manager.utils.writeJSON(this.manager.profilesFile, profiles);
+        console.log("Profile Instance Files saved to:", this.manager.profilesFile, profiles);
+    };
+
+    async writeInstanceFiles(id, instanceId) {
+        const data = await this.get(id);
+        if (!data) throw new Error("Profile not found");
+        
+        const instData = await this.manager.instances.get(instanceId);
+        if (!instData) throw new Error("Instance not found");
+
+        const contentDir = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instanceId, "content");
+        const instanceFiles = data?.instanceFiles?.[instanceId] || {};
+
+        for (const filename of this.manager.profileInstanceFiles) {
+            const filepath = `${contentDir}/${filename}`;
+            const content = instanceFiles[filename];
+
+            if (!content) {
+                await Neutralino.filesystem.remove(filepath).catch(e=>{});
+                continue;
+            };
+
+            const binary = atob(content);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            await Neutralino.filesystem.writeBinaryFile(`${contentDir}/${filename}`, bytes.buffer);
+            console.log("Profile Instance File written to:", `${contentDir}/${filename}`, bytes.buffer);
+        };
+    };
+
+    async removeInstanceFiles(instanceId) {
+        const profiles = await this.list();
+        
+        for (const profile of profiles)
+            if (profile.instanceFiles?.[instanceId]) delete profile.instanceFiles[instanceId];
+
+        await this.manager.utils.writeJSON(this.manager.profilesFile, profiles);
     };
 };

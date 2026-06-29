@@ -87,6 +87,9 @@ export default function OptionsMenu({ setMenu }) {
                     value={settings.volume}
                     onInput={(e) => updateSetting('volume', parseInt(e.target.value))}
                 />
+
+                <div id="options-spacer"></div>
+
                 <Textbox
                     id="data-path"
                     onchange={async (txt) => {
@@ -143,72 +146,77 @@ export default function OptionsMenu({ setMenu }) {
                 }}>
                     Erase all data
                 </Button>
-                <Button type="destructive" onclick={async () => {
-                    let shouldDo = await Neutralino.os
-                                .showMessageBox('Confirm',
-                                                'Are you sure you want to uninstall?',
-                                                'YES_NO', 'WARNING');
-                    if (shouldDo !== 'YES') return;
+                {!NL_PORTABLE &&
+                    <Button type="destructive" onclick={async () => {
+                        let shouldDo = await Neutralino.os
+                                    .showMessageBox('Confirm',
+                                                    'Are you sure you want to uninstall?',
+                                                    'YES_NO', 'WARNING');
+                        if (shouldDo !== 'YES') return;
 
-                    try {
-                        if (NL_OS === "Windows") {
-                            const appPath = NL_PATH.replace(/\//g, '\\');
-                            const uninstallerPath = `${appPath}\\Uninstall.exe`;
-                            await Neutralino.os.execCommand(`cmd /c start /b "" "${uninstallerPath}"`);
-                            await Neutralino.app.exit();
-                        } else if (NL_OS === "Darwin") {
-                            const dataPath = await Neutralino.filesystem.getJoinedPath(settings.dataDirectory, "../");
-                            const appPath = await Neutralino.filesystem.getJoinedPath(NL_PATH, "../../");
-
-                            await Neutralino.filesystem.remove(dataPath);
-                            await Neutralino.filesystem.remove(appPath);
-
-                            showToast("Uninstalled, quitting...");
-                            setTimeout(async () => {
-                                if (window.whenQuitting) await window.whenQuitting();
-                                if (window.beforeExitRPC) await window.beforeExitRPC();
+                        try {
+                            if (NL_OS === "Windows") {
+                                const appPath = NL_PATH.replace(/\//g, '\\');
+                                const uninstallerPath = `${appPath}\\Uninstall.exe`;
+                                await Neutralino.os.execCommand(`cmd /c start /b "" "${uninstallerPath}"`);
                                 await Neutralino.app.exit();
-                            }, 200);
-                        } else if (NL_OS === "Linux") {
-                            /*try {
-                                const home = await Neutralino.os.getEnv('HOME');
-                                const desktopFolder = `${home}/.local/share/applications`;
-                                const shortcutPath = `${desktopFolder}/${NL_APPID}.desktop`;
+                            } else if (NL_OS === "Darwin") {
+                                const dataPath = await Neutralino.filesystem.getJoinedPath(settings.dataDirectory, "../");
+                                const appPath = await Neutralino.filesystem.getJoinedPath(NL_PATH, "../../");
 
-                                await Neutralino.filesystem.getStats(shortcutPath);
-                                await Neutralino.filesystem.remove(shortcutPath);
-                            } catch (err) {
-                                if (err.code === 'NE_FS_NOPATHE') console.log("Linux shortcut never existed");
-                                else console.error("Error removing linux shortcut:", err);
+                                await Neutralino.filesystem.remove(dataPath);
+                                await Neutralino.filesystem.remove(appPath);
+
+                                showToast("Uninstalled, quitting...");
+                                setTimeout(async () => {
+                                    if (window.whenQuitting) await window.whenQuitting();
+                                    if (window.beforeExitRPC) await window.beforeExitRPC();
+                                    await Neutralino.app.exit();
+                                }, 200);
+                            } else if (NL_OS === "Linux") {
+                                /*try {
+                                    const home = await Neutralino.os.getEnv('HOME');
+                                    const desktopFolder = `${home}/.local/share/applications`;
+                                    const shortcutPath = `${desktopFolder}/${NL_APPID}.desktop`;
+
+                                    await Neutralino.filesystem.getStats(shortcutPath);
+                                    await Neutralino.filesystem.remove(shortcutPath);
+                                } catch (err) {
+                                    if (err.code === 'NE_FS_NOPATHE') console.log("Linux shortcut never existed");
+                                    else console.error("Error removing linux shortcut:", err);
+                                };
+
+                                const appPath = NL_PATH;
+                                await Neutralino.filesystem.remove(appPath);
+
+                                showToast("Uninstalled, quitting...");
+                                setTimeout(async () => {
+                                    if (window.whenQuitting) await window.whenQuitting();
+                                    if (window.beforeExitRPC) await window.beforeExitRPC();
+                                    await Neutralino.app.exit();
+                                }, 200);*/
+                                const dataPath = await Neutralino.filesystem.getJoinedPath(settings.dataDirectory, "../");
+                                await Neutralino.filesystem.remove(dataPath);
+
+                                await Neutralino.os.showMessageBox('Uninstall', 'The application data has been removed, you will need to manually remove the app itself');
+
+                                showToast("Uninstalled, quitting...");
+                                setTimeout(async () => {
+                                    if (window.whenQuitting) await window.whenQuitting();
+                                    if (window.beforeExitRPC) await window.beforeExitRPC();
+                                    await Neutralino.app.exit();
+                                }, 200);
                             };
-
-                            const appPath = NL_PATH;
-                            await Neutralino.filesystem.remove(appPath);
-
-                            showToast("Uninstalled, quitting...");
-                            setTimeout(async () => {
-                                if (window.whenQuitting) await window.whenQuitting();
-                                if (window.beforeExitRPC) await window.beforeExitRPC();
-                                await Neutralino.app.exit();
-                            }, 200);*/
-                            const dataPath = await Neutralino.filesystem.getJoinedPath(settings.dataDirectory, "../");
-                            await Neutralino.filesystem.remove(dataPath);
-
-                            await Neutralino.os.showMessageBox('Uninstall', 'The application data has been removed, you will need to manually remove the app itself');
-
-                            showToast("Uninstalled, quitting...");
-                            setTimeout(async () => {
-                                if (window.whenQuitting) await window.whenQuitting();
-                                if (window.beforeExitRPC) await window.beforeExitRPC();
-                                await Neutralino.app.exit();
-                            }, 200);
+                        } catch (e) {
+                            console.error(e);
+                            showToast("Failed to uninstall");
                         };
-                    } catch (e) {
-                        console.error(e);
-                        showToast("Failed to uninstall");
-                    };
-                }}>
-                    Uninstall
+                    }}>
+                        Uninstall
+                    </Button>
+                }
+                <Button onclick={async () => setMenu("about")}>
+                    About
                 </Button>
             </div>
         </>

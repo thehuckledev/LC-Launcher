@@ -29,6 +29,15 @@ function toggleTransparency(on) {
     fs.writeFileSync(CONF, JSON.stringify(cfg, null, 4));
 };
 
+function togglePortableMode(on) {
+    const cfg = JSON.parse(fs.readFileSync(CONF, "utf-8"));
+
+    if (on) cfg.globalVariables.PORTABLE = true;
+    else cfg.globalVariables.PORTABLE = false;
+
+    fs.writeFileSync(CONF, JSON.stringify(cfg, null, 4));
+};
+
 function patchConfig(on) {
     const cfg = JSON.parse(fs.readFileSync(CONF, "utf-8"));
 
@@ -82,14 +91,14 @@ function copyLibs(src, dest, filterFn) {
     };
 };
 
-function buildLinux(cfg) {
+function buildLinux(cfg, portable) {
     const archList = cfg.buildScript.linux.architecture;
     const binary = cfg.cli.binaryName;
     const appName = cfg.buildScript.linux.appName;
     const safeAppName = appName.replaceAll(" ", "-");
 
     for (const arch of archList) {
-        const outDir = `./dist/linux_${arch}/${safeAppName}`;
+        const outDir = `./dist/linux_${arch}${!!portable ? "_portable" : ""}/${safeAppName}`;
         const exe = `./dist/${binary}/${binary}-linux_${arch}`;
 
         if (!exists(exe)) {
@@ -136,21 +145,21 @@ StartupNotify=true
 Keywords=game;launcher;legacy;community;`;
         fs.writeFileSync(`${outDir}/${safeAppName}.desktop`, desktopFile);
 
-        const tarName = `./dist/__${safeAppName}-linux-${arch}.tar.gz`;
+        const tarName = `./dist/__${safeAppName}-linux-${arch}${!!portable ? "-portable" : ""}.tar.gz`;
         const envPrefix = process.platform === 'darwin' ? 'export COPYFILE_DISABLE=1 && ' : '';
-        run(`${envPrefix}tar --exclude="._*" --exclude=".DS_Store" --exclude="__MACOSX" -cJf "${tarName}" -C ./dist/linux_${arch} "${safeAppName}"`);
+        run(`${envPrefix}tar --exclude="._*" --exclude=".DS_Store" --exclude="__MACOSX" -cJf "${tarName}" -C ./dist/linux_${arch}${!!portable ? "_portable" : ""} "${safeAppName}"`);
 
         if (process.platform === "linux" && process.argv.length > 2) {
             console.log(`Creating AppImage for ${arch}...`);
             const targetArch = arch === 'arm64' ? 'aarch64' : arch;
-            run(`ARCH=${targetArch} appimagetool "${outDir}" "./dist/${safeAppName}-linux-${arch}.AppImage"`);
+            run(`ARCH=${targetArch} appimagetool "${outDir}" "./dist/${safeAppName}-linux-${arch}${!!portable ? "-portable" : ""}.AppImage"`);
         };
 
         console.log(`Created ${tarName}`);
     };
 };
 
-function buildMac(cfg) {
+function buildMac(cfg, portable) {
     const archList = cfg.buildScript.mac.architecture;
     const binary = cfg.cli.binaryName;
     const appName = cfg.buildScript.mac.appName;
@@ -163,7 +172,7 @@ function buildMac(cfg) {
     const appCredits = cfg.buildScript.mac.appCredits;
 
     for (const arch of archList) {
-        const appDir = `./dist/mac_${arch}/${appName}.app`;
+        const appDir = `./dist/mac_${arch}${!!portable ? "_portable" : ""}/${appName}.app`;
         const exe = `./dist/${binary}/${binary}-mac_${arch}`;
 
         if (!exists(exe)) {
@@ -202,14 +211,14 @@ function buildMac(cfg) {
         copyIfExists(`./dist/${binary}/extensions`, `${appDir}/Contents/Resources/`);
         copyLibs(`./libs`, `${appDir}/Contents/Resources/libs/`, (f) => f.includes("osx") && (f.includes(arch) || f.includes("no-arch")));
 
-        const zipParent = path.join("./dist", `mac_${arch}`);
-        const zipName = `./dist/__${safeAppName}-mac-${arch}.zip`;
+        const zipParent = path.join("./dist", `mac_${arch}${!!portable ? "_portable" : ""}`);
+        const zipName = `./dist/${!portable ? "__" : ""}${safeAppName}-mac-${arch}${!!portable ? "-portable" : ""}.zip`;
         if (process.platform === "win32")
-            run(`powershell -Command "Compress-Archive -Path '${zipParent}\\*' -DestinationPath '${zipName}' -Force"`);
+            run(`powershell -Command "Compress-Archive -Path '${zipParent}\\${appName}.app' -DestinationPath '${zipName}' -Force"`);
         else
-            run(`cd ./dist && zip -9 -rq "${path.basename(zipName)}" "mac_${arch}" -x "**/._*" -x "**/.DS_Store" -x "**/__MACOSX"`);
+            run(`cd "./dist/mac_${arch}${!!portable ? "_portable" : ""}" && zip -9 -rq "../${path.basename(zipName)}" "${appName}.app" -x "**/._*" -x "**/.DS_Store" -x "**/__MACOSX"`);
 
-        if (process.platform === "darwin" && process.argv.length > 2) {
+        if (process.platform === "darwin" && process.argv.length > 2 && !portable) {
             console.log("Creating DMG...");
             run(`create-dmg \
                     --volname "${appName}" \
@@ -221,7 +230,7 @@ function buildMac(cfg) {
                     --icon "${appName}.app" 200 190 \
                     --hide-extension "${appName}.app" \
                     --app-drop-link 600 185 \
-                    "./dist/${safeAppName}-mac-${arch}.dmg" \
+                    "./dist/${safeAppName}-mac-${arch}${!!portable ? "-portable" : ""}.dmg" \
                     "${appDir}"`);
         };
 
@@ -229,7 +238,7 @@ function buildMac(cfg) {
     };
 };
 
-function buildWin(cfg) {
+function buildWin(cfg, portable) {
     const archList = cfg.buildScript.win.architecture;
     const binary = cfg.cli.binaryName;
     let appName = cfg.buildScript.win.appName;
@@ -239,7 +248,7 @@ function buildWin(cfg) {
     const safeAppName = appName.replaceAll(" ", "-");
 
     for (const arch of archList) {
-        const outDir = `./dist/win_${arch}`;
+        const outDir = `./dist/win_${arch}${!!portable ? "_portable" : ""}`;
         const exe = `./dist/${binary}/${binary}-win_${arch}.exe`;
 
         if (!exists(exe)) {
@@ -252,20 +261,20 @@ function buildWin(cfg) {
         fs.mkdirSync(outDir, { recursive: true });
 
         run(`cp "${exe}" "${outDir}/${appName}"`);
-        run(`cp "./assets/nsis/icon.ico" "${outDir}/icon.ico"`);
+        if (!portable) run(`cp "./assets/nsis/icon.ico" "${outDir}/icon.ico"`);
         run(`cp "./dist/${binary}/resources.neu" "${outDir}/"`);
 
         copyIfExists(`./dist/${binary}/extensions`, outDir);
         copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.includes("windows") && (f.includes(arch) || f.includes("no-arch")));
 
-        const zipParent = path.join("./dist", `win_${arch}`);
-        const zipName = `./dist/__${safeAppName.replace(".exe", "")}-win-${arch}.zip`;
+        const zipParent = path.join("./dist", `win_${arch}${!!portable ? "_portable" : ""}`);
+        const zipName = `./dist/${!portable ? "__" : ""}${safeAppName.replace(".exe", "")}-win-${arch}${!!portable ? "-portable" : ""}.zip`;
         if (process.platform === "win32")
             run(`powershell -Command "Compress-Archive -Path '${zipParent}\\*' -DestinationPath '${zipName}' -Force"`);
         else
             run(`cd ./dist && zip -9 -rq "${path.basename(zipName)}" "win_${arch}" -x "**/._*" -x "**/.DS_Store" -x "**/__MACOSX"`);
 
-        if (process.platform === "win32" && process.argv.length > 2) {
+        if (process.platform === "win32" && process.argv.length > 2 && !portable) {
             console.log("Creating Windows Installer...");
             run(`"C:\\Program Files (x86)\\NSIS\\makensis.exe" ./build-scripts/installer.nsi`);
         };
@@ -283,26 +292,34 @@ ensureDependencies();
 
 const shouldBuild = (platform) => !targetArg || platform.includes(targetArg);
 
-try {
-    patchConfig(true);
+function buildApp(portable) {
+    try {
+        patchConfig(true);
+        if (!!portable) togglePortableMode(true);
 
-    if (shouldBuild('linux') || shouldBuild('darwin')) buildBase();
-    if (shouldBuild('linux')) buildLinux(cfg);
-    if (shouldBuild('darwin')) buildMac(cfg);
+        if (shouldBuild('linux') || shouldBuild('darwin')) buildBase(!portable);
+        if (shouldBuild('linux')) buildLinux(cfg, portable);
+        if (shouldBuild('darwin')) buildMac(cfg, portable);
 
-    if (shouldBuild('windows')) {
-        toggleTransparency(false);
-        buildBase(false);
-        buildWin(cfg);
+        if (shouldBuild('windows')) {
+            toggleTransparency(false);
+            buildBase(false);
+            buildWin(cfg, portable);
+            toggleTransparency(true);
+        };
+
+        togglePortableMode(false);
+        patchConfig(false);
+    } catch(e) {
+        console.error(e);
+
         toggleTransparency(true);
+        togglePortableMode(false);
+        patchConfig(false);
     };
-
-    patchConfig(false);
-} catch(e) {
-    console.error(e);
-
-    toggleTransparency(true);
-    patchConfig(false);
 };
+
+buildApp(false);
+buildApp(true);
 
 console.log("\nAll platforms built.\n");

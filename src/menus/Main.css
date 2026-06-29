@@ -58,6 +58,7 @@
 
 #top-bar {
     height: 55px;
+	min-height: 55px;
 }
 
 #launch-options-bar #main-actions {

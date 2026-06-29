@@ -50,7 +50,7 @@ export default function Dropdown({ id, selected, items = [], onSelect, onEdit, o
                                 </div>
                             </div>
                             {onEdit && (
-                                <Button id="dropdown-edit-btn" pushable={true} onclick={() => onEdit(item)}>
+                                <Button id="dropdown-edit-btn" disabled={item?.editable === false} pushable={item?.editable !== false} onclick={() => onEdit(item)}>
                                     <img src={editIcon} draggable={false} />
                                 </Button>
                             )}

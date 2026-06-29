@@ -54,6 +54,7 @@
     background: rgba(38, 38, 38, 0.562);
     margin: 15px 0;
     height: 3px;
+    min-height: 3px;
 }
 
 #servers-empty {

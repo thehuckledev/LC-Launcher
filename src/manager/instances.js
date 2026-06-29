@@ -81,6 +81,7 @@ export class Instances {
 
     async delete(id) {
         try {
+            await this.manager.profiles.removeInstanceFiles(id);
             await Neutralino.filesystem.remove(await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id));
         } catch {
             return;
