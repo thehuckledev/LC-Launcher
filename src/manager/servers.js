@@ -1,5 +1,8 @@
 import Neutralino from "@neutralinojs/lib";
 
+import { getSetting } from "../utils/settingsManager.js";
+import config from "../data/config";
+
 export class Servers {
     constructor(manager) {
         this.manager = manager;
@@ -23,6 +26,7 @@ export class Servers {
 
     async add(instanceId, name, ip, port = "25565") {
         if (!name || !ip) throw new Error("Name and IP required");
+        if (name.trim().toLowerCase().startsWith("[F]")) throw new Error("Server Name cannot start with '[F]'");
 
         const path = await Neutralino.filesystem.getJoinedPath(
             this.manager.instancesDir,
@@ -46,6 +50,7 @@ export class Servers {
 
     async update(instanceId, serverId, updateData) {
         if (!updateData.name || !updateData.ip) throw new Error("Name and IP required");
+        if (updateData.name.trim().toLowerCase().startsWith("[F]")) throw new Error("Server Name cannot start with '[F]'");
 
         const path = await Neutralino.filesystem.getJoinedPath(
             this.manager.instancesDir,
@@ -92,8 +97,21 @@ export class Servers {
         const encoder = new TextEncoder();
 
         let totalSize = 12;
+
+        let formattedFeaturedServers = [];
+        if (await getSetting("showFeaturedServers") === true) {
+            formattedFeaturedServers = config.featuredServers.map(s => (
+                {
+                    ...s,
+                    name: `[F] ${s.name}`
+                }
+            ));
+        };
         
-        const packedServers = servers.map(s => {
+        const packedServers = [
+            ...formattedFeaturedServers,
+            ...servers
+        ].map(s => {
             const ipBytes = encoder.encode(s.ip);
             const nameBytes = encoder.encode(s.name);
             const portNum = parseInt(s.port, 10) || 25565;
@@ -199,13 +217,15 @@ export class Servers {
             });
         };
 
+        const nonFeaturedServers = parsedServers.filter(s => !s.name.startsWith("[F] "));
+
         const jsonPath = await Neutralino.filesystem.getJoinedPath(
             this.manager.instancesDir,
             instanceId,
             "servers.json"
         );
 
-        await Neutralino.filesystem.writeFile(jsonPath, JSON.stringify(parsedServers, null, 2));
+        await Neutralino.filesystem.writeFile(jsonPath, JSON.stringify(nonFeaturedServers, null, 2));
         console.log("Servers saved to:", jsonPath, parsedServers);
     };
 };

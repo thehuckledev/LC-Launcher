@@ -1,5 +1,5 @@
 .mc-server {
-    width: 500px;
+    width: 510px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -68,4 +68,8 @@
 
 #mc-server-delete-btn, #mc-server-edit-btn {
     width: 40px;
+}
+
+.mc-server-featured-icon {
+    color: rgb(255, 226, 97);
 }

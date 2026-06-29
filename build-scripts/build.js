@@ -141,8 +141,9 @@ Keywords=game;launcher;legacy;community;`;
         run(`${envPrefix}tar --exclude="._*" --exclude=".DS_Store" --exclude="__MACOSX" -cJf "${tarName}" -C ./dist/linux_${arch} "${safeAppName}"`);
 
         if (process.platform === "linux" && process.argv.length > 2) {
-            console.log("Creating AppImage...");
-            run(`appimagetool "${outDir}" "./dist/${safeAppName}-linux-${arch}.AppImage"`);
+            console.log(`Creating AppImage for ${arch}...`);
+            const targetArch = arch === 'arm64' ? 'aarch64' : arch;
+            run(`ARCH=${targetArch} appimagetool "${outDir}" "./dist/${safeAppName}-linux-${arch}.AppImage"`);
         };
 
         console.log(`Created ${tarName}`);

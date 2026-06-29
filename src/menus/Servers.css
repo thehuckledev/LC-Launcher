@@ -49,6 +49,13 @@
     background: rgba(255, 255, 255, 0.2);
 }
 
+#servers-separator {
+    width: 100%;
+    background: rgba(38, 38, 38, 0.562);
+    margin: 15px 0;
+    height: 3px;
+}
+
 #servers-empty {
     height: 100%;
 

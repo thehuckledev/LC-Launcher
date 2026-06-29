@@ -3,11 +3,15 @@ import "./Servers.css";
 import { useEffect, useState } from "preact/hooks";
 import { useManager } from "../utils/ManagerProvider.jsx";
 
+import { useSettings } from "../utils/SettingsStore.jsx";
+import config from "../data/config.js";
+
 import Button from "../components/Button.jsx";
 import ServerCard from "../components/Server.jsx";
 import closeIcon from "../assets/buttons/close.svg";
 
 export default function ServersMenu({ setMenu, instance, profile, setServer }) {
+    const { settings } = useSettings();
     const Manager = useManager();
     const [servers, setServers] = useState([]);
 
@@ -41,14 +45,27 @@ export default function ServersMenu({ setMenu, instance, profile, setServer }) {
             </div>
 
             <div id="servers-container">
-                {servers.length === 0 ? (
-                    <div id="servers-empty">No servers added. Press Add Server in-game or below.</div>
-                ) : (
-                    <div id="server-list">
-                        {servers.map(server => (
+                <div id="server-list">
+                    {settings.showFeaturedServers === true &&
+                        <>
+                            {config.featuredServers.map(server => (
+                                <ServerCard 
+                                    key={server.name}
+                                    server={server}
+                                    isFeatured={true}
+                                />
+                            ))}
+                            <div id="servers-separator"></div>
+                        </>
+                    }
+                    {servers.length === 0 ? (
+                        <div id="servers-empty">No servers added. Press Add Server in-game or below.</div>
+                    ) : (
+                        servers.map(server => (
                             <ServerCard 
                                 key={server.id}
                                 server={server}
+                                isFeatured={false}
                                 onJoin={() => {
                                     Manager.servers.join(instance?.id, profile?.id, server?.id);
                                     setMenu("main");
@@ -59,9 +76,9 @@ export default function ServersMenu({ setMenu, instance, profile, setServer }) {
                                 }}
                                 onDelete={handleDelete}
                             />
-                        ))}
-                    </div>
-                )}
+                        ))
+                    )}
+                </div>
 
                 <div id="servers-footer-actions">
                     <Button id="add-server-btn" onclick={() => setMenu("addserver")}>

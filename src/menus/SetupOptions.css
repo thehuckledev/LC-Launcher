@@ -1,10 +1,28 @@
-    #setupOptions {
+#setupOptions {
+    padding: 0 15px;
     height: 100%;
     width: 100%;
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 15px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+}
+
+#setupOptions::-webkit-scrollbar {
+    width: 8px;
+}
+
+#setupOptions::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+
+#setupOptions::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 #setupOptions-action-bar {
