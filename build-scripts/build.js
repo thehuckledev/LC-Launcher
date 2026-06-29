@@ -145,14 +145,14 @@ StartupNotify=true
 Keywords=game;launcher;legacy;community;`;
         fs.writeFileSync(`${outDir}/${safeAppName}.desktop`, desktopFile);
 
-        const tarName = `./dist/__${safeAppName}-linux-${arch}${!!portable ? "-portable" : ""}.tar.gz`;
+        const tarName = `./dist/__${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}x.tar.gz`;
         const envPrefix = process.platform === 'darwin' ? 'export COPYFILE_DISABLE=1 && ' : '';
         run(`${envPrefix}tar --exclude="._*" --exclude=".DS_Store" --exclude="__MACOSX" -cJf "${tarName}" -C ./dist/linux_${arch}${!!portable ? "_portable" : ""} "${safeAppName}"`);
 
         if (process.platform === "linux" && process.argv.length > 2) {
             console.log(`Creating AppImage for ${arch}...`);
             const targetArch = arch === 'arm64' ? 'aarch64' : arch;
-            run(`ARCH=${targetArch} appimagetool "${outDir}" "./dist/${safeAppName}-linux-${arch}${!!portable ? "-portable" : ""}.AppImage"`);
+            run(`ARCH=${targetArch} appimagetool "${outDir}" "./dist/${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.AppImage"`);
         };
 
         console.log(`Created ${tarName}`);
@@ -212,7 +212,7 @@ function buildMac(cfg, portable) {
         copyLibs(`./libs`, `${appDir}/Contents/Resources/libs/`, (f) => f.includes("osx") && (f.includes(arch) || f.includes("no-arch")));
 
         const zipParent = path.join("./dist", `mac_${arch}${!!portable ? "_portable" : ""}`);
-        const zipName = `./dist/${!portable ? "__" : ""}${safeAppName}-mac-${arch}${!!portable ? "-portable" : ""}.zip`;
+        const zipName = `./dist/${!portable ? "__" : ""}${safeAppName}${!!portable ? "-portable" : ""}-mac-${arch}.zip`;
         if (process.platform === "win32")
             run(`powershell -Command "Compress-Archive -Path '${zipParent}\\${appName}.app' -DestinationPath '${zipName}' -Force"`);
         else
@@ -268,7 +268,7 @@ function buildWin(cfg, portable) {
         copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.includes("windows") && (f.includes(arch) || f.includes("no-arch")));
 
         const zipParent = path.join("./dist", `win_${arch}${!!portable ? "_portable" : ""}`);
-        const zipName = `./dist/${!portable ? "__" : ""}${safeAppName.replace(".exe", "")}-win-${arch}${!!portable ? "-portable" : ""}.zip`;
+        const zipName = `./dist/${!portable ? "__" : ""}${safeAppName.replace(".exe", "")}${!!portable ? "-portable" : ""}-win-${arch}.zip`;
         if (process.platform === "win32")
             run(`powershell -Command "Compress-Archive -Path '${zipParent}\\*' -DestinationPath '${zipName}' -Force"`);
         else

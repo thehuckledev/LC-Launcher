@@ -14,7 +14,7 @@
     "enableServer": true,
     "enableNativeAPI": true,
     "enableExtensions": true,
-    "tokenSecurity": "one-time",
+    "tokenSecurity": "none",
     "logging": {
         "enabled": false,
         "writeToLogFile": false
@@ -55,7 +55,7 @@
             "center": true,
             "fullScreen": false,
             "alwaysOnTop": false,
-            "enableInspector": false,
+            "enableInspector": true,
             "openInspectorOnStartup": false,
             "transparent": true,
             "borderless": true,

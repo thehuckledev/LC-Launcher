@@ -1,7 +1,7 @@
 ; Huge thanks to https://github.com/Midrags/SFF/blob/main/installer.nsi
 
 !define APPNAME "LC Launcher"
-!define SAFEAPPNAME "LCLauncher"
+!define SAFEAPPNAME "LC-Launcher"
 !ifndef VERSION
     !define VERSION "0.1.0"
 !endif
