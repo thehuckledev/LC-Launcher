@@ -12,7 +12,7 @@ export const defaultSettings = {
     lastProfileID: null,
     lastInstanceID: null,
     dataDirectory: async () => {
-        if(NL_PORTABLE === true) return "./data";
+        if(NL_PORTABLE === true) return await Neutralino.filesystem.getJoinedPath(NL_PATH, "data");
 
         const homeDir =
             (await Neutralino.os.getEnv("HOME")) ||
