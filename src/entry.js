@@ -21,5 +21,7 @@ NJS Server: ${NL_VERSION || "Unknown"} (${NL_COMMIT || "Unknown"})
 ---------------------------
 `);
 
+    if (NL_PATH.includes("/AppTranslocation/")) return await Neutralino.os.showMessageBox("LC Launcher", "Move LC Launcher out of the Downloads folder. MacOS app translocation prevents it from running while in the Downloads folder.");
+
     await import("./main.jsx");
 })();

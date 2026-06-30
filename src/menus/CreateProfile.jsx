@@ -2,6 +2,7 @@ import "./CreateProfile.css";
 
 import { useState } from "preact/hooks";
 import Neutralino from "@neutralinojs/lib";
+import Net from "../lib/net.js";
 import { useManager } from "../utils/ManagerProvider.jsx";
 import { showToast } from "../components/Toast.jsx";
 
@@ -30,9 +31,9 @@ export default function CreateProfileMenu({ setMenu, setProfile, reloadData }) {
             if (skinMode === "java") {
                 showToast("Fetching Java Edition skin...");
                 try {
-                    const userRes = await fetch(`https://mcprofile.io/api/v1/java/username/${username}`);
+                    const userRes = await Net.get(`https://mcprofile.io/api/v1/java/username/${username}`);
                     if (!userRes.ok) throw new Error("User not found");
-                    const userData = await userRes.json();
+                    const userData = userRes.data;
                     
                     if (userData?.skin) {
                         const skinRes = await fetch(userData.skin);
@@ -53,9 +54,9 @@ export default function CreateProfileMenu({ setMenu, setProfile, reloadData }) {
             } else if (skinMode === "bedrock") {
                 showToast("Fetching Bedrock Edition skin...");
                 try {
-                    const userRes = await fetch(`https://mcprofile.io/api/v1/bedrock/gamertag/${username}`);
+                    const userRes = await Net.get(`https://mcprofile.io/api/v1/bedrock/gamertag/${username}`);
                     if (!userRes.ok) throw new Error("User not found");
-                    const userData = await userRes.json();
+                    const userData = userRes.data;
                     
                     if (userData?.skin) {
                         const skinRes = await fetch(userData.skin);
