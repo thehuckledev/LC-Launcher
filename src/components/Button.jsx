@@ -2,7 +2,7 @@ import "./Button.css";
 
 import { useState, useRef, useEffect } from "preact/hooks";
 
-import clickSfx from "../assets/sfx/minecraft_click.opus";
+import clickSfx from "../assets/sfx/press.flac";
 
 import { useSettings } from "../utils/SettingsStore.jsx";
 

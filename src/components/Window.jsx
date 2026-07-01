@@ -5,21 +5,33 @@ import Neutralino from "@neutralinojs/lib";
 import { motion } from "motion/react";
 import * as THREE from 'three';
 
+import { useSettings } from "../utils/SettingsStore.jsx";
+
+import backSfx from "../assets/sfx/back.flac";
 import minIcon from "../assets/window/min.png";
 import maxIcon from "../assets/window/max.png";
 import restoreIcon from "../assets/window/restore.png";
 import closeIcon from "../assets/window/close.png";
 import defaultBG from "../assets/ui/background.jpeg";
 
+const backSound = new Audio(backSfx);
+backSound.preload = "auto";
+
 export default function Window({ title, showClose = true, showMinimize = true, showMaximize = true, isPanorama = false, backgroundSrc = defaultBG, backgroundFade = true, backgroundAnimated = true, menu, setMenu, children }) {
+    const { settings } = useSettings();
     const [openAnim, setOpenAnim] = useState(true);
     const lastStillBg = useRef(backgroundSrc);
     const canvasRef = useRef(null);
     const menuRef = useRef(menu);
+    const settingsRef = useRef(settings);
 
     useEffect(() => {
         menuRef.current = menu;
     }, [menu]);
+
+    useEffect(() => {
+        settingsRef.current = settings;
+    }, [settings]);
 
     async function maximize() {
         await Neutralino.window.maximize();
@@ -248,14 +260,25 @@ export default function Window({ title, showClose = true, showMinimize = true, s
             window.addEventListener("keydown", (e) => {
                 if (e.key === "Escape") {
                     const currentMenu = menuRef.current;
+                    const currentSettings = settingsRef.current;
+
                     if (
                         currentMenu !== "main" &&
                         currentMenu !== "setup" &&
                         currentMenu !== "setupoptions"
                     ) {
+                        e.preventDefault();
+                        
+                        if (!!currentSettings.buttonClickSFX) {
+                            const back = backSound.cloneNode();
+                            back.volume = (currentSettings?.volume ?? 100) / 100;
+                            back.play().catch(err => console.error("Back sfx failed:", err));
+                            back.onended = () => back.remove();
+                        };
+                        
                         if (currentMenu === "addserver" || currentMenu === "editserver") setMenu("servers");
                         else setMenu("main");
-                    }
+                    };
                 };
             }); 
         };

@@ -1,6 +1,8 @@
 import Neutralino from "@neutralinojs/lib";
 import { startLogger } from "./utils/logger.js";
 
+import darwinIcon from "./assets/darwin_icon.png";
+
 Neutralino.init();
 if (NL_ARGS.includes("--neu-dev-extension")) window._neutralino = Neutralino; // huge ram increase prob
 
@@ -20,6 +22,11 @@ NJS Client: ${NL_CVERSION || "Unknown"} (${NL_CCOMMIT || "Unknown"})
 NJS Server: ${NL_VERSION || "Unknown"} (${NL_COMMIT || "Unknown"})
 ---------------------------
 `);
+
+    if (NL_OS === "Darwin") {
+        if(NL_ARGS.includes("--neu-dev-extension")) await Neutralino.window.setIcon(`/src${darwinIcon}`); // dev mode acts differently as the resources path is different due to vite bundling
+        else await Neutralino.window.setIcon(`/public${darwinIcon}`);
+    };
 
     if (NL_PATH.includes("/AppTranslocation/")) {
         await Neutralino.os.showMessageBox(

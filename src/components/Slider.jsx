@@ -2,7 +2,7 @@ import "./Slider.css";
 
 import { useSettings } from "../utils/SettingsStore.jsx";
 
-import clickSfx from "../assets/sfx/minecraft_click.opus";
+import clickSfx from "../assets/sfx/press.flac";
 
 const sound = new Audio(clickSfx);
 sound.preload = "auto";
