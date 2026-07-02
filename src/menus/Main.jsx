@@ -88,7 +88,7 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                         <img src={folderIcon} draggable={false} />
                     </Button>
                     <div style={{ width: "5px" }}></div>
-                    <Button id="screenshots-button" tooltip="Screenshots" tooltipAlign="RIGHT" onclick={() => setMenu("screenshots")}>
+                    <Button id="screenshots-button" tooltip="Screenshots" tooltipAlign="RIGHT" disabled={!instance?.id} pushable={!!instance?.id} onclick={() => setMenu("screenshots")}>
                         <img src={screenshotIcon} draggable={false} />
                     </Button>
                     <Button id="multiplayer-button" tooltip="Multiplayer" tooltipAlign="RIGHT" disabled={!instance?.id} pushable={!!instance?.id} onclick={async() => await Manager.instances.openFolder(instance?.id)}>
@@ -147,7 +147,7 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                         direction="up"
                     />
                     <div id="main-actions">
-                        <Button id="worlds-button" tooltip="Worlds" tooltipAlign="LEFT" disabled={!instance?.id || progress.active || processing} pushable={!progress.active && !processing}>
+                        <Button id="worlds-button" tooltip="Worlds" tooltipAlign="LEFT" disabled={!instance?.id || progress.active || processing} pushable={instance?.id && !progress.active && !processing}>
                             <img src={worldsIcon} draggable={false} />
                         </Button>
                         <Button id="play-button" type={runningProc !== null ? "destructive" : "primary"} disabled={!instance?.id || !profile?.id || progress.active || (processing && runningProc === null)} pushable={!progress.active || !processing || runningProc !== null} onclick={async () => {
@@ -163,7 +163,7 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                                 instance?.installed === true ? "Play" : "Install"
                             ) : "Stop"}
                         </Button>
-                        <Button id="servers-button" tooltip="Servers" tooltipAlign="LEFT" disabled={!instance?.id || progress.active || processing} pushable={!progress.active && !processing} onclick={() => setMenu('servers')}>
+                        <Button id="servers-button" tooltip="Servers" tooltipAlign="LEFT" disabled={!instance?.id || progress.active || processing} pushable={instance?.id && !progress.active && !processing} onclick={() => setMenu('servers')}>
                             <img src={serversIcon} draggable={false} />
                         </Button>
                     </div>
