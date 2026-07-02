@@ -23,8 +23,13 @@ function loadConfig() {
 function toggleTransparency(on) {
     const cfg = JSON.parse(fs.readFileSync(CONF, "utf-8"));
 
-    if (on) cfg.modes.window.transparent = true;
-    else cfg.modes.window.transparent = false;
+    if (on) {
+        cfg.modes.window.transparent = true;
+        cfg.modes.window.borderless = true;
+    } else {
+        cfg.modes.window.transparent = false;
+        cfg.modes.window.borderless = false;
+    };
 
     fs.writeFileSync(CONF, JSON.stringify(cfg, null, 4));
 };
