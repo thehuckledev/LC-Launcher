@@ -168,6 +168,10 @@ p {
     overscroll-behavior: none;
 }
 
+.windowsOS #main {
+    margin-top: 12px;
+}
+
 /*#titlebar {
     padding: 4px;
 }*/
