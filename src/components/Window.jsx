@@ -152,7 +152,7 @@ export default function Window({ title, showClose = true, showMinimize = true, s
             const scale = window.devicePixelRatio || 1;
 
             const width = Math.round(1000 * scale);
-            const height = Math.round(620 * scale);
+            const height = Math.round(600 * scale); // -20 due to using the window titlebar instead of custom
 
             await Neutralino.window.setSize({
                 width,
@@ -268,7 +268,7 @@ export default function Window({ title, showClose = true, showMinimize = true, s
                         currentMenu !== "setupoptions"
                     ) {
                         e.preventDefault();
-                        
+
                         if (!!currentSettings.buttonClickSFX) {
                             const back = backSound.cloneNode();
                             back.volume = (currentSettings?.volume ?? 100) / 100;
