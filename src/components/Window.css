@@ -169,6 +169,7 @@ p {
 }
 
 .windowsOS #main {
+    height: calc(100% - 12px);
     margin-top: 12px;
 }
 
