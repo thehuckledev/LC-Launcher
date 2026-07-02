@@ -407,7 +407,7 @@ export class Exec {
         const profile = await this.manager.profiles.get(profileId);
         if (!profile) return showToast("Error: Profile not found");
 
-        if (!instance.installed) return await this.installInstance(instance);
+        if (!instance.installed) return await this.installInstance(instance, false, false);
 
         if (navigator.onLine === true && await this.needsUpdate(instance)) {
             let shouldDo = await Neutralino.os

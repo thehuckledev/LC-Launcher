@@ -160,72 +160,77 @@ export class Servers {
     };
 
     async read(instanceId) {
-        const dbPath = await Neutralino.filesystem.getJoinedPath(
-            this.manager.instancesDir,
-            instanceId,
-            "content",
-            "servers.db"
-        );
-
-        let buffer;
         try {
-            buffer = await Neutralino.filesystem.readBinaryFile(dbPath);
-        } catch (e) {
-            return console.error(e);
+            const dbPath = await Neutralino.filesystem.getJoinedPath(
+                this.manager.instancesDir,
+                instanceId,
+                "content",
+                "servers.db"
+            );
+
+            let buffer;
+            try {
+                buffer = await Neutralino.filesystem.readBinaryFile(dbPath);
+            } catch (e) {
+                return console.error(e);
+            };
+
+            const view = new DataView(buffer);
+            const uint8 = new Uint8Array(buffer);
+            const decoder = new TextDecoder("utf-8");
+
+            if (buffer.byteLength < 12 || uint8[0] !== 77 || uint8[1] !== 67 || uint8[2] !== 83 || uint8[3] !== 86) return;
+
+            const version = view.getUint32(4, true);
+            const serverCount = view.getUint32(8, true);
+
+            let offset = 12;
+            const parsedServers = [];
+
+            for (let i = 0; i < serverCount; i++) {
+                if (offset + 2 > buffer.byteLength) break;
+                
+                // ip len and ip
+                const ipLen = view.getUint16(offset, true);
+                offset += 2;
+                if (offset + ipLen > buffer.byteLength) break;
+                const ip = decoder.decode(uint8.subarray(offset, offset + ipLen));
+                offset += ipLen;
+
+                // port
+                if (offset + 2 > buffer.byteLength) break;
+                const port = view.getUint16(offset, true).toString();
+                offset += 2;
+
+                // name length and name
+                if (offset + 2 > buffer.byteLength) break;
+                const nameLen = view.getUint16(offset, true);
+                offset += 2;
+                if (offset + nameLen > buffer.byteLength) break;
+                const name = decoder.decode(uint8.subarray(offset, offset + nameLen));
+                offset += nameLen;
+
+                parsedServers.push({
+                    id: crypto.randomUUID(),
+                    name,
+                    ip,
+                    port
+                });
+            };
+
+            const nonFeaturedServers = parsedServers.filter(s => !s.name.startsWith("[F] "));
+
+            const jsonPath = await Neutralino.filesystem.getJoinedPath(
+                this.manager.instancesDir,
+                instanceId,
+                "servers.json"
+            );
+
+            await Neutralino.filesystem.writeFile(jsonPath, JSON.stringify(nonFeaturedServers, null, 2));
+            console.log("Servers saved to:", jsonPath, parsedServers);
+        } catch(e) {
+            console.error(e);
+            console.log(`Failed to read servers.db for instance ${instanceId}:`, e);
         };
-
-        const view = new DataView(buffer);
-        const uint8 = new Uint8Array(buffer);
-        const decoder = new TextDecoder("utf-8");
-
-        if (buffer.byteLength < 12 || uint8[0] !== 77 || uint8[1] !== 67 || uint8[2] !== 83 || uint8[3] !== 86) return;
-
-        const version = view.getUint32(4, true);
-        const serverCount = view.getUint32(8, true);
-
-        let offset = 12;
-        const parsedServers = [];
-
-        for (let i = 0; i < serverCount; i++) {
-            if (offset + 2 > buffer.byteLength) break;
-            
-            // ip len and ip
-            const ipLen = view.getUint16(offset, true);
-            offset += 2;
-            if (offset + ipLen > buffer.byteLength) break;
-            const ip = decoder.decode(uint8.subarray(offset, offset + ipLen));
-            offset += ipLen;
-
-            // port
-            if (offset + 2 > buffer.byteLength) break;
-            const port = view.getUint16(offset, true).toString();
-            offset += 2;
-
-            // name length and name
-            if (offset + 2 > buffer.byteLength) break;
-            const nameLen = view.getUint16(offset, true);
-            offset += 2;
-            if (offset + nameLen > buffer.byteLength) break;
-            const name = decoder.decode(uint8.subarray(offset, offset + nameLen));
-            offset += nameLen;
-
-            parsedServers.push({
-                id: crypto.randomUUID(),
-                name,
-                ip,
-                port
-            });
-        };
-
-        const nonFeaturedServers = parsedServers.filter(s => !s.name.startsWith("[F] "));
-
-        const jsonPath = await Neutralino.filesystem.getJoinedPath(
-            this.manager.instancesDir,
-            instanceId,
-            "servers.json"
-        );
-
-        await Neutralino.filesystem.writeFile(jsonPath, JSON.stringify(nonFeaturedServers, null, 2));
-        console.log("Servers saved to:", jsonPath, parsedServers);
     };
 };
