@@ -4,7 +4,8 @@ const DEBUG = true;
 const publicClasses = {
     net: require("./src/net"),
     filesystem: require("./src/filesystem"),
-    discordRPC: require("./src/discordRPC")
+    discordRPC: require("./src/discordRPC"),
+    childProcess: require("./src/childProcess"),
 };
 
 let ext;
