@@ -32,8 +32,8 @@ if (buildList.length === 0) {
 
 const cwd = join(__dirname, "../src-lib");
 if (!fs.existsSync(join(cwd, "node_modules"))) {
-    console.log("\nInstalling Node Modules...");
-    execSync("npm i", { stdio: "ignore", cwd });
+    console.log("\nInstalling Bun Modules...");
+    execSync("bun i", { stdio: "ignore", cwd });
 };
 
 await mkdir(OUT_DIR, { recursive: true });
