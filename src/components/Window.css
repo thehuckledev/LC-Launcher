@@ -259,7 +259,7 @@ p {
     background: #E81123 !important;
 }
 
-.maximized #close-button:hover, #close-button:hover {
+.maximized #close-button:hover, .maximized #close-button:hover {
     border-radius: 0;
 }
 
