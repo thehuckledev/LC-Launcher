@@ -115,7 +115,6 @@ class NeutralinoExtension extends EventEmitter {
             console.log(`WebSocket closed: ${code} - ${reason}`);
             try {
                 self.emit('close');
-                setTimeout(() => process.exit(0), 100);
             } catch (e) {};
         });
 

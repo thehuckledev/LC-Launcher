@@ -45,7 +45,11 @@ async function processAppEvent(d) {
 (async() => {
     ext = await new NeutralinoExtension(DEBUG);
     ext.on('close', () => {
-        publicClasses.discordRPC.disable(null, ext);
+        try {
+            await publicClasses.discordRPC.disable(null, ext);
+        } catch {};
+
+        process.exit(0);
     });
     ext.run(processAppEvent);
 })();
