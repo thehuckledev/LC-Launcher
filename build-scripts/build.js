@@ -167,7 +167,8 @@ Keywords=game;launcher;legacy;community;`;
             console.log(`Creating AppImage for ${arch}...`);
             const targetArch = arch === 'arm64' ? 'aarch64' : arch;
 
-            if (!!execSync("which linuxdeploy 2>/dev/null").toString().trim()) {
+            const hasLinuxDeploy = !!execSync("which linuxdeploy 2>/dev/null || true").toString().trim();
+            if (hasLinuxDeploy) {
                 run(`ARCH=${targetArch} LINUXDEPLOY_PLUGINS="gstreamer" linuxdeploy --appdir "${outDir}" --output appimage --desktop-file="${outDir}/${safeAppName}.desktop"`);
                 run(`mv ./*.AppImage "./dist/${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.AppImage" 2>/dev/null || true`);
             } else {
