@@ -169,7 +169,7 @@ Keywords=game;launcher;legacy;community;`;
 
             const hasLinuxDeploy = !!execSync("which linuxdeploy 2>/dev/null || true").toString().trim();
             if (hasLinuxDeploy) {
-                run(`ARCH=${targetArch} LINUXDEPLOY_PLUGINS="gstreamer" linuxdeploy --appdir "${outDir}" --output appimage --desktop-file="${outDir}/${safeAppName}.desktop" --icon-file="./src/assets/icon.png"`);
+                run(`ARCH=${targetArch} LINUXDEPLOY_PLUGINS="gstreamer" linuxdeploy --appdir "${outDir}" --output appimage --desktop-file="${outDir}/${safeAppName}.desktop" --icon-file="./assets/appimage/icon.png"`);
                 run(`mv ./*.AppImage "./dist/${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.AppImage" 2>/dev/null || true`);
             } else {
                 run(`ARCH=${targetArch} appimagetool "${outDir}" "./dist/${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.AppImage"`);
