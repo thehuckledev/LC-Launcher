@@ -47,11 +47,16 @@ jobs:
             - name: Install installer deps (Linux)
               if: matrix.os == 'ubuntu-latest'
               run: |
-                sudo apt-get install -y libfuse2
+                sudo apt-get update
+                sudo apt-get install -y libfuse2 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-gl
 
-                wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
-                chmod +x appimagetool
-                sudo mv appimagetool /usr/local/bin/
+                wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -O linuxdeploy
+                chmod +x linuxdeploy
+                sudo mv linuxdeploy /usr/local/bin/
+
+                wget https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gstreamer/master/linuxdeploy-plugin-gstreamer.sh -O linuxdeploy-plugin-gstreamer.sh
+                chmod +x linuxdeploy-plugin-gstreamer.sh
+                sudo mv linuxdeploy-plugin-gstreamer.sh /usr/local/bin/
 
             - name: Build lib
               run: bun ./build-scripts/build-lib.js ${{ matrix.target }}

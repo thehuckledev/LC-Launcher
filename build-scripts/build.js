@@ -125,13 +125,22 @@ function buildLinux(cfg, portable) {
 
         const appRun = `#!/bin/sh
 
-if [ -z $APPDIR ]; then
-    APPDIR=$(readlink -f $(dirname "$0"))
+if [ -z "$APPDIR" ]; then
+    APPDIR=$(readlink -f "$(dirname "$0")")
 fi
+
+# fixes the webkit no window showing up
+export WEBKIT_DISABLE_DMABUF_RENDERER=1
 
 # stops double window titlebar
 if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
     export GDK_BACKEND=x11
+fi
+
+# expose internal bundled gstreamer plugins
+if [ -d "$APPDIR/usr/lib/gstreamer-1.0" ]; then
+    export GST_PLUGIN_SYSTEM_PATH=""
+    export GST_PLUGIN_PATH="$APPDIR/usr/lib/gstreamer-1.0"
 fi
 
 exec $APPDIR/usr/bin/${safeAppName} "$@"`;
@@ -157,7 +166,13 @@ Keywords=game;launcher;legacy;community;`;
         if (process.platform === "linux" && process.argv.length > 2) {
             console.log(`Creating AppImage for ${arch}...`);
             const targetArch = arch === 'arm64' ? 'aarch64' : arch;
-            run(`ARCH=${targetArch} appimagetool "${outDir}" "./dist/${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.AppImage"`);
+
+            if (run("which linuxdeploy 2>/dev/null || true").toString().trim()) {
+                run(`ARCH=${targetArch} LINUXDEPLOY_PLUGINS="gstreamer" linuxdeploy --appdir "${outDir}" --output appimage --desktop-file="${outDir}/${safeAppName}.desktop"`);
+                run(`mv ./*.AppImage "./dist/${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.AppImage" 2>/dev/null || true`);
+            } else {
+                run(`ARCH=${targetArch} appimagetool "${outDir}" "./dist/${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.AppImage"`);
+            };
         };
 
         console.log(`Created ${tarName}`);
