@@ -1,6 +1,8 @@
 import Neutralino from "@neutralinojs/lib";
 import { showToast } from "../components/Toast.jsx";
 
+import Filesystem from "../lib/filesystem.js";
+
 export class Instances {
     constructor(manager) {
         this.manager = manager;
@@ -51,7 +53,9 @@ export class Instances {
             id,
         };
 
-        await this.manager.utils.writeJSON(await Neutralino.filesystem.getJoinedPath(path, "instance.json"), instance);
+        // using writing in chunks to fix linux webkitgtk issue where it cant write more than about 2mb due to the websocket message size limit
+        await Filesystem.writeStream(await Neutralino.filesystem.getJoinedPath(path, "instance.json"), instance);
+        //await this.manager.utils.writeJSON(await Neutralino.filesystem.getJoinedPath(path, "instance.json"), instance);
 
         return instance;
     };
@@ -71,7 +75,9 @@ export class Instances {
                 id,
             };
 
-            await this.manager.utils.writeJSON(instancePath, updatedData);
+            // using writing in chunks to fix linux webkitgtk issue where it cant write more than about 2mb due to the websocket message size limit
+            await Filesystem.writeStream(instancePath, updatedData);
+            //await this.manager.utils.writeJSON(instancePath, updatedData);
             return updatedData;
         } catch (err) {
             console.error(`Failed to update instance ${id}:`, err);

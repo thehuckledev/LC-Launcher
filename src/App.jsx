@@ -88,8 +88,15 @@ export default function App() {
             const existing = installedObjects.find(i => i.id === inst.id);
             if (!existing) continue;
 
-            const { id, compatibilityLayer, ...updateData } = inst; 
-            await Manager.instances.update(existing.id, updateData);
+            const { id, compatibilityLayer, ...updateData } = inst;
+            const hasChanges = Object.keys(updateData).some(
+                key => JSON.stringify(existing[key]) !== JSON.stringify(updateData[key])
+            );
+
+            if (hasChanges) {
+                await Manager.instances.update(existing.id, updateData);
+                await new Promise(resolve => setTimeout(resolve, 50)); 
+            };
         };
     };
 

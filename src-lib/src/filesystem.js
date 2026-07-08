@@ -4,7 +4,52 @@ const fflate = require('fflate');
 const tarStream = require('tar-stream');
 const { XzReadableStream } = require("xz-decompress");
 
+const activeWriteStreams = new Map();
+
 class Filesystem {
+    static async writeStreamStart(callID, ext, config) {
+        const { streamID, targetPath, append = false } = config;
+
+        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+
+        const writeStream = fs.createWriteStream(targetPath, { flags: append ? 'a' : 'w' });
+
+        activeWriteStreams.set(streamID, writeStream);
+        return { success: true, streamID };
+    };
+
+    static async writeStreamChunk(callID, ext, config) {
+        const { streamID, data, isBase64 = false } = config;
+
+        const stream = activeWriteStreams.get(streamID);
+        if (!stream) throw new Error(`Stream not found: ${streamID}`);
+
+        return new Promise((resolve, reject) => {
+            const buffer = isBase64 ? Buffer.from(data, 'base64') : data;
+
+            const cacheDrained = stream.write(buffer, (err) => {
+                if (err) return reject(new Error(`Write chunk error: ${err.message}`));
+                if (cacheDrained) resolve({ success: true });
+            });
+
+            if (!cacheDrained) stream.once('drain', () => resolve({ success: true }));
+        });
+    };
+
+    static async writeStreamEnd(callID, ext, config) {
+        const { streamID } = config;
+
+        const stream = activeWriteStreams.get(streamID);
+        if (!stream) throw new Error(`Stream not found: ${streamID}`);
+
+        return new Promise((resolve) => {
+            stream.end(() => {
+                activeWriteStreams.delete(streamID);
+                resolve({ success: true });
+            });
+        });
+    };
+
     static async unzip(callID, ext, config) {
         const { zipPath, destPath } = config;
 
@@ -182,5 +227,15 @@ class Filesystem {
         };
     };
 };
+
+process.on('exit', () => {
+    for (const [id, stream] of activeWriteStreams.entries()) {
+        try {
+            stream.end();
+        } catch {};
+    };
+
+    activeWriteStreams.clear();
+});
 
 module.exports = Filesystem;
