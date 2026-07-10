@@ -18,7 +18,12 @@ export class Instances {
 
     async get(id) {
         try {
-            return await this.manager.utils.readJSON(await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id, "instance.json"));
+            // reading in chunks to fix linux webkitgtk issue where it cant read more than about 2mb due to the websocket message size limit
+            //return await this.manager.utils.readJSON(await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id, "instance.json"));
+            const targetPath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id, "instance.json");
+            const instanceContent = await Filesystem.readStream(targetPath);
+            if (!instanceContent) throw new Error("File not readable");
+            return JSON.parse(instanceContent);
         } catch {
             return;
         };

@@ -7,6 +7,37 @@ const { XzReadableStream } = require("xz-decompress");
 const activeWriteStreams = new Map();
 
 class Filesystem {
+    static async readStream(callID, ext, config) {
+        const { targetPath, chunkSize = 256 * 1024, asBase64 = false } = config; // 256kb
+
+        if (!fs.existsSync(targetPath)) throw new Error(`File not found: ${targetPath}`);
+
+        ext.sendMessage('readStreamStart', { callID, success: true });
+
+        return new Promise((resolve, reject) => {
+            const readStream = fs.createReadStream(targetPath, { highWaterMark: chunkSize });
+
+            readStream.on('data', (chunk) => {
+                const data = asBase64 ? chunk.toString('base64') : chunk.toString('utf8');
+                
+                ext.sendMessage('readStreamChunk', {
+                    callID,
+                    data
+                });
+            });
+
+            readStream.on('end', () => {
+                ext.sendMessage('readStreamEnd', { callID, success: true });
+                resolve({ success: true });
+            });
+
+            readStream.on('error', (err) => {
+                ext.sendMessage('readStreamError', { callID, error: err.message });
+                reject(err);
+            });
+        });
+    };
+
     static async writeStreamStart(callID, ext, config) {
         const { streamID, targetPath, append = false } = config;
 
