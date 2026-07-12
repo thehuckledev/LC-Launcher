@@ -14,6 +14,13 @@ import restoreIcon from "../assets/window/restore.png";
 import closeIcon from "../assets/window/close.png";
 import defaultBG from "../assets/ui/background.jpeg";
 
+let panoramaEnabled = false;
+(async() => {
+    let panoEnv = await Neutralino.os.getEnv('INSTANCE_PANORAMAS');
+    console.log(panoramaEnabled);
+    if (panoEnv !== "false") panoramaEnabled = true;
+})();
+
 const backSound = new Audio(backSfx);
 backSound.preload = "auto";
 
@@ -55,12 +62,12 @@ export default function Window({ title, showClose = true, showMinimize = true, s
     }, [backgroundSrc, isPanorama]);
 
     useEffect(() => {
-        if (!isPanorama || !canvasRef.current) return;
+        if (!panoramaEnabled || !isPanorama || !canvasRef.current) return;
 
         // Panorama code modified from Prismarine Web Client. All credit to Prismarine JS.
         // https://github.com/PrismarineJS/prismarine-web-client/blob/master/index.js
 
-        let scene, camera, renderer, animationFrameId;
+        let scene, camera, renderer, animationFrameId, panoramaBox, panorGeo, panorMaterials;
         let disposed = false;
 
         function addPanoramaCubeMap() {
@@ -69,15 +76,18 @@ export default function Window({ title, showClose = true, showMinimize = true, s
             camera.updateProjectionMatrix();
             camera.position.set(0, 0, 0);
             camera.rotation.set(0, 0, 0);
-            const panorGeo = new THREE.BoxGeometry(1000, 1000, 1000);
+            panorGeo = new THREE.BoxGeometry(1000, 1000, 1000);
 
             const loader = new THREE.TextureLoader();
             const indices = [1, 3, 4, 5, 0, 2];
-            const panorMaterials = indices.map(idx => {
-                return new THREE.MeshBasicMaterial({ map: loader.load(backgroundSrc[idx]), transparent: true, side: THREE.DoubleSide });
+            panorMaterials = indices.map(idx => {
+                const texture = loader.load(backgroundSrc[idx]);
+                texture.premultiplyAlpha = false;
+
+                return new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide });
             });
 
-            const panoramaBox = new THREE.Mesh(panorGeo, panorMaterials);
+            panoramaBox = new THREE.Mesh(panorGeo, panorMaterials);
             panoramaBox.scale.x = -1;
 
             panoramaBox.onBeforeRender = () => {
@@ -102,6 +112,8 @@ export default function Window({ title, showClose = true, showMinimize = true, s
         };
 
         function onWindowResize() {
+            if (!camera || !renderer) return;
+
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -109,6 +121,7 @@ export default function Window({ title, showClose = true, showMinimize = true, s
 
         function animate() {
             if (disposed) return;
+
             animationFrameId = window.requestAnimationFrame(animate);
             renderer.render(scene, camera);
         };
@@ -122,10 +135,25 @@ export default function Window({ title, showClose = true, showMinimize = true, s
             cancelAnimationFrame(animationFrameId);
             window.removeEventListener('resize', onWindowResize);
 
+            if (panoramaBox && scene) scene.remove(panoramaBox);
+
+            if (panorMaterials.length > 0) {
+                panorMaterials.forEach(material => {
+                    if (material.map) material.map.dispose();
+                    material.dispose();
+                });
+            };
+
+            if (panorGeo) panorGeo.dispose();
+
             if (renderer) {
                 renderer.renderLists.dispose();
                 renderer.dispose();
             };
+            
+            scene = null;
+            camera = null;
+            renderer = null;
         };
     }, [isPanorama, backgroundSrc]);
 
