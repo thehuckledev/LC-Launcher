@@ -3,9 +3,13 @@ class Net {
         let url = config.url;
         if (url && !/^https?:\/\//i.test(url)) url = `https://${url}`;
 
+        const headers = { ...config.headers };
+        const hasUserAgent = Object.keys(headers).some( key => key.toLowerCase() === 'user-agent' );
+        if (!hasUserAgent) headers['User-Agent'] = 'LC-Launcher';
+
         const fetchOptions = {
             method: config.method || 'GET',
-            headers: config.headers,
+            headers,
         };
 
         if (config.data) {
