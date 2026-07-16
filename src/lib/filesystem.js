@@ -54,14 +54,6 @@ export default class Filesystem {
     };
 
     static async readStream(targetPath, chunkSize = 256 * 1024, asBase64 = false) {
-        await lib.run(null, 'filesystem', 'readStream', {
-            targetPath,
-            chunkSize,
-            asBase64
-        });
-    };
-
-    static async readStream(targetPath, chunkSize = 256 * 1024, asBase64 = false) {
         const callID = crypto.randomUUID();
 
         return new Promise(async (resolve, reject) => {
@@ -72,11 +64,11 @@ export default class Filesystem {
                 if (payload.callID === callID) fileContent += payload.data;
             };
 
-            const onStreamEnd = (event) => {
+            const onStreamEnd = async (event) => {
                 const payload = event.detail;
                 if (payload.callID === callID) {
-                    Neutralino.events.off('readStreamChunk', onChunkReceived);
-                    Neutralino.events.off('readStreamEnd', onStreamEnd);
+                    await Neutralino.events.off('readStreamChunk', onChunkReceived);
+                    await Neutralino.events.off('readStreamEnd', onStreamEnd);
 
                     resolve(fileContent);
                 };
@@ -92,8 +84,8 @@ export default class Filesystem {
                     asBase64
                 });
             } catch (err) {
-                Neutralino.events.off('readStreamChunk', onChunkReceived);
-                Neutralino.events.off('readStreamEnd', onStreamEnd);
+                await Neutralino.events.off('readStreamChunk', onChunkReceived);
+                await Neutralino.events.off('readStreamEnd', onStreamEnd);
                 reject(err);
             };
         });

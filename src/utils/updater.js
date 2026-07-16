@@ -2,7 +2,8 @@ import Neutralino from "@neutralinojs/lib";
 import config from "../data/config.js";
 
 export const checkForUpdates = async() => {
-    if (NL_ARGS.includes("--neu-dev-extension")) return console.log("Update check bypassed, dev mode is on!");
+    return; // No auto update for now, needs a whole rework and currently people are being blocked leading to frozen setup screen
+    /*if (NL_ARGS.includes("--neu-dev-extension")) return console.log("Update check bypassed, dev mode is on!");
     if (navigator.onLine === false) return;
 
     try {
@@ -24,5 +25,5 @@ From v${NL_APPVERSION} to v${manifest.version}${manifest.data.release_notes ? `\
         };
     } catch (err) {
         console.error(err);
-    };
+    };*/
 };
