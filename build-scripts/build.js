@@ -48,7 +48,9 @@ function patchConfig(on) {
 
     if (on) {
         const isDebug = process.argv.includes("--debug");
-        if(!isDebug) cfg.modes.window.enableInspector = false;
+        if(isDebug) cfg.modes.window.enableInspector = true;
+        else cfg.modes.window.enableInspector = false;
+        
         if(isDebug) cfg.logging.enabled = true;
         if(isDebug) cfg.logging.writeToLogFile = true;
         cfg.tokenSecurity = "one-time";
