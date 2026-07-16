@@ -61,6 +61,7 @@ console.log("lcLib processAppEvent defined");
 
         process.exit(0);
     });
+    await new Promise(r => setTimeout(r, 500)); // add delay due to the ext loading faster than neutralino js can register it
     ext.run(processAppEvent);
 
     console.log("lcLib async global loop ran");
