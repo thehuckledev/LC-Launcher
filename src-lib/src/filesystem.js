@@ -185,7 +185,7 @@ class Filesystem {
                     if (header.type === 'directory') {
                         fs.mkdirSync(targetFilePath, {
                             recursive: true,
-                            mode: header.mode || 0o755
+                            ...(process.platform !== "win32" && { mode: header.mode || 0o755 })
                         });
                         stream.resume();
                         return next();
@@ -217,8 +217,12 @@ class Filesystem {
                         const fileData = Buffer.concat(chunks);
 
                         const fileMode = header.mode || 0o755;
-                        await fs.promises.writeFile(targetFilePath, fileData, { mode: fileMode });
-                        fs.chmodSync(targetFilePath, fileMode);
+                        if (process.platform === "win32") {
+                            await fs.promises.writeFile(targetFilePath, fileData);
+                        } else {
+                            await fs.promises.writeFile(targetFilePath, fileData, { mode: fileMode });
+                            fs.chmodSync(targetFilePath, fileMode).catch(e=>{});
+                        };
 
                         ext.sendMessage("unzipProgress", {
                             callID,
