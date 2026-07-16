@@ -104,9 +104,9 @@ export default function App() {
     useEffect(() => {
         async function load() {
             const loadedSettings = await loadSettings();
-            await Manager.init();
-            await syncDefaultInstances();
-            await loadData(loadedSettings);
+            await Manager.init().catch(e=>console.log(e));
+            await syncDefaultInstances().catch(e=>console.log(e));
+            await loadData(loadedSettings).catch(e=>console.log(e));
 
             setMenu(loadedSettings.hasSetup ? "main" : "setup");
             setLoaded(true);
