@@ -2,8 +2,9 @@
 set -e
 
 NL_PATH="$1"
-ARCH="$(uname -m)"
+shift
 
+ARCH="$(uname -m)"
 EXT_DIR="$NL_PATH/libs"
 
 case "$ARCH" in
@@ -18,4 +19,4 @@ case "$ARCH" in
         ;;
 esac
 
-exec "$BIN"
+exec "$BIN" "$@"
