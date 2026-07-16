@@ -10,6 +10,8 @@ class NeutralinoExtension extends EventEmitter {
     constructor(debug=false) {
         super();
 
+        console.log("NeutralinoExtension:constructor()");
+
         this.version = '1.0.4';
         this.debug = debug;
 
@@ -18,6 +20,8 @@ class NeutralinoExtension extends EventEmitter {
 
     async _init() {
 
+        console.log("NeutralinoExtension:_init()");
+
         this.debugTermColors = true;             // Use terminal colors
         this.debugTermColorIN = '\x1b[32m';      // Green: All incoming events, except function calls
         this.debugTermColorCALL = '\x1b[91m';    // Red: Incoming function calls
@@ -25,6 +29,7 @@ class NeutralinoExtension extends EventEmitter {
         this.termOnWindowClose = true;   // Terminate on windowCloseEvent message
 
         if(Bun.argv.length > 2) {
+            console.log("NeutralinoExtension using arg mode");
             this.port = Bun.argv[2].split('=')[1];
             this.token = Bun.argv[3].split('=')[1];
             this.connectToken = '';
@@ -32,6 +37,7 @@ class NeutralinoExtension extends EventEmitter {
             this.urlSocket = `ws://127.0.0.1:${this.port}?extensionId=${this.idExtension}`;
         }
         else {
+            console.log("NeutralinoExtension using stdin mode");
             let conf =  await Bun.stdin.json();
             this.port = conf.nlPort;
             this.token = conf.nlToken;
@@ -39,6 +45,8 @@ class NeutralinoExtension extends EventEmitter {
             this.idExtension = conf.nlExtensionId;
             this.urlSocket = `ws://127.0.0.1:${this.port}?extensionId=${this.idExtension}&connectToken=${this.connectToken}`;
         }
+
+        console.log("NeutralinoExtension connecting to " + this.urlSocket);
 
         this.socket = undefined;
         this.debugLog(`${this.idExtension} running on port ${this.port}`);

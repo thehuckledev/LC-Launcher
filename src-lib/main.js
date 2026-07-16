@@ -1,5 +1,9 @@
+console.log("lcLib ran");
+
 const NeutralinoExtension = require('./neutralino-extension');
 const DEBUG = true;
+
+console.log("lcLib imports complete");
 
 const publicClasses = {
     net: require("./src/net"),
@@ -7,6 +11,8 @@ const publicClasses = {
     discordRPC: require("./src/discordRPC"),
     childProcess: require("./src/childProcess"),
 };
+
+console.log("lcLib publicClasses defined");
 
 let ext;
 async function processAppEvent(d) {
@@ -42,7 +48,11 @@ async function processAppEvent(d) {
     };
 };
 
+console.log("lcLib processAppEvent defined");
+
 (async() => {
+    console.log("lcLib async global loop");
+
     ext = await new NeutralinoExtension(DEBUG);
     ext.on('close', async () => {
         try {
@@ -52,4 +62,6 @@ async function processAppEvent(d) {
         process.exit(0);
     });
     ext.run(processAppEvent);
+
+    console.log("lcLib async global loop ran");
 })();
