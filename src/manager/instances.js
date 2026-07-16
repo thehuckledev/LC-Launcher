@@ -10,10 +10,20 @@ export class Instances {
 
     async list() {
         const list = await Neutralino.filesystem.readDirectory(this.manager.instancesDir);
+        const validInstances = [];
 
-        return list
-            .filter(e => e.type === "DIRECTORY")
-            .map(e => e.entry);
+        for (const e of list) {
+            if (e.type !== "DIRECTORY") continue;
+
+            const jsonPath = `${this.manager.instancesDir}/${e.entry}/instance.json`;
+
+            try {
+                await Neutralino.filesystem.getStats(jsonPath);
+                validInstances.push(e.entry);
+            } catch (err) {};
+        };
+
+        return validInstances;
     };
 
     async get(id) {
