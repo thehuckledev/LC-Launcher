@@ -160,6 +160,7 @@
 	transform: translateX(-50%);
 
 	font: 12px 'Minecraftia', sans-serif;
+	text-align: center;
 	text-shadow: 2px 2px #000A;
 	transition: opacity .3s linear;
 	opacity: 0;

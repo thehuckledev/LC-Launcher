@@ -10,6 +10,7 @@ import { startMusic, stopMusic, setVolume } from "./utils/music.js";
 import { useSettings } from "./utils/SettingsStore.jsx";
 import { useManager } from "./utils/ManagerProvider.jsx";
 import DiscordRPC from "./lib/discordRPC.js";
+import Net from "./lib/net.js";
 
 import Window from "./components/Window.jsx";
 import Toast, { showToast } from "./components/Toast.jsx";
@@ -256,11 +257,19 @@ export default function App() {
                         if (response.ok) {
                             const json = await response.json();
                             if (json.status === 'success' && json.data?.url) {
-                                const newSkinCDNLink = json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+                                const response2 = await Net.get(json?.data?.url);
+                                if (response2.ok) {
+                                    const responseHTML = response2?.data;
+                                    const newSkinCDNLink = responseHTML?.split(`<img id="img_preview" src="`)?.[1]?.split(`"/>
+            
+            <p><a class="download" `)?.[0];
                                 
-                                skinCDNLink = newSkinCDNLink;
-                                lastSkinCDNLink.current = newSkinCDNLink;
-                                lastProfileID.current = profile.id;
+                                    skinCDNLink = newSkinCDNLink;
+                                    lastSkinCDNLink.current = newSkinCDNLink;
+                                    lastProfileID.current = profile.id;
+                                } else {
+                                    throw new Error("Skin view URL didn't return ok response");
+                                };
                             } else {
                                 throw new Error("Skin upload wasn't successful");
                             };
@@ -277,8 +286,7 @@ export default function App() {
                 };
             };
 
-            console.log("Updating RPC:", { details, state });
-            DiscordRPC.edit({
+            const RPCObj = {
                 details,
                 state,
                 largeImageText,
@@ -295,7 +303,10 @@ export default function App() {
                         url: config.button2Url
                     }
                 ]
-            });
+            };
+
+            console.log("Updating RPC:", RPCObj);
+            DiscordRPC.edit(RPCObj);
         };
         updateRPC();
     }, [menu, instance, profile, processing, settings.discordRPC]);
@@ -385,8 +396,9 @@ export default function App() {
             const file = e.dataTransfer.files[0];
             const isInstance = file.name.endsWith(".lceinstance.json");
             const isProfile = file.name.endsWith(".lceprofile.json");
+            const isServer = file.name.endsWith(".lceserver.json");
 
-            if (!isInstance && !isProfile) return showToast("Invalid, must be a .lceinstance.json or .lceprofile.json file.");
+            if (!isInstance && !isProfile && !isServer) return showToast("Invalid, must be a .lceinstance.json, .lceprofile.json or .lceserver.json file.");
 
             try {
                 const text = await file.text();
@@ -401,6 +413,8 @@ export default function App() {
                     await loadData();
 
                     setProfile(newProfile);
+                } else if (isServer) {
+                    await Manager.servers.import(instance?.id, text);
                 };
             } catch (err) {
                 console.error(err);
@@ -432,7 +446,7 @@ export default function App() {
             window.removeEventListener("dragleave", unhighlight);
             window.removeEventListener("drop", handleDrop);
         };
-    }, [Manager]);
+    }, [Manager, instance]);
 
     return (
         <>
@@ -441,7 +455,7 @@ export default function App() {
                     <div id="instance-drop-area">
                         <div className="instance-drop-inner">
                             <h2>Drop Instance File Here</h2>
-                            <p>.lceinstance.json / .lceprofile.json</p>
+                            <p>.lceinstance.json / .lceprofile.json / .lceserver.json</p>
                         </div>
                     </div>
                 )}

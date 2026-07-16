@@ -13,12 +13,9 @@
 // TODO add world backups online, dont add until 20th march cause neo will kill u.
 // TODO add a extension system to the launcher itself so u can add stuff.
 
-//+ TODO add maxmimise and minimize back to windows build
-
 // NEEDED BEFORE RELEASE
 //+ TODO add cape menu and make the profile skin be placed as a DLC rather than replacing steve
 //+ TODO make all the popups browser based to reduce need on zenity (also fits in theme more)
 //+ TODO add more detailed playtime so when u click on it in bottom corner it opens up and shows usage sessions, eg. 50 mins here 20 mins there.
 //+ TODO add file icon next to the icon and background textbox for instances which gets the file and turns it into data uri
-//+ TODO add a servername.lceserver.json file format and import and export
 //+ TODO fix the auto update to update libs also

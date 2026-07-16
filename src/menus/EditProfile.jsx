@@ -33,12 +33,15 @@ export default function EditProfileMenu({ setMenu, profile, setProfile, reloadDa
     };
 
     const handleExport = async () => {
+        setProcessing(true);
         try {
             const res = await Manager.profiles.export(profile.id);
             if(res === true) showToast("Exported successfully");
         } catch(e) {
             showToast("Export failed");
             console.error(e);
+        } finally {
+            setProcessing(false);
         };
     };
 

@@ -183,12 +183,15 @@ export default function EditInstanceMenu({ setMenu, instance, setInstance, reloa
     };
 
     const handleExport = async () => {
+        setProcessing(true);
         try {
             const res = await Manager.instances.export(instance.id);
             if(res === true) showToast("Exported successfully");
         } catch(e) {
             showToast("Export failed");
             console.error(e);
+        } finally {
+            setProcessing(false);
         };
     };
 

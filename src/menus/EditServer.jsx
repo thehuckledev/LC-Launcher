@@ -31,6 +31,19 @@ export default function EditServerMenu({ setMenu, instance, server }) {
         setForm(prev => ({ ...prev, [field]: value }));
     };
 
+    const handleExport = async () => {
+        setProcessing(true);
+        try {
+            const res = await Manager.servers.export(instance.id, server.id);
+            if(res === true) showToast("Exported successfully");
+        } catch(e) {
+            showToast("Export failed");
+            console.error(e);
+        } finally {
+            setProcessing(false);
+        };
+    };
+
     const handleSave = async () => {
         if (!form?.name?.trim() || !form?.ip?.trim()) return showToast("Name and IP Address are required");
         if (!instance?.id) return showToast("No active instance selected");
@@ -98,12 +111,17 @@ export default function EditServerMenu({ setMenu, instance, server }) {
             </div>
 
             <div id="edit-server-action-bar">
-                <Button type="destructive" disabled={processing} onclick={() => setMenu("servers")}>
+                <Button type="destructive" disabled={processing} pushable={!processing} onclick={() => setMenu("servers")}>
                     Cancel
                 </Button>
-                <Button disabled={processing} onclick={handleSave}>
-                    Save
-                </Button>
+                <div id="server-action-bar-group">
+                    <Button disabled={processing} pushable={!processing} onclick={handleExport}>
+                        Export
+                    </Button>
+                    <Button disabled={processing} pushable={!processing} onclick={handleSave}>
+                        Save
+                    </Button>
+                </div>
             </div>
         </>
     );

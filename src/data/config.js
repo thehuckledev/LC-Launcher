@@ -8,10 +8,10 @@ export default {
     rpcClientID: "1493892302312050789",
     rpcIcon: "icon",
 
-    button1Label: "↓⠀Download Launcher",
+    button1Label: "↓  Download Launcher",
     button1Url: "https://lce-launcher.com",
 
-    button2Label: "+⠀Join Discord",
+    button2Label: "+  Join Discord",
     button2Url: "https://discord.gg/DBw6V5v8C9",
 
     featuredServers: [

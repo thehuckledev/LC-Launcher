@@ -17,7 +17,6 @@ import defaultBG from "../assets/ui/background.jpeg";
 let panoramaEnabled = false;
 (async() => {
     let panoEnv = await Neutralino.os.getEnv('INSTANCE_PANORAMAS');
-    console.log(panoramaEnabled);
     if (panoEnv !== "false") panoramaEnabled = true;
 })();
 

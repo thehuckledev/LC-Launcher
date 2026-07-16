@@ -1,4 +1,5 @@
 import Neutralino from "@neutralinojs/lib";
+import { showToast } from "../components/Toast.jsx";
 
 import { getSetting } from "../utils/settingsManager.js";
 import config from "../data/config";
@@ -38,14 +39,17 @@ export class Servers {
         if (servers.some(s => s.ip === ip && s.port === port))
             throw new Error("Server already exists");
 
-        servers.push({
+        const serverContent = {
             id: crypto.randomUUID(),
             name,
             ip,
             port
-        });
+        };
 
+        servers.push(serverContent);
         await Neutralino.filesystem.writeFile(path, JSON.stringify(servers, null, 2));
+
+        return serverContent;
     };
 
     async update(instanceId, serverId, updateData) {
@@ -231,6 +235,85 @@ export class Servers {
         } catch(e) {
             console.error(e);
             console.log(`Failed to read servers.db for instance ${instanceId}:`, e);
+        };
+    };
+
+    async export(instanceId, id) {
+        const data = await this.get(instanceId, id);
+        if (!data) throw new Error("Server not found");
+
+        const sterilisedData = {
+            ...data,
+            id: undefined 
+        };
+
+        const savePath = await Neutralino.os.showSaveDialog("Export Server (Must use .lceserver.json)", {
+            filters: [{ name: 'LCE Server Files', extensions: ['lceserver.json'] }],
+            defaultPath: NL_OS === "Darwin" ? undefined : `${id}.lceserver.json`
+        });
+
+        if (!savePath) return false;
+        const saveFinal = savePath.trim();
+        if (!saveFinal.endsWith(".lceserver.json")) return showToast("You must save as a .lceserver.json file");
+
+        if (saveFinal) {
+            await this.manager.utils.writeJSON(saveFinal, sterilisedData);
+            return true;
+        };
+        return true;
+    };
+
+    async import(instanceId, jsonStr) {
+        try {
+            let data;
+            try {
+                data = JSON.parse(jsonStr);
+            } catch (e) {
+                showToast("The file you dropped is not a valid JSON document");
+                throw new Error("The file is not a valid JSON document.");
+            };
+
+            const required = {
+                name: "string",
+                ip: "string",
+                port: "string"
+            };
+
+            for (const [field, type] of Object.entries(required)) {
+                if (
+                    (!data[field] || typeof data[field] !== type) &&
+                    !(Array.isArray(type) && type.includes(data[field]))
+                ) {
+                    showToast(`Invalid or missing required field: ${field}`);
+                    throw new Error(`Invalid or missing required field: ${field}`);
+                };
+            };
+
+            const portNum = Number(data.port);
+            if (
+                isNaN(portNum) ||
+                !Number.isInteger(portNum) ||
+                portNum < 1 ||
+                portNum > 65535
+            ) {
+                showToast(`Invalid port: ${portStr}`);
+                throw new Error(`Invalid port: ${portStr}`);
+            };
+
+            if (data.name.trim().toLowerCase().startsWith("[F]")) throw new Error("Server Name cannot start with '[F]'");
+
+            const newServer = await this.add(
+                instanceId,
+                data.name,
+                data.ip,
+                data.port
+            );
+
+            showToast(`Imported ${newServer.name}`);
+            return newServer;
+        } catch (err) {
+            console.error("Import failed:", err);
+            throw err;
         };
     };
 };
