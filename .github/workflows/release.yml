@@ -1,0 +1,114 @@
+name: Release LC Launcher
+
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - main
+        paths:
+            - "BUMP"
+
+permissions:
+    contents: write
+
+jobs:
+    build:
+        strategy:
+            matrix:
+                include:
+                    - os: windows-latest
+                      target: windows
+                    - os: ubuntu-latest
+                      target: linux
+                    - os: macos-latest
+                      target: darwin
+        runs-on: ${{ matrix.os }}
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                bun-version: latest
+
+            - name: Setup node
+              uses: actions/setup-node@v4
+              with:
+                node-version: latest
+
+            - name: Install installer deps (Windows)
+              if: matrix.os == 'windows-latest'
+              shell: powershell
+              run: choco install nsis -y
+
+            - name: Install installer deps (Mac)
+              if: matrix.os == 'macos-latest'
+              run: HOMEBREW_REQUIRE_TAP_TRUST=1 brew install create-dmg
+
+            - name: Install installer deps (Linux)
+              if: matrix.os == 'ubuntu-latest'
+              run: |
+                sudo apt-get update
+                sudo apt-get install -y libfuse2 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-gl
+
+                wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -O linuxdeploy
+                chmod +x linuxdeploy
+                sudo mv linuxdeploy /usr/local/bin/
+
+                wget https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gstreamer/master/linuxdeploy-plugin-gstreamer.sh -O linuxdeploy-plugin-gstreamer.sh
+                chmod +x linuxdeploy-plugin-gstreamer.sh
+                sudo mv linuxdeploy-plugin-gstreamer.sh /usr/local/bin/
+
+            - name: Build lib
+              run: bun ./build-scripts/build-lib.js ${{ matrix.target }}
+
+            - name: Build app
+              run: node ./build-scripts/build.js ${{ matrix.target }}
+
+            - name: Upload Artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                name: build-${{ matrix.target }}
+                path: |
+                  dist/
+                  !dist/__*
+
+    publish:
+        needs: build
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Get release details
+              id: release_details
+              run: |
+                VERSION="$(tr -d '\r\n' < BUMP)"
+                echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+                
+                {
+                  echo "description<<EOF"
+                  cat NOTES.md
+                  echo "EOF"
+                } >> "$GITHUB_OUTPUT"
+
+            - name: Download artifacts
+              uses: actions/download-artifact@v4
+              with:
+                path: artifacts
+                merge-multiple: true
+
+            - name: Publish release
+              uses: softprops/action-gh-release@v1
+              with:
+                tag_name: v${{ steps.release_details.outputs.version }}
+                name: "v${{ steps.release_details.outputs.version }}"
+                body: ${{ steps.release_details.outputs.description }}
+                target_commitish: ${{ github.sha }}
+                generate_release_notes: true
+                prerelease: false
+                files: artifacts/*
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
