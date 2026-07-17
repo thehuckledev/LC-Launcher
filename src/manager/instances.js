@@ -17,6 +17,8 @@ export class Instances {
 
             const jsonPath = `${this.manager.instancesDir}/${e.entry}/instance.json`;
 
+            console.log("Listing instances from", jsonPath);
+
             try {
                 await Neutralino.filesystem.getStats(jsonPath);
                 validInstances.push(e.entry);
@@ -32,6 +34,7 @@ export class Instances {
             //return await this.manager.utils.readJSON(await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id, "instance.json"));
             const targetPath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id, "instance.json");
             const instanceContent = await Filesystem.readStream(targetPath);
+            console.log(`Instance ${id} fetched with content ${instanceContent?.length || "0"}`);
             if (!instanceContent) throw new Error("File not readable");
             return JSON.parse(instanceContent);
         } catch {

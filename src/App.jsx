@@ -53,10 +53,13 @@ export default function App() {
 
     async function loadData(loadedSettings = settings) {
         const profiles = await Manager.profiles.list();
+        console.log("Loading profile list", profiles);
         const instances = await Manager.instances.list();
+        console.log("Loading instance list", instances);
         const instancesData = (await Promise.all(
             instances.map(id => Manager.instances.get(id))
         )).filter(i => i !== undefined);
+        console.log("Getting full instance list", instancesData);
         
         setProfilesList(profiles);
         console.log("setProfilesList()", profiles);
@@ -83,6 +86,7 @@ export default function App() {
 
     async function syncDefaultInstances() {
         const installedInstances = await Manager.instances.list();
+        console.log("Loading instance list", installedInstances);
         const installedObjects = (await Promise.all(
             installedInstances.map(id => Manager.instances.get(id))
         )).filter(i => i !== undefined);
