@@ -59,13 +59,16 @@ export default function App() {
         )).filter(i => i !== undefined);
         
         setProfilesList(profiles);
+        console.log("setProfilesList()", profiles);
         setInstancesList(instancesData);
+        console.log("setInstancesList()", instancesData);
 
         if (profiles.length > 0) {
             const lastProfile = profiles.find(p => p.id === loadedSettings.lastProfileID);
             if (lastProfile) setProfile(lastProfile);
             else setProfile(profiles[0]);
         } else setProfile(null);
+        console.log("setProfile()");
 
         if (instances.length > 0) {
             const defaultInst = instancesData.find(i => i.id === config.defaultInstance);
@@ -75,6 +78,7 @@ export default function App() {
             else if (defaultInst) setInstance(defaultInst);
             else setInstance(instancesData[0]);
         } else setInstance(null);
+        console.log("setInstance()");
     };
 
     async function syncDefaultInstances() {
@@ -82,9 +86,12 @@ export default function App() {
         const installedObjects = (await Promise.all(
             installedInstances.map(id => Manager.instances.get(id))
         )).filter(i => i !== undefined);
+        console.log("Fetched installed instances", installedInstances);
 
         for await (const inst of defaultInstances) {
             if (!inst.supportedPlatforms.includes(NL_OS)) continue;
+
+            console.log("Syncing instance " + inst?.name);
 
             const existing = installedObjects.find(i => i.id === inst.id);
             if (!existing) continue;
@@ -93,6 +100,8 @@ export default function App() {
             const hasChanges = Object.keys(updateData).some(
                 key => JSON.stringify(existing[key]) !== JSON.stringify(updateData[key])
             );
+
+            console.log(`Instance has changes: ${hasChanges} (${inst?.name})`);
 
             if (hasChanges) {
                 await Manager.instances.update(existing.id, updateData);
@@ -103,16 +112,23 @@ export default function App() {
 
     useEffect(() => {
         async function load() {
+            console.log("Running load func");
             const loadedSettings = await loadSettings();
+            console.log("Loaded settings", loadedSettings);
             await Manager.init().catch(e=>console.log(e));
+            console.log("Initialised manager");
             await syncDefaultInstances().catch(e=>console.log(e));
+            console.log("Synced default instances");
             await loadData(loadedSettings).catch(e=>console.log(e));
+            console.log("Loaded data");
 
             setMenu(loadedSettings.hasSetup ? "main" : "setup");
+            console.log("Load menu set to", loadedSettings.hasSetup ? "main" : "setup");
             setLoaded(true);
             console.log("Loaded!");
 
             setTimeout(checkForUpdates, 2000);
+            console.log("Update check triggered");
         };
 
         load();

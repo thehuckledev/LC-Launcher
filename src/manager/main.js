@@ -35,6 +35,7 @@ export class Manager {
     };
 
     async init() {
+        console.log("Running manager init func");
         this.dataDir = await getSetting("dataDirectory");
         this.profilesFile = await Neutralino.filesystem.getJoinedPath(this.dataDir, "profiles.json");
         this.instancesDir = await Neutralino.filesystem.getJoinedPath(this.dataDir, "instances");
@@ -48,6 +49,14 @@ export class Manager {
             "profile0.dat", "settings.dat", "options.txt",
         ];
 
+        console.log("Manager vars defined", {
+            dataDir: this.dataDir,
+            profilesFile: this.profilesFile,
+            instancesDir: this.instancesDir,
+            preserveList: this.preserveList,
+            profileInstanceFiles: this.profileInstanceFiles
+        });
+
         await this.utils.ensureDir(this.dataDir);
         await this.utils.ensureDir(this.instancesDir);
 
@@ -58,7 +67,7 @@ export class Manager {
             await Neutralino.filesystem.writeFile(this.profilesFile, JSON.stringify([], null, 2));
         };
 
-        // this causes crash
+        // this increases memory usage
         //window.manager = this;
     };
 };
