@@ -70,7 +70,7 @@
     },
     "cli": {
         "binaryName": "LC_Launcher",
-        "binaryVersion": "6.4.0",
+        "binaryVersion": "6.8.0",
         "resourcesPath": "/public/",
         "frontendLibrary": {
             "patchFile": "/src/index.html",

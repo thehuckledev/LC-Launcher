@@ -33,7 +33,7 @@
         "build-lib": "bun run ./build-scripts/build-lib.js"
     },
     "dependencies": {
-        "@neutralinojs/lib": "^6.5.0",
+        "@neutralinojs/lib": "^6.8.0",
         "cross-env": "^10.1.0",
         "motion": "^12.38.0",
         "nano-markdown": "^1.2.2",
@@ -42,7 +42,7 @@
         "three": "^0.184.0"
     },
     "devDependencies": {
-        "@neutralinojs/neu": "^11.6.0",
+        "@neutralinojs/neu": "^11.7.2",
         "@preact/preset-vite": "2.10.3",
         "vite": "^7.3.1",
         "vite-plugin-static-copy": "^3.3.0"
