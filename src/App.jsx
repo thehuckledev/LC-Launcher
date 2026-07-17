@@ -3,7 +3,6 @@ import "./App.css";
 import { useState, useEffect, useRef } from "preact/hooks";
 import Neutralino from "@neutralinojs/lib";
 import config from "./data/config.js";
-import { defaultInstances } from "./data/defaultInstances.js";
 
 import { checkForUpdates } from "./utils/updater.js";
 import { startMusic, stopMusic, setVolume } from "./utils/music.js";
@@ -48,6 +47,7 @@ export default function App() {
     const dragCounter = useRef(0);
     const lastSkinCDNLink = useRef(""); 
     const lastProfileID = useRef("");
+    const [loadProgress, setLoadProgress] = useState({ label: '', percent: 0 });
     const { settings, loadSettings, updateSetting } = useSettings();
     const Manager = useManager();
 
@@ -84,7 +84,7 @@ export default function App() {
         console.log("setInstance()");
     };
 
-    async function syncDefaultInstances() {
+    async function syncDefaultInstances(onProgress = ()=>{}) {
         const installedInstances = await Manager.instances.list();
         console.log("Loading instance list", installedInstances);
         const installedObjects = (await Promise.all(
@@ -92,8 +92,13 @@ export default function App() {
         )).filter(i => i !== undefined);
         console.log("Fetched installed instances", installedInstances);
 
+        const { defaultInstances } = await import("./data/defaultInstances.js");
+        const total = defaultInstances.length;
+
         for await (const inst of defaultInstances) {
             if (!inst.supportedPlatforms.includes(NL_OS)) continue;
+
+            onProgress(inst?.name || inst?.id || "Unknown", i, total);
 
             console.log("Syncing instance " + inst?.name);
 
@@ -115,17 +120,62 @@ export default function App() {
     };
 
     useEffect(() => {
+        async function waitForExtension() {
+            console.log("Waiting for lcLib ext...");
+            
+            while (true) {
+                try {
+                    const stats = await Neutralino.extensions.getStats("lcLib");
+                    
+                    if (stats && Array.isArray(stats.loaded) && Array.isArray(stats.connected)) {
+                        const isLoaded = stats.loaded.some(str => str.includes("lcLib"));
+                        const isConnected = stats.connected.some(str => str.includes("lcLib"));
+
+                        if (isLoaded && isConnected) {
+                            console.log("lcLib ext is loaded and connected");
+                            break;
+                        };
+                    };
+                } catch (e) {
+                    console.error("Err fetching Neutralino ext stats:", e);
+                };
+                
+                await new Promise(resolve => setTimeout(resolve, 100));
+            };
+        };
+
         async function load() {
             console.log("Running load func");
+
+            setLoadProgress({ label: "Waiting for extension...", percent: 10 });
+            await waitForExtension().catch(e => console.error(e));
+
+            setLoadProgress({ label: "Loading settings...", percent: 20 });
             const loadedSettings = await loadSettings();
             console.log("Loaded settings", loadedSettings);
-            await Manager.init().catch(e=>console.log(e));
+
+            setLoadProgress({ label: "Initialising manager...", percent: 40 });
+            await Manager.init().catch(e=>console.error(e));
             console.log("Initialised manager");
-            await syncDefaultInstances().catch(e=>console.log(e));
+
+            setLoadProgress({ label: "Checking default instances...", percent: 60 });
+            await syncDefaultInstances((name, current, total) => {
+                const startPercent = 70;
+                const endPercent = 80;
+                const currentProgress = startPercent + Math.round(((current / total) * (endPercent - startPercent)));
+                
+                setLoadProgress({ 
+                    label: `Syncing default instances: ${name}...`, 
+                    percent: currentProgress 
+                });
+            }).catch(e=>console.error(e));
             console.log("Synced default instances");
-            await loadData(loadedSettings).catch(e=>console.log(e));
+
+            setLoadProgress({ label: "Fetching instances and profiles...", percent: 90 });
+            await loadData(loadedSettings).catch(e=>console.error(e));
             console.log("Loaded data");
 
+            setLoadProgress({ label: "Loaded", percent: 100 });
             setMenu(loadedSettings.hasSetup ? "main" : "setup");
             console.log("Load menu set to", loadedSettings.hasSetup ? "main" : "setup");
             setLoaded(true);
@@ -409,6 +459,8 @@ export default function App() {
 
     useEffect(() => {
         const handleDrop = async (e) => {
+            if (!loaded) return;
+
             e.preventDefault();
             dragCounter.current = 0;
             setDropHighlight(false);
@@ -470,8 +522,8 @@ export default function App() {
 
     return (
         <>
-            <Window title="" menu={menu} setMenu={setMenu} isPanorama={Array.isArray(instance?.background)} backgroundSrc={instance?.background}>
-                {dropHighlight && (
+            <Window title="" loaded={loaded} menu={menu} setMenu={setMenu} isPanorama={Array.isArray(instance?.background)} backgroundSrc={instance?.background}>
+                {loaded && dropHighlight && (
                     <div id="instance-drop-area">
                         <div className="instance-drop-inner">
                             <h2>Drop Instance File Here</h2>
@@ -479,6 +531,16 @@ export default function App() {
                         </div>
                     </div>
                 )}
+
+                <div id="load-progress-container" className={loaded ? "fade-out" : ""}>
+                    <h2 id="load-progress-status">{loadProgress.label}</h2>
+                    <div id="load-progress-bar">
+                        <div
+                            id="load-progress-fill"
+                            style={{ width: `${loadProgress.percent}%` }}
+                        />
+                    </div>
+                </div>
                 
                 {loaded && <>
                     {menu === "setup" &&          <SetupMenu setMenu={setMenu} reloadData={loadData} />}

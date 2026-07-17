@@ -139,6 +139,17 @@ p {
   background: linear-gradient(to top, black, transparent);
 }
 
+#window-background.loading {
+    background-color: #000000 !important;
+    background-image: none !important;
+    animation: none !important;
+}
+
+#window-background.loading .window-background-inner {
+    opacity: 0 !important;
+    animation: none !important;
+}
+
 #titlebar {
     display: block;
     position: fixed;
@@ -299,12 +310,12 @@ p {
     display: none;
 }
 
-#window-background.animated>.window-background-inner {
+#window-background.ready.animated>.window-background-inner {
 	filter: blur(20px) brightness(0%);
 	background-color: black;
 }
 
-#window-background.animated>.window-background-inner, #window-background.animated .window-background-inner {
+#window-background.ready.animated>.window-background-inner, #window-background.ready.animated .window-background-inner {
 	animation: fade-background .4s linear 1.1s forwards;
 	filter: blur(20px) brightness(0%);
 }

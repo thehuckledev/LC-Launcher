@@ -20,9 +20,17 @@ export default defineConfig({
         assetsInlineLimit: 0,
         rollupOptions: {
             output: {
-                manualChunks: {
-                    vendor: ['preact'],
-                    njs: ['@neutralinojs/lib']
+                manualChunks: (id) => {
+                    if (id.includes("node_modules")) {
+                        if (id.includes("preact")) return "preact";
+                        else if (id.includes("@neutralinojs/lib")) return "njs";
+                        else if (id.includes("socket.io")) return "socket-io";
+                        else if (id.includes("three")) return "threejs";
+
+                        return "vendor";
+                    } else {
+                        if (id.includes("defaultInstances.js")) return "instances";
+                    };
                 }
             }
         }

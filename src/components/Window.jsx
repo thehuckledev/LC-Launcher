@@ -23,7 +23,7 @@ let panoramaEnabled = false;
 const backSound = new Audio(backSfx);
 backSound.preload = "auto";
 
-export default function Window({ title, showClose = true, showMinimize = true, showMaximize = true, isPanorama = false, backgroundSrc = defaultBG, backgroundFade = true, backgroundAnimated = true, menu, setMenu, children }) {
+export default function Window({ title, loaded = false, showClose = true, showMinimize = true, showMaximize = true, isPanorama = false, backgroundSrc = defaultBG, backgroundFade = true, backgroundAnimated = true, menu, setMenu, children }) {
     const { settings } = useSettings();
     const [openAnim, setOpenAnim] = useState(true);
     const lastStillBg = useRef(backgroundSrc);
@@ -157,9 +157,11 @@ export default function Window({ title, showClose = true, showMinimize = true, s
     }, [isPanorama, backgroundSrc]);
 
     useEffect(() => {
+        if(!loaded) return;
+
         const timer = setTimeout(() => setOpenAnim(false), 2000);
         return () => clearTimeout(timer);
-    }, []);
+    }, [loaded]);
     
     useEffect(() => {
         function stopKeybinds() {
@@ -337,7 +339,7 @@ export default function Window({ title, showClose = true, showMinimize = true, s
 
     return (
         <>
-            <div id="window-background" class={`${backgroundFade ? "fade" : ""} ${backgroundAnimated && openAnim ? "animated" : ""}`}>
+            <div id="window-background" class={`${backgroundFade ? "fade" : ""} ${backgroundAnimated && openAnim ? "animated" : ""} ${!loaded ? "loading" : "ready"}`}>
                 <div class="window-background-inner">
                     <motion.div
                         animate={{ opacity: isPanorama ? 0 : 1 }}

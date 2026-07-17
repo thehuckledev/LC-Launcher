@@ -34,3 +34,42 @@
     50% { border-color: #66becb; }
     100% { border-color: #66becb87; }
 }
+
+#load-progress-container {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 80px);
+    
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+#load-progress-container.fade-out {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#load-progress-status {
+    color: white;
+    font: 10pt 'Minecraftia', sans-serif;
+    margin-bottom: 8px;
+	margin-left: 3px;
+    text-shadow: 2px 2px 0 #000;
+}
+
+#load-progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #7a7a7a;
+    border: 2px solid #7a7a7a;
+}
+
+#load-progress-fill {
+    height: 100%;
+    background: #00ff00;
+    transition: width 0.2s linear;
+}
