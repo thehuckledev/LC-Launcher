@@ -4,11 +4,13 @@ const fflate = require('fflate');
 const tarStream = require('tar-stream');
 const { XzReadableStream } = require("xz-decompress");
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const activeWriteStreams = new Map();
 
 class Filesystem {
     static async readStream(callID, ext, config) {
-        const { targetPath, chunkSize = 256 * 1024, asBase64 = false } = config; // 256kb
+        const { targetPath, chunkSize = 128 * 1024, asBase64 = false, delayMs = 10 } = config; // 128kb
 
         if (!fs.existsSync(targetPath)) throw new Error(`File not found: ${targetPath}`);
 
@@ -17,13 +19,20 @@ class Filesystem {
         return new Promise((resolve, reject) => {
             const readStream = fs.createReadStream(targetPath, { highWaterMark: chunkSize });
 
-            readStream.on('data', (chunk) => {
+            readStream.on('data', async (chunk) => {
                 const data = asBase64 ? chunk.toString('base64') : chunk.toString('utf8');
+
+                if (delayMs > 0) {
+                    readStream.pause();
+                    await sleep(delayMs);
+                };
                 
                 ext.sendMessage('readStreamChunk', {
                     callID,
                     data
                 });
+
+                if (delayMs > 0) readStream.resume();
             });
 
             readStream.on('end', () => {

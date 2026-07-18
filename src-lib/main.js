@@ -54,13 +54,6 @@ console.log("lcLib processAppEvent defined");
     console.log("lcLib async global loop");
 
     ext = await new NeutralinoExtension(DEBUG);
-    ext.on('close', async () => {
-        try {
-            await publicClasses.discordRPC.disable(null, ext);
-        } catch {};
-
-        process.exit(0);
-    });
     ext.run(processAppEvent);
 
     console.log("lcLib async global loop ran");

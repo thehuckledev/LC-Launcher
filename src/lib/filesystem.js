@@ -1,5 +1,7 @@
 import Neutralino from "@neutralinojs/lib";
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 export default class Filesystem {
     static async symlink(path, target) {
         return await lib.run(null, 'filesystem', 'symlink', path, target);
@@ -36,10 +38,10 @@ export default class Filesystem {
         return await lib.run(null, 'filesystem', 'writeStreamEnd', { streamID });
     };
 
-    static async writeStream(targetPath, rawData) {
+    static async writeStream(targetPath, rawData, delayMs = 10) {
         const streamID = crypto.randomUUID();
         const jsonString = typeof rawData === "string" ? rawData : JSON.stringify(rawData, null, 2);
-        const CHUNK_SIZE = 256 * 1024; // 256 kb
+        const CHUNK_SIZE = 128 * 1024; // 128 kb
         
         await Filesystem.writeStreamStart(streamID, targetPath, false);
 
@@ -48,12 +50,14 @@ export default class Filesystem {
             const chunk = jsonString.slice(offset, offset + CHUNK_SIZE);
             await Filesystem.writeStreamChunk(streamID, chunk, false);
             offset += CHUNK_SIZE;
+
+            if (offset < jsonString.length && delayMs > 0) await sleep(delayMs);
         };
 
         return await Filesystem.writeStreamEnd(streamID);
     };
 
-    static async readStream(targetPath, chunkSize = 256 * 1024, asBase64 = false) {
+    static async readStream(targetPath, chunkSize = 128 * 1024, asBase64 = false, delayMs = 10) {
         const callID = crypto.randomUUID();
 
         return new Promise(async (resolve, reject) => {
@@ -81,7 +85,8 @@ export default class Filesystem {
                 await lib.run(callID, 'filesystem', 'readStream', {
                     targetPath,
                     chunkSize,
-                    asBase64
+                    asBase64,
+                    delayMs
                 });
             } catch (err) {
                 await Neutralino.events.off('readStreamChunk', onChunkReceived);

@@ -79,7 +79,7 @@ class NeutralinoExtension extends EventEmitter {
         }
     }
 
-    run(onReceiveMessage) {
+    run(onReceiveMessage, timeoutMs = 5000) {
         //
         //  Socket-handler main loop. Sends and receives messages.
         //  :param onReceiveMessage: Callback for incoming messages
@@ -88,7 +88,14 @@ class NeutralinoExtension extends EventEmitter {
         this.socket = new WebSocket(this.urlSocket);
         let self = this;
 
+        const connectionTimeout = setTimeout(() => {
+            console.error(`WebSocket timeout: failed to connect within ${timeoutMs}ms`);
+            if (this.socket) this.socket.terminate();
+            process.exit(1);
+        }, timeoutMs);
+
         this.socket.on('open', () => {
+            clearTimeout(connectionTimeout);
             console.log('WebSocket ready');
             console.log(`Running on port ${self.port}`);
         });
@@ -103,14 +110,8 @@ class NeutralinoExtension extends EventEmitter {
 
             try {
                 if(self.termOnWindowClose) {
-                    if(msg.event === 'windowClose' || msg.event === 'appClose') {
-                        try {
-                            self.emit('close');
-                            setTimeout(() => process.exit(0), 100);
-                        }
-                        catch (e) {}
-                        return;
-                    }
+                    if(msg.event === 'windowClose' || msg.event === 'appClose')
+                        return process.exit(0);
                 }
             }
             catch (e) {}
@@ -120,14 +121,15 @@ class NeutralinoExtension extends EventEmitter {
         });
 
         this.socket.on('close', (code, reason) => {
+            clearTimeout(connectionTimeout);
             console.log(`WebSocket closed: ${code} - ${reason}`);
-            try {
-                self.emit('close');
-            } catch (e) {};
+            process.exit(0);
         });
 
         this.socket.on('error', (error) => {
+            clearTimeout(connectionTimeout);
             console.error(`WebSocket Error: ${error}`);
+            process.exit(1);
         });
     }
     isEvent(e, eventName) {

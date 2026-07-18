@@ -83,4 +83,8 @@ class DiscordRPC {
     };
 };
 
+process.on('exit', async () => {
+    await DiscordRPC.disable(null, null);
+});
+
 module.exports = DiscordRPC;
