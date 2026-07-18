@@ -134,25 +134,27 @@ export default function Window({ title, loaded = false, showClose = true, showMi
             cancelAnimationFrame(animationFrameId);
             window.removeEventListener('resize', onWindowResize);
 
-            if (panoramaBox && scene) scene.remove(panoramaBox);
+            requestAnimationFrame(() => {
+                if (panoramaBox && scene) scene.remove(panoramaBox);
 
-            if (panorMaterials.length > 0) {
-                panorMaterials.forEach(material => {
-                    if (material.map) material.map.dispose();
-                    material.dispose();
-                });
-            };
+                if (panorMaterials.length > 0) {
+                    panorMaterials.forEach(material => {
+                        if (material.map) material.map.dispose();
+                        material.dispose();
+                    });
+                };
 
-            if (panorGeo) panorGeo.dispose();
+                if (panorGeo) panorGeo.dispose();
 
-            if (renderer) {
-                renderer.renderLists.dispose();
-                renderer.dispose();
-            };
-            
-            scene = null;
-            camera = null;
-            renderer = null;
+                if (renderer) {
+                    renderer.renderLists.dispose();
+                    renderer.dispose();
+                };
+                
+                scene = null;
+                camera = null;
+                renderer = null;
+            });
         };
     }, [isPanorama, backgroundSrc]);
 
