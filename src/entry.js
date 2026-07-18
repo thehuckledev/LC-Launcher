@@ -3,9 +3,10 @@ import { startLogger } from "./utils/logger.js";
 
 import darwinIcon from "./assets/darwin_icon.png";
 
-Neutralino.init();
-if (NL_ARGS.includes("--neu-dev-extension")) window._neutralino = Neutralino; // huge ram increase prob
 if (NL_OS === "Windows") document.body.style.background = "#000"; // fix white screen when open on windows
+
+Neutralino.init(); // this stalls entire app
+if (NL_ARGS.includes("--neu-dev-extension")) window._neutralino = Neutralino; // huge ram increase prob
 
 (async () => {
     startLogger();

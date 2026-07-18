@@ -21,11 +21,10 @@ export default defineConfig({
         rollupOptions: {
             output: {
                 manualChunks: (id) => {
-                    if (id.includes("node_modules")) {
+                    if (id.includes("node_modules") || id.includes("vendor")) {
                         if (id.includes("preact")) return "preact";
                         else if (id.includes("@neutralinojs/lib")) return "njs";
                         else if (id.includes("socket.io")) return "socket-io";
-                        else if (id.includes("three")) return "threejs";
 
                         return "vendor";
                     } else {
