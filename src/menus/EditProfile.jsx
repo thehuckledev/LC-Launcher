@@ -88,7 +88,7 @@ export default function EditProfileMenu({ setMenu, profile, setProfile, reloadDa
                 } catch (e) {
                     console.error(e);
                     showToast("Failed to fetch Java Edition skin");
-                    skinData = undefined;
+                    skinDataURI = undefined;
                 };
             } else if (skinMode === "bedrock") {
                 showToast("Fetching Bedrock Edition skin...");
@@ -111,7 +111,7 @@ export default function EditProfileMenu({ setMenu, profile, setProfile, reloadDa
                 } catch (e) {
                     console.error(e);
                     showToast("Failed to fetch Bedrock Edition skin");
-                    skinData = undefined;
+                    skinDataURI = undefined;
                 };
             } else if (skin) skinDataURI = skin;
 
