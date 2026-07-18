@@ -57,7 +57,9 @@ export default function App() {
         const instances = await Manager.instances.list();
         console.log("Loading instance list", instances);
         const instancesData = (await Promise.all(
-            instances.map(id => Manager.instances.get(id))
+            instances.map(async (id) => {
+                return await Manager.instances.get(id); 
+            })
         )).filter(i => i !== undefined);
         console.log("Getting full instance list", instancesData);
         

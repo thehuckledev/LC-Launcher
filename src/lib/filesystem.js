@@ -41,9 +41,10 @@ export default class Filesystem {
     static async writeStream(targetPath, rawData, delayMs = 10) {
         const streamID = crypto.randomUUID();
         const jsonString = typeof rawData === "string" ? rawData : JSON.stringify(rawData, null, 2);
-        const CHUNK_SIZE = 128 * 1024; // 128 kb
+        const CHUNK_SIZE = 32 * 1024; // 32 kb
         
         await Filesystem.writeStreamStart(streamID, targetPath, false);
+        await sleep(15);
 
         let offset = 0;
         while (offset < jsonString.length) {
@@ -54,10 +55,11 @@ export default class Filesystem {
             if (offset < jsonString.length && delayMs > 0) await sleep(delayMs);
         };
 
+        await sleep(15);
         return await Filesystem.writeStreamEnd(streamID);
     };
 
-    static async readStream(targetPath, chunkSize = 128 * 1024, asBase64 = false, delayMs = 10) {
+    static async readStream(targetPath, chunkSize = 32 * 1024, asBase64 = false, delayMs = 10) {
         const callID = crypto.randomUUID();
 
         return new Promise(async (resolve, reject) => {

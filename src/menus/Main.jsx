@@ -66,11 +66,13 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                         line2: parseProfileType(p.type)
                     }))}
                     onSelect={async (selectedProfile) => {
-                        const profile = await Manager.profiles.get(selectedProfile.id);
+                        //const profile = await Manager.profiles.get(selectedProfile.id);
+                        const profile = profilesList.find(e => e.id === selectedProfile.id);
                         setProfile(profile);
                     }}
                     onEdit={async (p) => {
-                        const profile = await Manager.profiles.get(p.id);
+                        //const profile = await Manager.profiles.get(p.id);
+                        const profile = profilesList.find(e => e.id === p.id);
                         setProfile(profile);
                         setMenu("editprofile");
                     }}
@@ -135,11 +137,13 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                             editable: !((processing || progress.active) && i.id === instance?.id)
                         }))}
                         onSelect={async (selectedInstance) => {
-                            const instance = await Manager.instances.get(selectedInstance.id);
+                            //const instance = await Manager.instances.get(selectedInstance.id);
+                            const instance = instancesList.find(e => e.id === selectedInstance.id);
                             setInstance(instance);
                         }}
                         onEdit={async (i) => {
-                            const instance = await Manager.instances.get(i.id);
+                            //const instance = await Manager.instances.get(i.id);
+                            const instance = instancesList.find(e => e.id === i.id);
                             setInstance(instance);
                             setMenu("editinstance");
                         }}

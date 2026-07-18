@@ -10,11 +10,12 @@ const activeWriteStreams = new Map();
 
 class Filesystem {
     static async readStream(callID, ext, config) {
-        const { targetPath, chunkSize = 128 * 1024, asBase64 = false, delayMs = 10 } = config; // 128kb
+        const { targetPath, chunkSize = 32 * 1024, asBase64 = false, delayMs = 10 } = config; // 32kb
 
         if (!fs.existsSync(targetPath)) throw new Error(`File not found: ${targetPath}`);
 
         ext.sendMessage('readStreamStart', { callID, success: true });
+        await sleep(15);
 
         return new Promise((resolve, reject) => {
             const readStream = fs.createReadStream(targetPath, { highWaterMark: chunkSize });
@@ -35,12 +36,14 @@ class Filesystem {
                 if (delayMs > 0) readStream.resume();
             });
 
-            readStream.on('end', () => {
+            readStream.on('end', async () => {
+                await sleep(15);
                 ext.sendMessage('readStreamEnd', { callID, success: true });
                 resolve({ success: true });
             });
 
-            readStream.on('error', (err) => {
+            readStream.on('error', async (err) => {
+                await sleep(15);
                 ext.sendMessage('readStreamError', { callID, error: err.message });
                 reject(err);
             });
