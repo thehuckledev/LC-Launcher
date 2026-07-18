@@ -95,7 +95,10 @@ export default function App() {
         const { defaultInstances } = await import("./data/defaultInstances.js");
         const total = defaultInstances.length;
 
+        let i = 0;
         for await (const inst of defaultInstances) {
+            i++;
+
             if (!inst.supportedPlatforms.includes(NL_OS)) continue;
 
             onProgress(inst?.name || inst?.id || "Unknown", i, total);
@@ -128,8 +131,8 @@ export default function App() {
                     const stats = await Neutralino.extensions.getStats("lcLib");
                     
                     if (stats && Array.isArray(stats.loaded) && Array.isArray(stats.connected)) {
-                        const isLoaded = stats.loaded.some(str => str.includes("lcLib"));
-                        const isConnected = stats.connected.some(str => str.includes("lcLib"));
+                        const isLoaded = stats.loaded.includes("lcLib");
+                        const isConnected = stats.connected.includes("lcLib");
 
                         if (isLoaded && isConnected) {
                             console.log("lcLib ext is loaded and connected");
