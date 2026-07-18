@@ -50,7 +50,7 @@ function patchConfig(on) {
         const isDebug = process.argv.includes("--debug");
         if(isDebug) cfg.modes.window.enableInspector = true;
         else cfg.modes.window.enableInspector = false;
-        
+
         if(isDebug) cfg.logging.enabled = true;
         if(isDebug) cfg.logging.writeToLogFile = true;
         cfg.tokenSecurity = "one-time";
@@ -118,8 +118,8 @@ function buildLinux(cfg, portable) {
         console.log(`Building Linux (${arch})...`);
 
         run(`cp "${exe}" "${outDir}/usr/bin/${safeAppName}"`);
-        run(`cp "./src/assets/icon.png" "${outDir}/.DirIcon"`);
-        run(`cp "./src/assets/icon.png" "${outDir}/icon.png"`);
+        run(`cp "./assets/appimage/icon.png" "${outDir}/.DirIcon"`);
+        run(`cp "./assets/appimage/icon.png" "${outDir}/${safeAppName}.png"`);
         run(`cp "./dist/${binary}/resources.neu" "${outDir}/usr/bin/"`);
 
         copyIfExists(`./dist/${binary}/extensions`, `${outDir}/usr/bin/`);
@@ -153,7 +153,7 @@ Version=1.0
 Name=${appName}
 Comment=Multi-platform launcher for LCE forks
 Exec=${safeAppName}
-Icon=icon
+Icon=${safeAppName}
 Type=Application
 Categories=Game;Utility;
 Terminal=false
@@ -171,7 +171,7 @@ Keywords=game;launcher;legacy;community;`;
 
             const hasLinuxDeploy = !!execSync("which linuxdeploy 2>/dev/null || true").toString().trim();
             if (hasLinuxDeploy) {
-                run(`ARCH=${targetArch} LINUXDEPLOY_PLUGINS="gstreamer" linuxdeploy --appdir "${outDir}" --output appimage --desktop-file="${outDir}/${safeAppName}.desktop" --icon-file="./assets/appimage/icon.png"`);
+                run(`ARCH=${targetArch} LINUXDEPLOY_PLUGINS="gstreamer" linuxdeploy --appdir="${outDir}" --executable="${outDir}/usr/bin/${safeAppName}" --output appimage`);
                 run(`mv ./*.AppImage "./dist/${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.AppImage" 2>/dev/null || true`);
             } else {
                 run(`ARCH=${targetArch} appimagetool "${outDir}" "./dist/${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.AppImage"`);
