@@ -46,7 +46,7 @@ jobs:
               if: matrix.os == 'ubuntu-latest'
               run: |
                 sudo apt-get update
-                sudo apt-get install -y libfuse2 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-gl
+                sudo apt-get install -y zenity libfuse2 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-gl
 
                 wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -O linuxdeploy
                 chmod +x linuxdeploy

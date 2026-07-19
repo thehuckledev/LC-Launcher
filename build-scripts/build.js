@@ -125,10 +125,30 @@ function buildLinux(cfg, portable) {
         copyIfExists(`./dist/${binary}/extensions`, `${outDir}/usr/bin/`);
         copyLibs(`./libs`, path.join(`${outDir}/usr/bin/`, "libs"), (f) => f.includes("linux") && (f.includes(arch) || f.includes("no-arch")));
 
+        if (process.platform === "linux" && fs.existsSync('/usr/bin/zenity')) {
+            console.log(`Bundling Zenity into AppImage...`);
+            run(`cp "/usr/bin/zenity" "${outDir}/usr/bin/zenity"`);
+
+            if (fs.existsSync('/usr/share/zenity')) {
+                fs.mkdirSync(`${outDir}/usr/share/`, { recursive: true });
+                run(`cp -r "/usr/share/zenity" "${outDir}/usr/share/"`);
+            };
+        };
+
         const appRun = `#!/bin/sh
 
 if [ -z "$APPDIR" ]; then
     APPDIR=$(readlink -f "$(dirname "$0")")
+fi
+
+export PATH="$APPDIR/usr/bin:$PATH"
+
+# expose the host architecture system paths
+HOST_ARCH=$(uname -m)
+if [ "$HOST_ARCH" = "x86_64" ]; then
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu"
+elif [ "$HOST_ARCH" = "aarch64" ] || [ "$HOST_ARCH" = "arm64" ]; then
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib/aarch64-linux-gnu"
 fi
 
 # fixes the webkit no window showing up
@@ -171,7 +191,7 @@ Keywords=game;launcher;legacy;community;`;
 
             const hasLinuxDeploy = !!execSync("which linuxdeploy 2>/dev/null || true").toString().trim();
             if (hasLinuxDeploy) {
-                run(`ARCH=${targetArch} LINUXDEPLOY_PLUGINS="gstreamer" linuxdeploy --appdir="${outDir}" --executable="${outDir}/usr/bin/${safeAppName}" --output appimage`);
+                run(`ARCH=${targetArch} LINUXDEPLOY_PLUGINS="gstreamer" linuxdeploy --appdir="${outDir}" --executable="${outDir}/usr/bin/${safeAppName}" --executable="${outDir}/usr/bin/zenity" --output appimage`);
                 run(`mv ./*.AppImage "./dist/${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.AppImage" 2>/dev/null || true`);
             } else {
                 run(`ARCH=${targetArch} appimagetool "${outDir}" "./dist/${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.AppImage"`);
