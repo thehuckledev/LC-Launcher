@@ -61,32 +61,46 @@ export default function Window({ title, loaded = false, showClose = true, showMi
     }, [backgroundSrc, isPanorama]);
 
     useEffect(() => {
-        if (!panoramaEnabled || !isPanorama || !panoRef.current) return;
+        if (!isPanorama || !panoRef.current) return;
 
-        let demoCube = new Cubemap(
-            panoRef.current,
-            [
-                backgroundSrc[0],
-                backgroundSrc[1],
-                backgroundSrc[2],
-                backgroundSrc[3],
-                backgroundSrc[4],
-                backgroundSrc[5]
-            ],
-            {
-                width: "100%",
-                height: "100%",
-                rotate_type: "auto",
-                rotate_speed: 3,
-                perspective: 300
-            }
-        );
+        if (!settings.renderPanorama || !panoramaEnabled) {
+            let stillImg = new Image();
+            stillImg.src = backgroundSrc[0];
+            stillImg.style.objectFit = "cover";
+            stillImg.style.width = "100%";
+            stillImg.style.height = "100%";
+            panoRef.current.appendChild(stillImg);
 
-        return () => {
-            if (panoRef.current) panoRef.current.innerHTML = "";
-            demoCube = null;
+            return () => {
+                if (panoRef.current) panoRef.current.innerHTML = "";
+                stillImg = null;
+            };
+        } else {
+            let demoCube = new Cubemap(
+                panoRef.current,
+                [
+                    backgroundSrc[0],
+                    backgroundSrc[1],
+                    backgroundSrc[2],
+                    backgroundSrc[3],
+                    backgroundSrc[4],
+                    backgroundSrc[5]
+                ],
+                {
+                    width: "100%",
+                    height: "100%",
+                    rotate_type: "auto",
+                    rotate_speed: 3,
+                    perspective: 300
+                }
+            );
+
+            return () => {
+                if (panoRef.current) panoRef.current.innerHTML = "";
+                demoCube = null;
+            };
         };
-    }, [isPanorama, backgroundSrc]);
+    }, [isPanorama, backgroundSrc, settings?.renderPanorama, panoramaEnabled]);
 
     useEffect(() => {
         if(!loaded) return;

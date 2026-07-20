@@ -12,6 +12,7 @@
 // TODO add realms which basically uses multiplayer system BUT if someone hosting u join their game otherwise u download world from server and host it, then u save to server when u exit.
 // TODO add world backups online, dont add until 20th march cause neo will kill u.
 // TODO add a extension system to the launcher itself so u can add stuff.
+// TODO add a way to view achivements inside the launcher
 
 // NEEDED BEFORE RELEASE
 //+ TODO add cape menu and make the profile skin be placed as a DLC rather than replacing steve
@@ -21,3 +22,5 @@
 //+ TODO fix the auto update to update libs also
 //+ TODO fix the java and bedrock skin fetch as the api went down
 //+ TODO fix the issue where the lcLib is left running in the background
+
+//+ TODO add option to toggle panoramas
