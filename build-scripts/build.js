@@ -1,11 +1,20 @@
 const fs = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
+const { spawnSync } = require("child_process");
 
 const CONF = "./neutralino.config.json";
 
-const run = (cmd) => execSync(cmd, { stdio: "inherit" });
+const run = (cmd) => {
+    if (typeof cmd !== "string" || cmd.trim().length === 0) {
+        throw new Error("Invalid command");
+    }
+    const shell = process.platform === "win32" ? "cmd" : "/bin/sh";
+    const flag = process.platform === "win32" ? "/c" : "-c";
+    const result = spawnSync(shell, [flag, cmd], { stdio: "inherit" });
+    if (result.status !== 0) process.exit(result.status || 1);
+};
 const exists = (p) => fs.existsSync(p);
+
 
 function loadConfig() {
     if (!exists(CONF)) {
@@ -91,10 +100,11 @@ function copyLibs(src, dest, filterFn) {
 
     fs.mkdirSync(dest, { recursive: true });
     for (const file of fs.readdirSync(src)) {
-        const fullSrc = path.join(src, file);
-        const fullDest = path.join(dest, file);
+        const safeName = path.basename(file);
+        const fullSrc = `${src}/${safeName}`;
+        const fullDest = `${dest}/${safeName}`;
 
-        if (fs.statSync(fullSrc).isFile() && filterFn(file)) fs.copyFileSync(fullSrc, fullDest);
+        if (fs.statSync(fullSrc).isFile() && filterFn(safeName)) fs.copyFileSync(fullSrc, fullDest);
     };
 };
 
@@ -121,7 +131,7 @@ function buildLinux(cfg, portable, arch = "x64") {
     run(`cp "./dist/${binary}/resources.neu" "${outDir}/usr/bin/"`);
 
     copyIfExists(`./dist/${binary}/extensions`, `${outDir}/usr/bin/`);
-    copyLibs(`./libs`, path.join(`${outDir}/usr/bin/`, "libs"), (f) => f.includes("linux") && (f.includes(arch) || f.includes("no-arch")));
+    copyLibs(`./libs`, `${outDir}/usr/bin/libs`, (f) => f.includes("linux") && (f.includes(arch) || f.includes("no-arch")));
 
     if (process.platform === "linux" && fs.existsSync('/usr/bin/zenity')) {
         const isHostArm = process.arch === 'arm64' || process.arch === 'aarch64';
@@ -195,7 +205,7 @@ Keywords=game;launcher;legacy;community;`;
         const targetArch = arch === 'arm64' ? 'aarch64' : arch;
         const targetLibDir = arch === 'arm64' ? '/usr/lib/aarch64-linux-gnu' : '/usr/lib/x86_64-linux-gnu';
 
-        const hasLinuxDeploy = !!execSync("which linuxdeploy 2>/dev/null || true").toString().trim();
+        const hasLinuxDeploy = spawnSync("which", ["linuxdeploy"], { stdio: "pipe" }).status === 0;
         if (hasLinuxDeploy) {
             const envVars = `ARCH=${targetArch} LD_LIBRARY_PATH="${targetLibDir}:$LD_LIBRARY_PATH" LINUXDEPLOY_PLUGINS="gstreamer"`;
             run(`${envVars} linuxdeploy --appdir="${outDir}" --executable="${outDir}/usr/bin/${safeAppName}" --output appimage`);
@@ -235,7 +245,7 @@ function buildMac(cfg, portable) {
 
         run(`cp -r ./build-scripts/_app_scaffolds/mac/myapp.app/* "${appDir}/"`);
 
-        const plistPath = path.join(appDir, "Contents/Info.plist");
+        const plistPath = `${appDir}/Contents/Info.plist`;
         if (exists(plistPath)) {
             let plistContent = fs.readFileSync(plistPath, "utf-8");
             plistContent = plistContent
@@ -258,9 +268,9 @@ function buildMac(cfg, portable) {
         if (appIcon && exists(appIcon)) run(`cp "${appIcon}" "${appDir}/Contents/Resources/"`);
 
         copyIfExists(`./dist/${binary}/extensions`, `${appDir}/Contents/Resources/`);
-        copyLibs(`./libs`, `${appDir}/Contents/Resources/libs/`, (f) => f.includes("osx") && (f.includes(arch) || f.includes("no-arch")));
+        copyLibs(`./libs`, `${appDir}/Contents/Resources/libs`, (f) => f.includes("osx") && (f.includes(arch) || f.includes("no-arch")));
 
-        const zipParent = path.join("./dist", `mac_${arch}${!!portable ? "_portable" : ""}`);
+        const zipParent = `./dist/mac_${arch}${!!portable ? "_portable" : ""}`;
         const zipName = `./dist/${!portable ? "__" : ""}${safeAppName}${!!portable ? "-portable" : ""}-mac-${arch}.zip`;
         if (process.platform === "win32")
             run(`powershell -Command "Compress-Archive -Path '${zipParent}\\${appName}.app' -DestinationPath '${zipName}' -Force"`);
@@ -314,9 +324,9 @@ function buildWin(cfg, portable) {
         run(`cp "./dist/${binary}/resources.neu" "${outDir}/"`);
 
         copyIfExists(`./dist/${binary}/extensions`, outDir);
-        copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.includes("windows") && (f.includes(arch) || f.includes("no-arch")));
+        copyLibs(`./libs`, `${outDir}/libs`, (f) => f.includes("windows") && (f.includes(arch) || f.includes("no-arch")));
 
-        const zipParent = path.join("./dist", `win_${arch}${!!portable ? "_portable" : ""}`);
+        const zipParent = `./dist/win_${arch}${!!portable ? "_portable" : ""}`;
         const zipName = `./dist/${!portable ? "__" : ""}${safeAppName.replace(".exe", "")}${!!portable ? "-portable" : ""}-win-${arch}.zip`;
         if (process.platform === "win32")
             run(`powershell -Command "Compress-Archive -Path '${zipParent}\\*' -DestinationPath '${zipName}' -Force"`);
