@@ -128,7 +128,7 @@ export class API {
         this.socket = io(this.url, { auth: { token: this.token } });
         if (onInvite) this.socket.on("invite_received", onInvite);
         if (onRelayClosed) this.socket.on("relay_closed", onRelayClosed);
-        socket.on("receive_message", (data) => {
+        this.socket.on("receive_message", (data) => {
             if (this.activeChatListeners.has(data.fromID)) {
                 const callback = this.activeChatListeners.get(data.fromID);
                 callback(data);
