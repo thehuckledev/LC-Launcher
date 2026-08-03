@@ -54,8 +54,17 @@ export class Exec {
 
         if (pathsFound.length === 0) return null;
         pathsFound.sort((a, b) => {
-            if (a.name.includes('Experimental')) return -1;
-            if (b.name.includes('Experimental')) return 1;
+            const isAExperimental = a.name.includes('Experimental');
+            const isBExperimental = b.name.includes('Experimental');
+            const isAHotfix = a.name.includes('Hotfix');
+            const isBHotfix = b.name.includes('Hotfix');
+
+            if (isAHotfix && !isBHotfix) return -1;
+            if (!isAHotfix && isBHotfix) return 1;
+
+            if (isAExperimental && !isBExperimental) return 1;
+            if (!isAExperimental && isBExperimental) return -1;
+
             return b.name.localeCompare(a.name, undefined, { numeric: true, sensitivity: 'base' });
         });
 
@@ -573,7 +582,7 @@ export class Exec {
                 const actualExecutable = parts.find(p => !p.includes("=") && p !== "run");
                 const baseCmd = actualExecutable ? actualExecutable.replace(/"/g, "") : "";
                 if (baseCmd.includes("/") || await this.manager.utils.cmdExists(baseCmd)) {
-                    const debug = "WINEDEBUG=err+all,warn+d3d,warn+msvcrt,fixme+d3d,fixme+ntdll,+timestamp";
+                    const debug = "WINEDEBUG=err+all,warn+d3d,warn+msvcrt,fixme+d3d,fixme+ntdll,+timestamp,+debugstr";
                     cmd = `${instance.customArgs ? `${instance.customArgs} ` : ""}${debug} ${bin} "${execPath}" ${joinedArgs}`;
                 } else return showToast(`Error: ${compat} is not installed on your system`);
             };
@@ -691,22 +700,31 @@ export class Exec {
                                     msg = parsed;
 
                                     const lower = parsed.message?.toLowerCase() || "";
+                                    const lowerChannel = parsed.channel?.toLowerCase() || "";
                                     const lowerFunc = parsed.func?.toLowerCase() || "";
                                     const level = parsed.level;
 
-                                    const containsCrashKeyword = (
-                                        lower.includes("unhandled exception") ||
-                                        lower.includes("segmentation fault") ||
-                                        lower.includes("stack overflow") ||
-                                        lower.includes("crash") ||
-                                        lower.includes("fault")
-                                    );
-
-                                    if (containsCrashKeyword && level !== "fixme" && level !== "warn") crashDetected = true;
                                     if (
-                                        lowerFunc.includes("apppolicygetprocessterminationmethod") ||
-                                        lower.includes("killed:")
-                                    ) crashDetected = false;
+                                        parsed.type === "warn" &&
+                                        lowerChannel === "debugstr" &&
+                                        lowerFunc.includes("outputdebugstring")
+                                    ) {
+                                        msg = { timestamp: parsed?.timestamp, type: "text", from: "DIRECT", message: parsed?.message?.replace(/^"|"$/g, '') }
+                                    } else {
+                                        const containsCrashKeyword = (
+                                            lower.includes("unhandled exception") ||
+                                            lower.includes("segmentation fault") ||
+                                            lower.includes("stack overflow") ||
+                                            lower.includes("crash") ||
+                                            lower.includes("fault")
+                                        );
+
+                                        if (containsCrashKeyword && level !== "fixme" && level !== "warn") crashDetected = true;
+                                        if (
+                                            lowerFunc.includes("apppolicygetprocessterminationmethod") ||
+                                            lower.includes("killed:")
+                                        ) crashDetected = false;
+                                    };
                                 };
 
                                 window.dispatchEvent(new CustomEvent("gameLog", {

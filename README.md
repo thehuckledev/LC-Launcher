@@ -88,7 +88,7 @@ wget -qO- https://uninstall.lce-launcher.com | bash
   - [x] Import and export instances
   - [ ] Corrupted installation fix menu
   - [ ] Multiple skins per profile
-  - [ ] Cape menu on profile edit/create
+  - [x] Cape menu on profile edit/create
 - [ ] **General**
   - [x] Download instance updates
   - [x] Use wine/proton to run instances on Linux and MacOS
@@ -114,7 +114,7 @@ wget -qO- https://uninstall.lce-launcher.com | bash
 - [ ] **Misc**
   - [x] Discord RPC Presence
   - [x] Game logs with channel parsing and colours
-  - [ ] Detailed playtime breakdown
+  - [x] Detailed playtime breakdown
   - [x] Option to toggle panoramas
   - [ ] View achievements inside the launcher
 
