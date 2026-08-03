@@ -1,7 +1,7 @@
 > # [Click to join the discord please!](https://discord.gg/DBw6V5v8C9)
 
 > **NOTE** <br>
-> Legacy Community Launcher does not contain any code from Minecraft Legacy Console Edition. Therefore, please don't DMCA this project. 
+> Legacy Community Launcher does not contain any code from Minecraft Legacy Console Edition. Therefore, please don't DMCA this project.
 
 <a name="readme-top"></a>
 
