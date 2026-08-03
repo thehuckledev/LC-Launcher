@@ -25,16 +25,7 @@ class lcLib {
             else reject(new Error(error));
         });
 
-        if (NL_MODE === 'window') {
-            Neutralino.events.on('windowClose', async () => {
-                try {
-                    await this.stop();
-                } catch (err) {
-                    console.error("EXT_BUN: Error during graceful exit, forcing app exit", err);
-                    await Neutralino.app.exit();
-                };
-            });
-        } else {
+        if (NL_MODE !== 'window') {
             window.addEventListener('beforeunload', (e) => {
                 e.preventDefault();
                 e.returnValue = '';
@@ -80,6 +71,7 @@ class lcLib {
         if(this.debug) {
             console.log(`EXT_BUN: Calling ${ext}.${event}`);
         };
+        await Neutralino.window.hide();
         await Neutralino.extensions.dispatch(ext, event, "");
         await sleep(200);
         await Neutralino.app.exit();

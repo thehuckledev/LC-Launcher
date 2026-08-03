@@ -13,3 +13,13 @@
 // TODO add a extension system to the launcher itself so u can add stuff.
 // TODO add a way to view achivements inside the launcher
 // TODO make a full auto update where it downloads inside the launcher, checksum and then launches, quits current (do check on load progress bar and then use that progress bar as download progress)
+
+// BUGS PEOPLE HAVE
+/*
+windows:
+- waiting for extension
+- lcLib staying open
+
+linux:
+- please install libwebkit2gtk-4.0-37 or libwebkit2gtk-4.1-0 library to run this application. arch based / cachy os / gentoo
+*/
