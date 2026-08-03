@@ -42,6 +42,7 @@ From v${NL_APPVERSION} to ${latestRelease?.data?.tag_name}${latestRelease?.data?
         await Neutralino.os.open(latestRelease?.data?.html_url);
 
         if (window.whenQuitting) await window.whenQuitting();
+        await lib.stop();
         await Neutralino.app.exit();
     };
 

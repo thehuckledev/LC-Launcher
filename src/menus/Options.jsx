@@ -170,6 +170,7 @@ export default function OptionsMenu({ setMenu }) {
                                 showToast("Uninstalled, quitting...");
                                 setTimeout(async () => {
                                     if (window.whenQuitting) await window.whenQuitting();
+                                    await lib.stop();
                                     await Neutralino.app.exit();
                                 }, 200);
                             } else if (NL_OS === "Linux") {
@@ -191,6 +192,7 @@ export default function OptionsMenu({ setMenu }) {
                                 showToast("Uninstalled, quitting...");
                                 setTimeout(async () => {
                                     if (window.whenQuitting) await window.whenQuitting();
+                                    await lib.stop();
                                     await Neutralino.app.exit();
                                 }, 200);*/
                                 const dataPath = await Neutralino.filesystem.getJoinedPath(settings.dataDirectory, "../");
@@ -201,6 +203,7 @@ export default function OptionsMenu({ setMenu }) {
                                 showToast("Uninstalled, quitting...");
                                 setTimeout(async () => {
                                     if (window.whenQuitting) await window.whenQuitting();
+                                    await lib.stop();
                                     await Neutralino.app.exit();
                                 }, 200);
                             };
