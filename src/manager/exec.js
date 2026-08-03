@@ -724,6 +724,7 @@ export class Exec {
                                             lowerFunc.includes("apppolicygetprocessterminationmethod") ||
                                             lower.includes("killed:")
                                         ) crashDetected = false;
+                                        if (lowerFunc.includes("apppolicygetprocessterminationmethod")) this.userStopped = true;
                                     };
                                 };
 
