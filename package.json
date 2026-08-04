@@ -1,6 +1,6 @@
 {
     "name": "legacycommunitylauncher",
-    "version": "1.2.0",
+    "version": "1.2.2",
     "description": "Multi-platform launcher for Minecraft Legacy Console Edition forks.",
     "keywords": [
         "Minecraft",
@@ -38,7 +38,8 @@
         "motion": "^12.38.0",
         "nano-markdown": "^1.2.2",
         "preact": "^10.29.0",
-        "socket.io-client": "^4.8.3"
+        "socket.io-client": "^4.8.3",
+        "three": "^0.185.1"
     },
     "devDependencies": {
         "@neutralinojs/neu": "^11.7.2",

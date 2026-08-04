@@ -96,6 +96,10 @@ export class Servers {
         this.manager.exec.launch(instanceId, profileId, server.ip, server.port || "25565")
     };
 
+    async joinFeatured(instanceId, profileId, ip, port) {
+        this.manager.exec.launch(instanceId, profileId, ip, port || "25565")
+    };
+
     async write(instanceId) {
         const servers = await this.list(instanceId);
         const encoder = new TextEncoder();

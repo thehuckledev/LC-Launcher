@@ -115,13 +115,21 @@ p {
     filter: blur(4px) brightness(70%);
 }
 
-#panorama-div {
+#panorama-div,
+#panorama-canvas {
     width: 100% !important;
     height: 100% !important;
-    filter: contrast(0.8) blur(2px);
     transform: scale(1.05);
     position: absolute;
     z-index: -1;
+}
+
+#panorama-div {
+    filter: contrast(0.8) blur(2px);
+}
+
+#panorama-canvas {
+    filter: brightness(80%) blur(2px);
 }
 
 #window-background.fade .window-background-inner::before,

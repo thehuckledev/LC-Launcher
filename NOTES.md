@@ -23,3 +23,8 @@
 
 ## v1.2.1-beta Bug Fixes
 - Fixed lcLib/Bun staying open after launcher closing
+
+## v1.2.2-beta Bug Fixes
+- Fixed cape previews & textures not loading
+- Fixed panorama cubemap distortion
+- Fixed join from launcher for featured servers

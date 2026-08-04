@@ -53,6 +53,10 @@ export default function ServersMenu({ setMenu, instance, profile, setServer }) {
                                     key={server.name}
                                     server={server}
                                     isFeatured={true}
+                                    onJoin={() => {
+                                        Manager.servers.joinFeatured(instance?.id, profile?.id, server?.ip, server?.port);
+                                        setMenu("main");
+                                    }}
                                 />
                             ))}
                             <div id="servers-separator"></div>

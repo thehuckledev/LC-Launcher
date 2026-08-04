@@ -25,6 +25,7 @@ export default defineConfig({
                         if (id.includes("preact")) return "preact";
                         else if (id.includes("@neutralinojs/lib")) return "njs";
                         else if (id.includes("socket.io")) return "socket-io";
+                        else if (id.includes("three")) return "threejs";
 
                         return "vendor";
                     } else {
