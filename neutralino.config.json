@@ -70,7 +70,7 @@
     },
     "cli": {
         "binaryName": "LC_Launcher",
-        "binaryVersion": "6.8.0",
+        "binaryVersion": "6.9.0",
         "resourcesPath": "/public/",
         "frontendLibrary": {
             "patchFile": "/src/index.html",
@@ -80,8 +80,7 @@
             "devCommand": "cross-env BROWSER=none npx vite",
             "buildCommand": "npx vite build",
             "waitTimeout": 20000
-        },
-        "clientVersion": "6.4.0"
+        }
     },
     "buildScript": {
         "mac": {
