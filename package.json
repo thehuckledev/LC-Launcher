@@ -33,7 +33,7 @@
         "build-lib": "bun run ./build-scripts/build-lib.js"
     },
     "dependencies": {
-        "@neutralinojs/lib": "^6.8.0",
+        "@neutralinojs/lib": "^6.9.0",
         "cross-env": "^10.1.0",
         "motion": "^12.38.0",
         "nano-markdown": "^1.2.2",
