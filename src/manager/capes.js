@@ -1,10 +1,19 @@
+const capeTextures = import.meta.glob('/assets/capes/**/*.{png,webp}', {
+    eager: true,
+    import: 'default'
+});
+
 export class Capes {
     constructor(manager) {
         this.manager = manager;
     };
 
+    #resolvePath(path) {
+        return capeTextures[path] || path;
+    };
+
     list() {
-        return [
+        const capeData = [
             {
                 category: "Featured",
                 items: [
@@ -517,5 +526,14 @@ export class Capes {
                 ]
             }
         ];
+
+        return capeData.map(catagory => ({
+            ...catagory,
+            items: catagory.items.map(item => ({
+                ...item,
+                path: this.#resolvePath(item.path),
+                previewUrl: this.#resolvePath(item.previewUrl)
+            }))
+        }));
     };
 };
