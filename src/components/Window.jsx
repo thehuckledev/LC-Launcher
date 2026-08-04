@@ -391,7 +391,7 @@ export default function Window({ title, loaded = false, showClose = true, showMi
                             backgroundImage: `url(${lastStillBg.current})`
                         }}
                     />
-                    {NL_OS !== "Linux" ? (
+                    {NL_OS !== "Linux" && settings.renderPanorama && panoramaEnabled ? (
                         <motion.canvas
                             ref={panoRef}
                             id="panorama-canvas"
