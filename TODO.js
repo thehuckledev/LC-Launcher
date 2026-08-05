@@ -35,3 +35,4 @@ x websocket streaming game logs isnt fast enough as it is always behind
 // fixed issue where you can change and edit instances while installing one
 // optimised downloading/unzipping progress message by adding an interval check
 // fixed websocket streaming game logs isnt fast enough as it is always behind
+// fixed custom cape upload issue

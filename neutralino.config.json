@@ -3,7 +3,7 @@
     "applicationId": "dev.huckle.legacycommunitylauncher",
     "applicationName": "LC Launcher",
     "applicationIcon": "./assets/icon.png",
-    "version": "1.2.4",
+    "version": "1.2.5",
     "author": "TheHuckle",
     "description": "Multi-platform launcher for Minecraft Legacy Console Edition forks.",
     "copyright": "© 2026 TheHuckle. All rights reserved.",

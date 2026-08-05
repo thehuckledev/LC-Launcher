@@ -36,3 +36,6 @@
 - Fixed bug where you can change/edit instances while installing one.
 - Optimised downloading/unzipping progress over socket by adding an interval flush.
 - Fixed game logs delay so it's real time now.
+
+## v1.2.5-beta Bug Fixes
+- Fixed custom cape upload not working
