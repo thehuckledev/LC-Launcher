@@ -33,6 +33,6 @@
 - Fixed still background not working when panoramas disabled.
 
 ## v1.2.4-beta Bug Fixes
-- Fixed bug where you can change/edit instances while installing one
-- Optimised downloading/unzipping progress over socket by adding an interval flush
-- Fixed game logs delay so it's real time now
+- Fixed bug where you can change/edit instances while installing one.
+- Optimised downloading/unzipping progress over socket by adding an interval flush.
+- Fixed game logs delay so it's real time now.
