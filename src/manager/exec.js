@@ -619,6 +619,30 @@ export class Exec {
         return new Promise(async (resolve) => {
             this.userStopped = false;
 
+            let logBuffer = [];
+            let logInterval = null;
+
+            const startLogFlusher = () => {
+                logInterval = setInterval(() => {
+                    if (logBuffer.length === 0) return;
+
+                    const chunk = logBuffer.splice(0, logBuffer.length);
+                    window.dispatchEvent(new CustomEvent("gameLog", { detail: chunk }));
+                }, 200);
+            };
+
+            const stopLogFlusher = () => {
+                if (logInterval) {
+                    clearInterval(logInterval);
+                    logInterval = null;
+                };
+
+                if (logBuffer.length > 0) {
+                    const chunk = logBuffer.splice(0, logBuffer.length);
+                    window.dispatchEvent(new CustomEvent("gameLog", { detail: chunk }));
+                };
+            };
+
             try {
                 if(keepLauncherOpen === false) {
                     if (NL_OS === "Windows") setTimeout(() => { Neutralino.window.hide(); }, 200);
@@ -632,6 +656,8 @@ export class Exec {
                     cwd: cwd,
                     env: parsedEnvs
                 });
+
+                startLogFlusher();
 
                 const updateGameData = async () => {
                     const duration = Date.now() - startTime;
@@ -681,9 +707,7 @@ export class Exec {
 
                             const lines = data.split(/\r?\n/);
                             for (const line of lines) {
-                                window.dispatchEvent(new CustomEvent("gameLog", {
-                                    detail: { type: "out", from: "DIRECT", message: line }
-                                }));
+                                logBuffer.push({ type: "out", from: "DIRECT", message: line });
                             };
                             break;
                         };
@@ -728,14 +752,14 @@ export class Exec {
                                     };
                                 };
 
-                                window.dispatchEvent(new CustomEvent("gameLog", {
-                                    detail: msg
-                                }));
+                                logBuffer.push(msg);
                             };
                             break;
                         };
                         case 'exit':
                             const exitCode = data;
+
+                            stopLogFlusher();
 
                             await updateGameData();
 

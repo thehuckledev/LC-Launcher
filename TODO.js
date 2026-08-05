@@ -28,5 +28,10 @@ linux:
 - please install libwebkit2gtk-4.0-37 or libwebkit2gtk-4.1-0 library to run this application. arch based / cachy os / gentoo
 
 macos:
-- websocket streaming game logs isnt fast enough as it is always behind
+x websocket streaming game logs isnt fast enough as it is always behind
 */
+
+// WHAT IVE DONE
+// fixed issue where you can change and edit instances while installing one
+// optimised downloading/unzipping progress message by adding an interval check
+// fixed websocket streaming game logs isnt fast enough as it is always behind

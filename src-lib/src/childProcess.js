@@ -52,38 +52,68 @@ class ChildProcess {
             (async () => {
                 const reader = proc.stdout.getReader();
                 const decoder = new TextDecoder();
+                let buffer = "";
+                let timer = null;
+
+                const flush = () => {
+                    if (buffer.length > 0) {
+                        ext.sendMessage('procData', { callID, type: 'stdOut', data: buffer });
+                        buffer = "";
+                    };
+                    
+                    if (timer) {
+                        clearInterval(timer);
+                        timer = null;
+                    };
+                };
+
                 try {
                     while (true) {
                         const { done, value } = await reader.read();
                         if (done) break;
 
-                        ext.sendMessage('procData', {
-                            callID,
-                            type: 'stdOut',
-                            data: decoder.decode(value)
-                        });
+                        buffer += decoder.decode(value, { stream: true });
+
+                        if (!timer) timer = setInterval(flush, 200);
                     };
                 } catch (err) {
                     console.error("stdOut stream error:", err);
+                } finally {
+                    flush();
                 };
             })();
 
             (async () => {
                 const reader = proc.stderr.getReader();
                 const decoder = new TextDecoder();
+                let buffer = "";
+                let timer = null;
+
+                const flush = () => {
+                    if (buffer.length > 0) {
+                        ext.sendMessage('procData', { callID, type: 'stdErr', data: buffer });
+                        buffer = "";
+                    };
+
+                    if (timer) {
+                        clearInterval(timer);
+                        timer = null;
+                    };
+                };
+
                 try {
                     while (true) {
                         const { done, value } = await reader.read();
                         if (done) break;
 
-                        ext.sendMessage('procData', {
-                            callID,
-                            type: 'stdErr',
-                            data: decoder.decode(value)
-                        });
+                        buffer += decoder.decode(value, { stream: true });
+
+                        if (!timer) timer = setInterval(flush, 200);
                     };
                 } catch (err) {
                     console.error("stdErr stream error:", err);
+                } finally {
+                    flush();
                 };
             })();
 

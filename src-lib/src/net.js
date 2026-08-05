@@ -65,13 +65,9 @@ class Net {
         const reader = response.body.getReader();
         
         let downloadedBytes = 0;
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+        let lastProgressTime = 0;
 
-            writer.write(value);
-            downloadedBytes += value.length;
-
+        const sendProgress = () => {
             if (totalBytes > 0) {
                 const percent = (downloadedBytes / totalBytes) * 100;
                 ext.sendMessage('downloadProgress', {
@@ -83,7 +79,22 @@ class Net {
             };
         };
 
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            writer.write(value);
+            downloadedBytes += value.length;
+
+            const now = Date.now();
+            if (now - lastProgressTime >= 200) {
+                sendProgress();
+                lastProgressTime = now;
+            };
+        };
+
         writer.end();
+        sendProgress();
 
         return { success: true, savePath };
     };

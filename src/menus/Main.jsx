@@ -220,14 +220,18 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                             icon: i.icon || instanceIcon,
                             line1: i.name,
                             line2: i?.serviceType == "URL" ? "Direct Download Link" : i?.serviceType == "LOCAL" ? "Local Build Directory" : i?.tag ? i.tag : "N/A",
-                            editable: !((processing || progress.active) && i.id === instance?.id)
+                            editable: !(processing || progress.active)
                         }))}
                         onSelect={async (selectedInstance) => {
+                            if (processing || progress.active) return;
+
                             //const instance = await Manager.instances.get(selectedInstance.id);
                             const instance = instancesList.find(e => e.id === selectedInstance.id);
                             setInstance(instance);
                         }}
                         onEdit={async (i) => {
+                            if (processing || progress.active) return;
+                            
                             //const instance = await Manager.instances.get(i.id);
                             const instance = instancesList.find(e => e.id === i.id);
                             setInstance(instance);
