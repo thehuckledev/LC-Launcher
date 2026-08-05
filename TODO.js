@@ -13,6 +13,7 @@
 // TODO add a extension system to the launcher itself so u can add stuff.
 // TODO add a way to view achivements inside the launcher
 // TODO make a full auto update where it downloads inside the launcher, checksum and then launches, quits current (do check on load progress bar and then use that progress bar as download progress)
+// TODO make logs from last game still visible so the button stays pressable
 
 // BUGS PEOPLE HAVE
 /*
