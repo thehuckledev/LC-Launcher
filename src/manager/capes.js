@@ -437,8 +437,8 @@ export class Capes {
                     {
                         id: "snail",
                         name: "Snail",
-                        path: "/assets/capes/snail/texture.webp",
-                        previewUrl: "/assets/capes/snail/preview.webp"
+                        path: "/assets/capes/Snail/texture.webp",
+                        previewUrl: "/assets/capes/Snail/preview.webp"
                     },
                     {
                         id: "squid",
