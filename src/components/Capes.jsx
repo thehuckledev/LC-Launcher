@@ -59,7 +59,19 @@ export default function Capes({ setShowCapeMenu, cape, setCape, profile }) {
             
             if (!(await testPath(src))) return showToast("Couldn't find cape from path");
 
-            setCape(src);
+            const file = await Neutralino.filesystem.readBinaryFile(src);
+            const base64String = btoa(
+                new Uint8Array(file)
+                    .reduce((data, byte) => data + String.fromCharCode(byte), '')
+            );
+    
+            let mimeType = 'image/png';
+            if (src.endsWith('.jpg') || src.endsWith('.jpeg'))
+                mimeType = 'image/jpeg';
+            
+            const capeDataURI = `data:${mimeType};base64,${base64String}`;
+
+            setCape(capeDataURI);
             setShowCapeMenu(false);
             showToast("Custom cape selected");
         } catch (err) {
