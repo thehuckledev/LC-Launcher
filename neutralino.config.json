@@ -41,7 +41,7 @@
             "id": "lcLib",
             "commandDarwin": "sh \"${NL_PATH}/libs/lcLib-osx-no-arch.sh\" \"${NL_PATH}\"",
             "commandLinux": "sh \"${NL_PATH}/libs/lcLib-linux-no-arch.sh\" \"${NL_PATH}\"",
-            "commandWindows": "\"${NL_PATH}\\libs\\lcLib-windows.cmd\" \"${NL_PATH}\""
+            "commandWindows": "\"${NL_PATH}/libs/lcLib-windows-no-arch.cmd\" \"${NL_PATH}\""
         }
     ],
     "modes": {
