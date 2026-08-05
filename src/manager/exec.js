@@ -303,13 +303,20 @@ export class Exec {
         const dataDirectory = await getSetting("dataDirectory");
         const runtimeDir = `${dataDirectory}/libraries/runtime`;
         const runtimeTempDir = `${dataDirectory}/libraries/_runtime`;
+        const dxvkDir = `${dataDirectory}/libraries/dxvk`;
         let archivePath = null;
+        let dxvkArchivePath = null;
         try {
             const prefix = `${dataDirectory}/pfx`;
 
             let repo = "";
-            if (NL_OS === "Darwin") repo = "Gcenx/game-porting-toolkit";
-            else if (NL_OS === "Linux") repo = "GloriousEggroll/proton-ge-custom";
+            if (NL_OS === "Darwin") {
+                if (NL_ARCH === "x64") repo = "Gcenx/macOS_Wine_builds";
+                else repo = "Gcenx/game-porting-toolkit";
+            } else if (NL_OS === "Linux") repo = "GloriousEggroll/proton-ge-custom";
+
+            const dxvkRepo = `Gcenx/DXVK-macOS`;
+
 
             window.dispatchEvent(
                 new CustomEvent("installProgress", {
@@ -333,7 +340,9 @@ export class Exec {
             if (!apiResponse.ok) throw new Error("Releases API not reachable");
             let releaseData = apiResponse.data;
 
-            let asset = releaseData.assets.find(a => a.name.endsWith('.tar.xz') || a.name.endsWith('.tar.gz'));
+            let asset;
+            if (NL_OS === "Darwin" && NL_ARCH === "x64") asset = releaseData.assets.find(a => (a.name.endsWith('.tar.xz') || a.name.endsWith('.tar.gz')) && a.name.includes('staging'));
+            else asset = releaseData.assets.find(a => a.name.endsWith('.tar.xz') || a.name.endsWith('.tar.gz'));
             if (!asset) throw new Error("No archive found in runtime release");
 
             const downloadUrl = asset.browser_download_url;
@@ -364,12 +373,16 @@ export class Exec {
                 const internalRuntimeSource = `${runtimeTempDir}/Contents/Resources/wine`;
                 await Neutralino.os.execCommand(`cp -R "${internalRuntimeSource}/." "${runtimeDir}"`);
                 await Neutralino.os.execCommand(`xattr -rd com.apple.quarantine "${runtimeDir}"`);
+            } else {
+                await Neutralino.os.execCommand(`cp -R "${runtimeTempDir}/." "${runtimeDir}"`);
             };
             await Neutralino.os.execCommand(`chmod -R 755 "${runtimeDir}"`);
 
             await Neutralino.filesystem.remove(archivePath).catch(()=>{});
             await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
+            archivePath = null;
 
+            // wineboot
             window.dispatchEvent(
                 new CustomEvent("installProgress", {
                     detail: {
@@ -383,7 +396,7 @@ export class Exec {
             );
             await Neutralino.filesystem.createDirectory(prefix).catch(()=>{});
 
-            const wineBin = (NL_OS === "Darwin") ? "wine64" : "wine";
+            const wineBin = (NL_OS === "Darwin" && NL_ARCH === "arm") ? "wine64" : "wine";
             const winePath = `${runtimeDir}/bin/${wineBin}`;
 
             let envVars = `WINEPREFIX="${prefix}" WINEDEBUG=-all WINEESYNC=1 `;
@@ -391,6 +404,75 @@ export class Exec {
             else envVars += `STEAM_COMPAT_CLIENT_INSTALL_PATH="~/.steam/steam" STEAM_COMPAT_DATA_PATH="${prefix}" `;
 
             await Neutralino.os.execCommand(`${envVars} "${winePath}" wineboot --init`);
+
+            // dxvk
+            if (NL_OS === "Darwin" && NL_ARCH === "x64") {
+                window.dispatchEvent(
+                    new CustomEvent("installProgress", {
+                        detail: {
+                            id: crypto.randomUUID(),
+                            active: true,
+                            status: "starting",
+                            percent: 0,
+                            label: "Fetching latest DXVK..."
+                        }
+                    })
+                );
+                
+                let dxvkApiResponse = await Net.get(`https://api.github.com/repos/${dxvkRepo}/releases/latest`, {
+                    headers: {
+                        "Accept": "application/vnd.github+json",
+                        "User-Agent": "LC-Launcher",
+                        "X-GitHub-Api-Version": "2026-03-10"
+                    }
+                });
+                if (!dxvkApiResponse.ok) throw new Error("DXVK Releases API not reachable");
+                let dxvkReleaseData = dxvkApiResponse.data;
+
+                let dxvkAsset = dxvkReleaseData.assets.find(a => (a.name.endsWith('.tar.xz') || a.name.endsWith('.tar.gz')) && !a.name.includes('builtin'));
+                if (!dxvkAsset) throw new Error("No archive found in DXVK release");
+
+                const dxvkDownloadUrl = dxvkAsset.browser_download_url;
+                dxvkArchivePath = `${dataDirectory}/libraries/${dxvkAsset.name}`;
+
+                await Neutralino.filesystem.createDirectory(dxvkDir).catch(()=>{});
+
+                const dxvkDownload = new Download(dxvkDownloadUrl, { label: `Downloading DXVK...` });
+                await dxvkDownload.start(dxvkArchivePath);
+
+                const dxvkUnzip = new Unzip(dxvkArchivePath, dxvkDir, { label: "Extracting DXVK..." });
+                await dxvkUnzip.start();
+
+                await Neutralino.filesystem.remove(dxvkArchivePath).catch(()=>{});
+
+                // patch wine
+                window.dispatchEvent(
+                    new CustomEvent("installProgress", {
+                        detail: {
+                            id: crypto.randomUUID(),
+                            active: true,
+                            status: "starting",
+                            percent: 0,
+                            label: "Patching runtime with DXVK..."
+                        }
+                    })
+                );
+
+                const system32 = `${prefix}/drive_c/windows/system32`;
+                const syswow64 = `${prefix}/drive_c/windows/syswow64`;
+        
+                try {
+                    await Neutralino.os.execCommand(`cp -f "${dxvkDir}/x64/"*.dll "${system32}"`);
+                    await Neutralino.os.execCommand(`cp -f "${dxvkDir}/x32/"*.dll "${syswow64}"`);
+
+                    const regCmd = `"${winePath}" reg add "HKCU\\Software\\Wine\\DllOverrides" /v d3d11 /t REG_SZ /d native,builtin /f && ` +
+                                   `"${winePath}" reg add "HKCU\\Software\\Wine\\DllOverrides" /v dxgi /t REG_SZ /d native,builtin /f`;
+                    await Neutralino.os.execCommand(`${envVars} ${regCmd}`);
+                } catch (err) {
+                    console.error("DXVK setup failed:", err);
+                    showToast("Failed to apply DXVK");
+                };
+            };
         } catch (err) {
             console.error("Runtime download failed:", err);
             showToast("Runtime install failed, try manual install");
@@ -398,6 +480,8 @@ export class Exec {
             await Neutralino.filesystem.remove(runtimeDir).catch(()=>{});
             await Neutralino.filesystem.remove(runtimeTempDir).catch(()=>{});
             if(archivePath !== null) await Neutralino.filesystem.remove(archivePath).catch(()=>{});
+            await Neutralino.filesystem.remove(dxvkDir).catch(()=>{});
+            if(dxvkArchivePath !== null) await Neutralino.filesystem.remove(dxvkArchivePath).catch(()=>{});
         };
     };
 

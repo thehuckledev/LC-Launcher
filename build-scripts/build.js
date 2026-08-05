@@ -221,69 +221,73 @@ function buildMac(cfg, portable) {
     const appCredits = cfg.buildScript.mac.appCredits;
 
     for (const arch of archList) {
-        const appDir = `./dist/mac_${arch}${!!portable ? "_portable" : ""}/${appName}.app`;
-        const exe = `./dist/${binary}/${binary}-mac_${arch}`;
+        try {
+            const appDir = `./dist/mac_${arch}${!!portable ? "_portable" : ""}/${appName}.app`;
+            const exe = `./dist/${binary}/${binary}-mac_${arch}`;
 
-        if (!exists(exe)) {
-            console.error(`Missing binary: ${exe}`);
-            process.exit(1);
+            if (!exists(exe)) {
+                console.error(`Missing binary: ${exe}`);
+                process.exit(1);
+            };
+
+            console.log(`Building macOS (${arch})...`);
+
+            fs.mkdirSync(appDir, { recursive: true });
+
+            run(`cp -r ./build-scripts/_app_scaffolds/mac/myapp.app/* "${appDir}/"`);
+
+            const plistPath = path.join(appDir, "Contents/Info.plist");
+            if (exists(plistPath)) {
+                let plistContent = fs.readFileSync(plistPath, "utf-8");
+                plistContent = plistContent
+                    .replace(/{APP_NAME}/g, appName)
+                    .replace(/{APP_BUNDLE}/g, appBundle)
+                    .replace(/{APP_ID}/g, appId)
+                    .replace(/{APP_VERSION}/g, appVersion)
+                    .replace(/{APP_MIN_OS}/g, appMinOs)
+                    .replace(/{APP_CREDITS}/g, appCredits);
+
+                fs.writeFileSync(plistPath, plistContent);
+            };
+
+            run(`cp "${exe}" "${appDir}/Contents/MacOS/main"`);
+            run(`chmod 755 "${appDir}/Contents/MacOS/main"`);
+
+            run(`cp "./dist/${binary}/resources.neu" "${appDir}/Contents/Resources/"`);
+
+            const appIcon = cfg.buildScript.mac.appIcon;
+            if (appIcon && exists(appIcon)) run(`cp "${appIcon}" "${appDir}/Contents/Resources/"`);
+
+            copyIfExists(`./dist/${binary}/extensions`, `${appDir}/Contents/Resources/`);
+            copyLibs(`./libs`, `${appDir}/Contents/Resources/libs/`, (f) => f.includes("osx") && (f.includes(arch) || f.includes("no-arch")));
+
+            const zipParent = path.join("./dist", `mac_${arch}${!!portable ? "_portable" : ""}`);
+            const zipName = `./dist/${!portable ? "__" : ""}${safeAppName}${!!portable ? "-portable" : ""}-mac-${arch}.zip`;
+            if (process.platform === "win32")
+                run(`powershell -Command "Compress-Archive -Path '${zipParent}\\${appName}.app' -DestinationPath '${zipName}' -Force"`);
+            else
+                run(`cd "./dist/mac_${arch}${!!portable ? "_portable" : ""}" && zip -9 -rq "../${path.basename(zipName)}" "${appName}.app" -x "**/._*" -x "**/.DS_Store" -x "**/__MACOSX"`);
+
+            if (process.platform === "darwin" && process.argv.length > 2 && !portable) {
+                console.log("Creating DMG...");
+                run(`create-dmg \
+                        --volname "${appName}" \
+                        --volicon "./assets/dmg/dmg-icon.icns" \
+                        --background "./assets/dmg/dmg-background.png" \
+                        --window-pos 300 100 \
+                        --window-size 800 505 \
+                        --icon-size 100 \
+                        --icon "${appName}.app" 200 190 \
+                        --hide-extension "${appName}.app" \
+                        --app-drop-link 600 185 \
+                        "./dist/${safeAppName}-mac-${arch}${!!portable ? "-portable" : ""}.dmg" \
+                        "${appDir}"`);
+            };
+
+            console.log(`Created ${zipName}`);
+        } catch (e) {
+            console.error(`Failed to build Mac (${arch})`, e);
         };
-
-        console.log(`Building macOS (${arch})...`);
-
-        fs.mkdirSync(appDir, { recursive: true });
-
-        run(`cp -r ./build-scripts/_app_scaffolds/mac/myapp.app/* "${appDir}/"`);
-
-        const plistPath = path.join(appDir, "Contents/Info.plist");
-        if (exists(plistPath)) {
-            let plistContent = fs.readFileSync(plistPath, "utf-8");
-            plistContent = plistContent
-                .replace(/{APP_NAME}/g, appName)
-                .replace(/{APP_BUNDLE}/g, appBundle)
-                .replace(/{APP_ID}/g, appId)
-                .replace(/{APP_VERSION}/g, appVersion)
-                .replace(/{APP_MIN_OS}/g, appMinOs)
-                .replace(/{APP_CREDITS}/g, appCredits);
-
-            fs.writeFileSync(plistPath, plistContent);
-        };
-
-        run(`cp "${exe}" "${appDir}/Contents/MacOS/main"`);
-        run(`chmod 755 "${appDir}/Contents/MacOS/main"`);
-
-        run(`cp "./dist/${binary}/resources.neu" "${appDir}/Contents/Resources/"`);
-
-        const appIcon = cfg.buildScript.mac.appIcon;
-        if (appIcon && exists(appIcon)) run(`cp "${appIcon}" "${appDir}/Contents/Resources/"`);
-
-        copyIfExists(`./dist/${binary}/extensions`, `${appDir}/Contents/Resources/`);
-        copyLibs(`./libs`, `${appDir}/Contents/Resources/libs/`, (f) => f.includes("osx") && (f.includes(arch) || f.includes("no-arch")));
-
-        const zipParent = path.join("./dist", `mac_${arch}${!!portable ? "_portable" : ""}`);
-        const zipName = `./dist/${!portable ? "__" : ""}${safeAppName}${!!portable ? "-portable" : ""}-mac-${arch}.zip`;
-        if (process.platform === "win32")
-            run(`powershell -Command "Compress-Archive -Path '${zipParent}\\${appName}.app' -DestinationPath '${zipName}' -Force"`);
-        else
-            run(`cd "./dist/mac_${arch}${!!portable ? "_portable" : ""}" && zip -9 -rq "../${path.basename(zipName)}" "${appName}.app" -x "**/._*" -x "**/.DS_Store" -x "**/__MACOSX"`);
-
-        if (process.platform === "darwin" && process.argv.length > 2 && !portable) {
-            console.log("Creating DMG...");
-            run(`create-dmg \
-                    --volname "${appName}" \
-                    --volicon "./assets/dmg/dmg-icon.icns" \
-                    --background "./assets/dmg/dmg-background.png" \
-                    --window-pos 300 100 \
-                    --window-size 800 505 \
-                    --icon-size 100 \
-                    --icon "${appName}.app" 200 190 \
-                    --hide-extension "${appName}.app" \
-                    --app-drop-link 600 185 \
-                    "./dist/${safeAppName}-mac-${arch}${!!portable ? "-portable" : ""}.dmg" \
-                    "${appDir}"`);
-        };
-
-        console.log(`Created ${zipName}`);
     };
 };
 
