@@ -36,3 +36,4 @@ x websocket streaming game logs isnt fast enough as it is always behind
 // optimised downloading/unzipping progress message by adding an interval check
 // fixed websocket streaming game logs isnt fast enough as it is always behind
 // fixed custom cape upload issue
+// fixed snail cape not rendering/applying

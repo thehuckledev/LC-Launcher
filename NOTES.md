@@ -39,3 +39,6 @@
 
 ## v1.2.5-beta Bug Fixes
 - Fixed custom cape upload not working.
+
+## v1.2.6-beta Bug Fixes
+- Fixed Snail cape not rendering/applying.
