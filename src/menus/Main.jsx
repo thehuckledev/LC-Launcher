@@ -244,7 +244,7 @@ export default function MainMenu({ setMenu, instance, setInstance, profile, setP
                         <Button id="worlds-button" tooltip="Worlds" tooltipAlign="LEFT" disabled={!instance?.id || progress.active || processing} pushable={instance?.id && !progress.active && !processing}>
                             <img src={worldsIcon} draggable={false} />
                         </Button>
-                        <Button id="play-button" type={runningProc !== null ? "destructive" : "primary"} disabled={!instance?.id || !profile?.id || progress.active || (processing && runningProc === null)} pushable={!progress.active || !processing || runningProc !== null} onclick={async () => {
+                        <Button id="play-button" type={runningProc !== null ? "destructive" : "primary"} disabled={!instance?.id || !profile?.id || progress.active || (processing && runningProc === null)} pushable={!progress.active && (!processing || runningProc !== null)} onclick={async () => {
                             if (runningProc !== null) {
                                 await Manager.exec.stop();
                             } else {

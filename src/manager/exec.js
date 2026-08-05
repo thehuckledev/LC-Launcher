@@ -789,7 +789,9 @@ export class Exec {
                 };
 
                 window.addEventListener(`proc:${proc.id}`, handler);
-                window.dispatchEvent(new CustomEvent("procRunning", { detail: proc.id }));
+                setTimeout(() => { // makes spam proof
+                    window.dispatchEvent(new CustomEvent("procRunning", { detail: proc.id }));
+                }, 1500);
             } catch(e) {
                 console.log(e);
 
