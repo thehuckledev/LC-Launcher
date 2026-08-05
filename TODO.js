@@ -18,17 +18,11 @@
 /*
 windows:
 - waiting for extension
-x lcLib staying open
-x capes not loading
-x cubemap panorama fullscreen looks odd (use three.js on non linux machines)
-x auto join doesnt work
-- capes doesnt work when using 64x32 skin
 
 linux:
 - please install libwebkit2gtk-4.0-37 or libwebkit2gtk-4.1-0 library to run this application. arch based / cachy os / gentoo
 
 macos:
-x websocket streaming game logs isnt fast enough as it is always behind
 */
 
 // WHAT IVE DONE
@@ -37,3 +31,4 @@ x websocket streaming game logs isnt fast enough as it is always behind
 // fixed websocket streaming game logs isnt fast enough as it is always behind
 // fixed custom cape upload issue
 // fixed snail cape not rendering/applying
+// made stop/start instance spam proof
