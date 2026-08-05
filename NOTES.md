@@ -38,4 +38,4 @@
 - Fixed game logs delay so it's real time now.
 
 ## v1.2.5-beta Bug Fixes
-- Fixed custom cape upload not working
+- Fixed custom cape upload not working.
