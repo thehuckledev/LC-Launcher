@@ -409,10 +409,13 @@ export default function App() {
 
     useEffect(() => {
         const handler = (e) => {
-            setLogs(prev => [
-                ...prev.slice(-1000),
-                e.detail
-            ]);
+            const incomingLogs = e.detail;
+            if (!Array.isArray(incomingLogs) || incomingLogs.length === 0) return;
+
+            setLogs(prev => {
+                const combined = [...prev, ...incomingLogs];
+                return combined.slice(-1000);
+            });
         };
 
         window.addEventListener("gameLog", handler);

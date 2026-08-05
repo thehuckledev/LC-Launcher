@@ -279,6 +279,8 @@ class Filesystem {
         if (totalFiles === 0) throw new Error("Zip archive is empty");
 
         let extractedCount = 0;
+        let lastProgressTime = 0;
+
         for (const filename of files) {
             const fileData = unzipped[filename];
             const targetFilePath = path.join(destPath, filename);
@@ -293,11 +295,18 @@ class Filesystem {
             await Bun.write(targetFilePath, fileData);
 
             extractedCount++;
-            ext.sendMessage('unzipProgress', {
-                callID,
-                percent: Math.floor((extractedCount / totalFiles) * 100)
-            });
+
+            const now = Date.now();
+            if (now - lastProgressTime >= 200) {
+                ext.sendMessage('unzipProgress', {
+                    callID,
+                    percent: Math.floor((extractedCount / totalFiles) * 100)
+                });
+                lastProgressTime = now;
+            };
         };
+
+        ext.sendMessage('unzipProgress', { callID, percent: 100 });
     };
 
     static async _extractTarGz(callID, ext, zipPath, destPath) {
@@ -326,6 +335,7 @@ class Filesystem {
             
             const totalBytes = tarBuffer.length;
             let totalProcessedBytes = 0;
+            let lastProgressTime = 0;
 
             extract.on('entry', async (header, stream, next) => {
                 const targetFilePath = path.resolve(destPath, header.name);
@@ -378,10 +388,14 @@ class Filesystem {
                             } catch (e) {};
                         };
 
-                        ext.sendMessage("unzipProgress", {
-                            callID,
-                            percent: Math.min(Math.floor((totalProcessedBytes / totalBytes) * 100), 99)
-                        });
+                        const now = Date.now();
+                        if (now - lastProgressTime >= 200) {
+                            ext.sendMessage("unzipProgress", {
+                                callID,
+                                percent: Math.min(Math.floor((totalProcessedBytes / totalBytes) * 100), 99)
+                            });
+                            lastProgressTime = now;
+                        };
 
                         return next();
                     };
