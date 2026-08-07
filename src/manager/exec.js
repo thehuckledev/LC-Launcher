@@ -615,7 +615,7 @@ export class Exec {
                 if (NL_OS === "Darwin") { // WINE RUNTIME
                     try {
                         await Neutralino.filesystem.getStats(`${runtimePath}/bin/wine64`);
-                        const winePath = `${runtimePath}/bin/wine64`;
+                        const winePath = `${runtimePath}/bin/${NL_ARCH === "arm" ? "wine64" : "wine"}`;
                         
                         const env = `WINEPREFIX="${prefix}" WINEESYNC=1 MTL_HUD_ENABLED=0`;
                         bin = `${env} "${winePath}"`;
