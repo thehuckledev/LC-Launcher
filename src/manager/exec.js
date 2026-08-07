@@ -531,7 +531,7 @@ export class Exec {
             const runtimePath = `${dataDir}/libraries/runtime`;
 
             try {
-                await Neutralino.filesystem.getStats(`${runtimePath}/bin/${NL_OS === "Darwin" ? 'wine64' : 'wine'}`);
+                await Neutralino.filesystem.getStats(`${runtimePath}/bin/${NL_OS === "Darwin" && NL_ARCH === "arm" ? 'wine64' : 'wine'}`);
             } catch {
                 let shouldDo = await showAlert('LC Launcher Runtime', 'This instance requires the runtime as its compatibility layer. Do you want to install the runtime?', 'YES_NO');
                 if(shouldDo == 'YES') {
