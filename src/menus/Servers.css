@@ -16,11 +16,13 @@
 
 #server-list {
     height: 100%;
+    min-height: 0;
 
     scroll-snap-type: y proximity;
 
     overflow-y: auto;
     overflow-x: hidden;
+    scrollbar-gutter: stable;
     scroll-behavior: smooth;
     overscroll-behavior: none;
 
