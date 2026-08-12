@@ -1,4 +1,4 @@
-//- TODO add controller mode which is like steam big screen mode
+//- TODO add controller support / mode which is like steam big screen mode
 //- TODO make instances appear as games in steam
 //* TODO add dev tools like .arc .pak and .loc editor
 //* TODO make each profile have multiple skins and capes
