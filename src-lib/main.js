@@ -1,5 +1,6 @@
 console.log("lcLib ran");
 
+const { execFile } = require("child_process");
 const NeutralinoExtension = require('./neutralino-extension');
 const DEBUG = true;
 
@@ -46,6 +47,30 @@ async function exit(exitCode = 0) {
     process.exit(exitCode);
 };
 
+function startParentWatchdog(intervalMs = 5000) {
+    if (process.platform !== "win32") return;
+
+    const processName = "LC Launcher.exe";
+
+    function check() {
+        if (isExiting) return;
+
+        execFile("tasklist.exe", ["/FI", `IMAGENAME eq ${processName}`], (err, stdout) => {
+            if (isExiting) return;
+
+            if (!err && stdout && !stdout.toLowerCase().includes(processName.toLowerCase())) {
+                console.log(`${processName} closed, exiting lcLib...`);
+                return exit(0);
+            };
+
+            setTimeout(check, intervalMs);
+        });
+    };
+
+    console.log("lcLib startParentWatchdog ran");
+    check();
+};
+
 async function processAppEvent(d) {
     if(ext.isEvent(d, 'runBun')) {
         const { callID, class: className, function: funcName, args = [] } = d.data;
@@ -86,6 +111,8 @@ console.log("lcLib processAppEvent defined");
 
     ext = await new NeutralinoExtension(DEBUG);
     ext.run(processAppEvent, 5000, exit);
+
+    startParentWatchdog();
 
     console.log("lcLib async global loop ran");
 })();

@@ -20,7 +20,7 @@
 // BUGS PEOPLE HAVE
 /*
 windows:
-- waiting for extension
+- waiting for extension (Due to CPU not supporting AVX2, can swap bun targets out in build-lib.js for baseline versions)
 
 linux:
 - please install libwebkit2gtk-4.0-37 or libwebkit2gtk-4.1-0 library to run this application. arch based / cachy os / gentoo
@@ -35,3 +35,11 @@ macos:
 // fixed custom cape upload issue
 // fixed snail cape not rendering/applying
 // made stop/start instance spam proof
+
+// make macos x64 builds work
+// fixed scrollbar rendering ontop of content
+// made stop/launch spam proof
+// fixed lcLib staying open
+// fixed skin some issues with 64x64 and slim on neo
+// stopped update prompt when running in dev mode
+// stop runtime install prompt on linux when using custom-proton-ge

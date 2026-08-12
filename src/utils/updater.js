@@ -2,6 +2,7 @@ import Neutralino from "@neutralinojs/lib";
 import config from "../data/config.js";
 
 import { showAlert } from "../components/Alert.jsx";
+import { showToast } from "../components/Toast.jsx";
 import Net from "../lib/net.js";
 
 const isVersionGreater = (latest, current) => {
@@ -15,6 +16,8 @@ const isVersionGreater = (latest, current) => {
 };
 
 export const checkForUpdates = async() => {
+    if (NL_ARGS.includes("--neu-dev-extension")) return console.log("Update check bypassed, dev mode is on!");
+
     const latestRelease = await Net.get(`https://api.github.com/repos/${config.projectGithubUser}/${config.projectGithubRepo}/releases/latest`, {
         headers: {
             'Accept': 'application/vnd.github+json',
@@ -23,7 +26,7 @@ export const checkForUpdates = async() => {
     });
 
     if (latestRelease?.ok !== true) {
-        console.error("Failed to check for updates:", data);
+        console.error("Failed to check for updates:", latestRelease);
         return showToast("Error: Failed to check for updates");
     };
 

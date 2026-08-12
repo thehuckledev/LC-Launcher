@@ -530,8 +530,16 @@ export class Exec {
             const dataDir = await getSetting("dataDirectory");
             const runtimePath = `${dataDir}/libraries/runtime`;
 
+            let wineBinPath = "";
+            if (NL_OS === "Darwin") {
+                if (NL_ARCH === "arm") wineBinPath = `${runtimePath}/bin/wine64`;
+                else wineBinPath = `${runtimePath}/bin/wine`;
+            } else if (NL_OS === "Linux") {
+                wineBinPath = `${runtimePath}/proton`;
+            };
+
             try {
-                await Neutralino.filesystem.getStats(`${runtimePath}/bin/${NL_OS === "Darwin" && NL_ARCH === "arm" ? 'wine64' : 'wine'}`);
+                await Neutralino.filesystem.getStats(wineBinPath);
             } catch {
                 let shouldDo = await showAlert('LC Launcher Runtime', 'This instance requires the runtime as its compatibility layer. Do you want to install the runtime?', 'YES_NO');
                 if(shouldDo == 'YES') {
