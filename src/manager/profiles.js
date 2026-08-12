@@ -4,6 +4,13 @@ import { showToast } from "../components/Toast.jsx";
 import Filesystem from "../lib/filesystem.js";
 import { pckFormat, PCKAssetType } from "../utils/pckFormat.js";
 
+const SkinAnimFlag = {
+    RIGHT_ARM_DISABLED: 1 << 11, // 0x800
+    LEFT_ARM_DISABLED: 1 << 12, // 0x1000
+    MODERN_WIDE_MODEL: 1 << 18, // 0x40000
+    SLIM_MODEL: 1 << 19, // 0x80000
+};
+
 export class Profiles {
     constructor(manager) {
         this.manager = manager;
@@ -35,7 +42,7 @@ export class Profiles {
             };
 
             return profiles;
-        } catch(e) {
+        } catch (e) {
             console.error(`Error fetching profiles`, e);
             return [];
         };
@@ -59,7 +66,7 @@ export class Profiles {
 
         if (skin)
             [skinDataURI, skin64x64DataURI, isSlim, skinRenderDataURI] = await this.manager.skins.process(skin);
-        
+
         const profile = {
             id: crypto.randomUUID(),
             username,
@@ -134,7 +141,7 @@ export class Profiles {
 
         const sterilisedData = {
             ...data,
-            id: undefined 
+            id: undefined
         };
 
         const savePath = await Neutralino.os.showSaveDialog("Export Profile (Must use .lceprofile.json)", {
@@ -163,7 +170,7 @@ export class Profiles {
             const required = {
                 username: "string",
                 uid: "string",
-                type: [ "OFFLINE" ],
+                type: ["OFFLINE"],
                 skin: "string",
                 skinRender: "string"
             };
@@ -243,7 +250,7 @@ export class Profiles {
     async writeInstanceFiles(id, instanceId) {
         const data = await this.get(id);
         if (!data) throw new Error("Profile not found");
-        
+
         const instData = await this.manager.instances.get(instanceId);
         if (!instData) throw new Error("Instance not found");
 
@@ -255,7 +262,7 @@ export class Profiles {
             const content = instanceFiles[filename];
 
             if (!content) {
-                await Neutralino.filesystem.remove(filepath).catch(e=>{});
+                await Neutralino.filesystem.remove(filepath).catch(e => { });
                 continue;
             };
 
@@ -286,6 +293,32 @@ export class Profiles {
         };
     };
 
+    getAnimValue(isSlim, supportsSlim, supports64x64) {
+        let flags = 0;
+        const boxes = [];
+
+        if (isSlim) {
+            if (supportsSlim && supports64x64) {
+                flags |= SkinAnimFlag.SLIM_MODEL;
+            } else {
+                flags |= SkinAnimFlag.RIGHT_ARM_DISABLED | SkinAnimFlag.LEFT_ARM_DISABLED;
+
+                if (supports64x64) flags |= SkinAnimFlag.MODERN_WIDE_MODEL;
+
+                boxes.push(
+                    { key: "BOX", value: "ARM0 -2 -2 -2 3 12 4 40 16 0 0 0" },
+                    { key: "BOX", value: "ARM1 -1 -2 -2 3 12 4 40 16 0 1 0" }
+                );
+            };
+        } else {
+            if (supports64x64) flags |= SkinAnimFlag.MODERN_WIDE_MODEL;
+        };
+
+        const animValue = `0x${flags.toString(16).padStart(8, "0")}`;
+
+        return { animValue, boxes };
+    };
+
     async packDLC(id, instanceId) {
         const profile = await this.get(id);
         if (!profile) throw new Error("Profile not found");
@@ -295,7 +328,7 @@ export class Profiles {
 
         // default to steve skin
         if (!profile.skin) profile.skin = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAABGdBTUEAALGPC/xhBQAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjM2qefiJQAABONJREFUaEPll99rVEcUx6+IUk1ijbQYosYfG+OaRtb4g2JEY42/EYuRipqioqIxMQiLVlDE+INqKlSfAkq0UChIUXzwFyL2sU956X9TmofjfM/u9/ZknLs30cUN8cJh5s6cuTvfz5w5MzslSnmaF9QIXP4bGYmmT5um3qjjGfl3arT/28aSX7j9+p8pab8xofsBoLHuC8kt/FKN72iDnd+ek55NK+XnfWviEnW0wya0uLFMDoIpvql+ZiKATCYj1gBlUgDg6nPlURIKSkbApAVgxSICYHY7fBYAAMEXz3yQBKAz2zQ5tgDFQ/Dy+dUKYuHsqjghEgD2vG+TIgcAAIUzCpgMmQOY8UPlWBJtRX2y82YKDKKWzatSsasys2XFooLlFtXINw2FkyA7v0qPPviiDQDohzEYi2+gn99l0sQ4W8c7Iqmi4vHjFgAm3tIwS4VA4OrGWi1peN/cPEfam79WPwChD8agjVFiAZS6R1QcgE66rrBqBeFOmFvFxjq+18jLgTPy9te8/D3YL29v5139nDz+6ZCsWTpHx8AXYzA23i7um/h22j2i4gB0pepdKC+YVVhV944wRj23pFb+vHxSnt/o0/JJf58M5X+UNwN5GTq9Ww0+8MUYjEUd38I38Z52j5gYAOI8UC2ZuTPk5oE2GTq+VdqyX6l4PJ0bBuTFpVMqHnU8gAIf+GIMxjbVV8f7HwDS7hETB4BbMWyFloZaudHZKoNHvpNbh9Y5cdvk2aVj8upaPj7m/rp1Rn7v2S797s4PH/hiDMbiG1x9Aih1j6g4AIY9wvZYR04e9Hwv949v0T83ONbuHu5wAjfJhc1rR9mdwxvl6r516gNfjMFYfEO3QHE7pN0jKg4Ak6cAlEOnduiK/nJwvZzbkZOzW1ukr6NZxcIu7lkt139Yr4Y6fOD7W/dOHXv/xK5CWYRIkPYOgTrBVRyAP4H9O4fFWjabFWupEx4ejv8K+xejyPVFR4+WtrQfePRI9DswV8ftc2/r0rhMG57aXw4AoWsx2soCgOKL5ecNwEWAXX2F/LFPOSIg6b9BWSLA2wIfDWBlNi+wpsVdWm5r+2OU2T6/v611QKIrV/63ri6J7t2T6OFDTZg4Kpk80aZm/VFHG0TRnj6VCMb3JH/6+P0czzItIijwQwAAlgrq7i4Y6px4EQIAqEhOyPpjDPz9SVsA/Da/zz6UBGp//0MBMBLGEwEKIDRBThITRERYkdYf9ZB4GwUhwHaM3//JASDsKQp1OwECsG1J/gBFcLbuC7TR9KkiwOYB7HtrKh6iaJg8BUAQ62y3vgSGCAkBcONxKaPddJcv/P+whjbr4/enpYAolOQoECHu54j3AFhBgGEBhIRZYNwCoTHFbRMCMHi2K4aAfguhLABsHih1CsQ5gBAIgCFv9z9hEAC3jQ175goDxIpjBBAAyhAAbS9CGlMEMAGO9xgMngJ++FMUAfinQAhWAgCItSvsAwhtkbIAKAXovWPQJjz/BMB7Wtb2sjgjgGUIQKkckQqgvb1dYKWOQfTRr7e3V6zFgngh4er54c+E6AOw/vQxCdGK8yMAMGyOYL/dImMGkCSQ7Un9NkfgMuXfI/CuN0YDAH724sXEqveFIhC0YWwSAIoMRUjFAIRyCIEoBCcu9WrtfCxEf4VHJUCX6ELH4HgAvAMPTt9mhQSK5wAAAABJRU5ErkJggg==`;
-        
+
         const supports64x64 = Boolean(instance.supports64x64Skins);
         const supportsSlim = Boolean(instance.supportsSlimSkins);
 
@@ -308,7 +341,7 @@ export class Profiles {
             return await res.arrayBuffer();
         };
 
-        const convert32To64 = (srcUri) => {
+        /*const convert32To64 = (srcUri) => {
             return new Promise((resolve, reject) => {
                 const img = new Image();
                 img.crossOrigin = "anonymous";
@@ -366,28 +399,16 @@ export class Profiles {
             else skinBuffer = await convert32To64(profile.skin);
         } else {
             skinBuffer = await DataURI_Buff(profile.skin);
-        };
+        };*/
+
+        const skinBuffer = await DataURI_Buff(
+            supports64x64 && profile?.skin64x64
+                ? profile.skin64x64
+                : profile.skin
+        );
 
         const isSlim = Boolean(profile.isSlim);
-        const animValue = isSlim
-            ? supportsSlim
-                ? "0x00080000"
-                : "0x00041800"
-            : supports64x64
-                ? "0x00040000"
-                : "0x00000000";
-
-        const boxes = [];
-        if (isSlim && !supportsSlim) {
-            boxes.push({
-                key: "BOX",
-                value: "ARM0 -2 -2 -2 3 12 4 40 16 0 0 0"
-            });
-            boxes.push({
-                key: "BOX",
-                value: "ARM1 -1 -2 -2 3 12 4 40 16 0 1 0"
-            });
-        };
+        const { animValue, boxes } = this.getAnimValue(isSlim, supportsSlim, supports64x64);
 
         let capeBuf = null;
         if (profile.cape) {
@@ -410,7 +431,10 @@ export class Profiles {
             endianness: "little",
             xmlSupport: false,
             properties: [
-                "ANIM",
+                ...(animValue !== "0x00000000"
+                    ? ["ANIM"]
+                    : []
+                ),
                 "DISPLAYNAME",
                 "THEMENAME",
                 "GAME_FLAGS",
@@ -426,9 +450,12 @@ export class Profiles {
                     data: new Uint8Array(skinBuffer),
                     properties: [
                         { key: "DISPLAYNAME", value: profile.username },
-                        { key: "GAME_FLAGS", value: "0x18" },
+                        { key: "GAME_FLAGS", value: "0x00" }, // 0x00 is correct for when the skin might not be human
                         { key: "FREE", value: "1" },
-                        { key: "ANIM", value: animValue },
+                        ...(animValue !== "0x00000000"
+                            ? [{ key: "ANIM", value: animValue }]
+                            : []
+                        ),
                         ...boxes,
                         ...(capeBuf
                             ? [{ key: "CAPEPATH", value: `dlccape${seededId}.png` }]
@@ -458,5 +485,22 @@ export class Profiles {
         console.log(`Packed profile DLC to: ${outputPath}`);
 
         return outputPath;
+    };
+
+    async readPckData() {
+        const res = await Neutralino.os.showOpenDialog(
+            "Select a PCK file",
+            {
+                multiSelections: false,
+                filters: [{ name: 'PCK', extensions: ['pck'] }]
+            }
+        );
+        if (!res || res.length === 0) return;
+        const src = res[0].trim();
+        if (!src.endsWith(".pck")) return showToast("Please select a valid pck file"); // extra check as sometimes a file explorer bypasses filter
+        
+        const file = await Neutralino.filesystem.readBinaryFile(src);
+        const parsedPckBuffer = await pckFormat.readPCK(file);
+        console.log(JSON.stringify(parsedPckBuffer, null, 2));
     };
 };
