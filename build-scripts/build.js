@@ -111,16 +111,16 @@ function buildLinux(cfg, portable, arch = "x64") {
         process.exit(1);
     };
 
-    fs.mkdirSync(`${outDir}/usr/bin/`, { recursive: true });
+    fs.mkdirSync(`${outDir}`, { recursive: true });
 
     console.log(`Building Linux (${arch})...`);
 
-    run(`cp "${exe}" "${outDir}/"`);
+    run(`cp "${exe}" "${outDir}/LC-Launcher"`);
     run(`cp "./src/assets/icon.png" "${outDir}/"`);
     run(`cp "./dist/${binary}/resources.neu" "${outDir}/"`);
 
     copyIfExists(`./dist/${binary}/extensions`, outDir);
-    copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.endsWith("linux"));
+    copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.includes(`linux-${arch}`) || f.includes(`linux-no-arch`));
 
     const tarName = `./dist/__${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.tar.gz`;
     const envPrefix = process.platform === 'darwin' ? 'export COPYFILE_DISABLE=1 && ' : '';
