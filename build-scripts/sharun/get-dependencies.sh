@@ -14,7 +14,17 @@ esac
 
 echo "Installing package dependencies..."
 echo "---------------------------------------------------------------"
-pacman -Syu --noconfirm webkit2gtk-4.1 gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-libav zenity
+pacman -Syu --noconfirm \
+    webkit2gtk-4.1 \
+    gstreamer \
+    gst-plugins-base \
+    gst-plugins-good \
+    gst-plugins-bad \
+    gst-libav \
+    zenity \
+    nodejs \
+    npm \
+    bun
 
 echo "Installing debloated packages..."
 echo "---------------------------------------------------------------"
