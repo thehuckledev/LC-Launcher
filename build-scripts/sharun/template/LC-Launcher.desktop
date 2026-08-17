@@ -2,6 +2,7 @@
 Version=1.0
 Name=LC Launcher
 Comment=Multi-platform launcher for LCE forks
+StartupWMClass=LC-Launcher
 Exec=LC-Launcher
 Icon=LC-Launcher
 Type=Application
