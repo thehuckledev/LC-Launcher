@@ -4,12 +4,12 @@ set -eu
 
 ARCH=$(uname -m)
 case "$ARCH" in
-  aarch64|arm64)
-    TARGET="linux-arm64"s
-    ;;
-  *)
-    TARGET="linux-x64"
-    ;;
+    aarch64|arm64)
+        TARGET="linux-arm64"s
+        ;;
+    *)
+        TARGET="linux-x64"
+        ;;
 esac
 
 echo "Installing package dependencies..."
