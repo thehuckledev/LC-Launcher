@@ -24,7 +24,16 @@ pacman -Syu --noconfirm \
     zenity \
     nodejs \
     npm \
-    bun
+    unzip \
+    curl
+
+echo "Installing Bun..."
+echo "---------------------------------------------------------------"
+if ! command -v bun >/dev/null 2>&1; then
+  curl -fsSL https://bun.sh/install | bash
+  export BUN_INSTALL="$HOME/.bun"
+  export PATH="$BUN_INSTALL/bin:$PATH"
+fi
 
 echo "Installing debloated packages..."
 echo "---------------------------------------------------------------"
