@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=LC Launcher
+Comment=Multi-platform launcher for LCE forks
+Exec=LC-Launcher
+Icon=LC-Launcher
+Type=Application
+Categories=Game;Utility;
+Terminal=false
+StartupNotify=true
+Keywords=game;launcher;legacy;community;

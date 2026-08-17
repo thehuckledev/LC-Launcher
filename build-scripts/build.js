@@ -115,95 +115,16 @@ function buildLinux(cfg, portable, arch = "x64") {
 
     console.log(`Building Linux (${arch})...`);
 
-    run(`cp "${exe}" "${outDir}/usr/bin/${safeAppName}"`);
-    run(`cp "./assets/appimage/icon.png" "${outDir}/.DirIcon"`);
-    run(`cp "./assets/appimage/icon.png" "${outDir}/${safeAppName}.png"`);
-    run(`cp "./dist/${binary}/resources.neu" "${outDir}/usr/bin/"`);
+    run(`cp "${exe}" "${outDir}/"`);
+    run(`cp "./src/assets/icon.png" "${outDir}/"`);
+    run(`cp "./dist/${binary}/resources.neu" "${outDir}/"`);
 
-    copyIfExists(`./dist/${binary}/extensions`, `${outDir}/usr/bin/`);
-    copyLibs(`./libs`, path.join(`${outDir}/usr/bin/`, "libs"), (f) => f.includes("linux") && (f.includes(arch) || f.includes("no-arch")));
-
-    if (process.platform === "linux" && fs.existsSync('/usr/bin/zenity')) {
-        const isHostArm = process.arch === 'arm64' || process.arch === 'aarch64';
-        const isTargetArm = arch === 'arm64' || arch === 'aarch64';
-
-        if (isHostArm === isTargetArm) {
-            console.log(`Bundling zenity into AppImage (${arch})...`);
-            run(`cp "/usr/bin/zenity" "${outDir}/usr/bin/zenity"`);
-
-            if (fs.existsSync('/usr/share/zenity')) {
-                fs.mkdirSync(`${outDir}/usr/share/`, { recursive: true });
-                run(`cp -r "/usr/share/zenity" "${outDir}/usr/share/"`);
-            };
-        } else {
-            console.warn(`Skipping zenity in bundle, host arch doesn't match target (${arch})`);
-        };
-    };
-
-    const appRun = `#!/bin/sh
-
-if [ -z "$APPDIR" ]; then
-APPDIR=$(readlink -f "$(dirname "$0")")
-fi
-
-export PATH="$APPDIR/usr/bin:$PATH"
-
-# expose the host architecture system paths
-HOST_ARCH=$(uname -m)
-if [ "$HOST_ARCH" = "x86_64" ]; then
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu"
-elif [ "$HOST_ARCH" = "aarch64" ] || [ "$HOST_ARCH" = "arm64" ]; then
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib/aarch64-linux-gnu"
-fi
-
-# fixes the webkit no window showing up
-export WEBKIT_DISABLE_DMABUF_RENDERER=1
-
-# stops double window titlebar
-if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
-export GDK_BACKEND=x11
-fi
-
-# expose internal bundled gstreamer plugins
-if [ -d "$APPDIR/usr/lib/gstreamer-1.0" ]; then
-export GST_PLUGIN_SYSTEM_PATH=""
-export GST_PLUGIN_PATH="$APPDIR/usr/lib/gstreamer-1.0"
-fi
-
-exec $APPDIR/usr/bin/${safeAppName} "$@"`;
-    fs.writeFileSync(`${outDir}/AppRun`, appRun, { mode: 0o755 });
-
-    const desktopFile = `[Desktop Entry]
-Version=1.0
-Name=${appName}
-Comment=Multi-platform launcher for LCE forks
-Exec=${safeAppName}
-Icon=${safeAppName}
-Type=Application
-Categories=Game;Utility;
-Terminal=false
-StartupNotify=true
-Keywords=game;launcher;legacy;community;`;
-    fs.writeFileSync(`${outDir}/${safeAppName}.desktop`, desktopFile);
+    copyIfExists(`./dist/${binary}/extensions`, outDir);
+    copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.endsWith("linux"));
 
     const tarName = `./dist/__${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}x.tar.gz`;
     const envPrefix = process.platform === 'darwin' ? 'export COPYFILE_DISABLE=1 && ' : '';
     run(`${envPrefix}tar --exclude="._*" --exclude=".DS_Store" --exclude="__MACOSX" -cJf "${tarName}" -C ./dist/linux_${arch}${!!portable ? "_portable" : ""} "${safeAppName}"`);
-
-    if (process.platform === "linux" && process.argv.length > 2) {
-        console.log(`Creating AppImage for ${arch}...`);
-        const targetArch = arch === 'arm64' ? 'aarch64' : arch;
-        const targetLibDir = arch === 'arm64' ? '/usr/lib/aarch64-linux-gnu' : '/usr/lib/x86_64-linux-gnu';
-
-        const hasLinuxDeploy = !!execSync("which linuxdeploy 2>/dev/null || true").toString().trim();
-        if (hasLinuxDeploy) {
-            const envVars = `ARCH=${targetArch} LD_LIBRARY_PATH="${targetLibDir}:$LD_LIBRARY_PATH" LINUXDEPLOY_PLUGINS="gstreamer"`;
-            run(`${envVars} linuxdeploy --appdir="${outDir}" --executable="${outDir}/usr/bin/${safeAppName}" --output appimage`);
-            run(`mv ./*.AppImage "./dist/${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.AppImage" 2>/dev/null || true`);
-        } else {
-            run(`ARCH=${targetArch} appimagetool "${outDir}" "./dist/${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.AppImage"`);
-        };
-    };
 
     console.log(`Created ${tarName}`);
 };
@@ -350,8 +271,8 @@ function buildApp(portable) {
         patchConfig(true);
         if (!!portable) togglePortableMode(true);
 
-        if (shouldBuild('linux') || shouldBuild('linux-arm64') || shouldBuild('darwin')) buildBase(!portable);
-        if (shouldBuild('linux')) buildLinux(cfg, portable, "x64");
+        if (shouldBuild('linux-x64') || shouldBuild('linux-arm64') || shouldBuild('darwin')) buildBase(!portable);
+        if (shouldBuild('linux-x64')) buildLinux(cfg, portable, "x64");
         if (shouldBuild('linux-arm64')) buildLinux(cfg, portable, "arm64");
         if (shouldBuild('darwin')) buildMac(cfg, portable);
 
