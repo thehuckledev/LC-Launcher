@@ -33,5 +33,5 @@ build_appimage() {
     rm -rf ./*.AppDir
 }
 
-build_appimage "./dist/linux_${TARGET}/LC-Launcher/LC_Launcher-linux_${TARGET}" ""
-build_appimage "./dist/linux_${TARGET}_portable/LC-Launcher/LC_Launcher-linux_${TARGET}" "-Portable"
+build_appimage "./dist/linux_${TARGET}/LC-Launcher/LC_Launcher" ""
+build_appimage "./dist/linux_${TARGET}_portable/LC-Launcher/LC_Launcher" "-Portable"
