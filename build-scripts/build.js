@@ -122,7 +122,7 @@ function buildLinux(cfg, portable, arch = "x64") {
     copyIfExists(`./dist/${binary}/extensions`, outDir);
     copyLibs(`./libs`, path.join(outDir, "libs"), (f) => f.endsWith("linux"));
 
-    const tarName = `./dist/__${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}x.tar.gz`;
+    const tarName = `./dist/__${safeAppName}${!!portable ? "-portable" : ""}-linux-${arch}.tar.gz`;
     const envPrefix = process.platform === 'darwin' ? 'export COPYFILE_DISABLE=1 && ' : '';
     run(`${envPrefix}tar --exclude="._*" --exclude=".DS_Store" --exclude="__MACOSX" -cJf "${tarName}" -C ./dist/linux_${arch}${!!portable ? "_portable" : ""} "${safeAppName}"`);
 
