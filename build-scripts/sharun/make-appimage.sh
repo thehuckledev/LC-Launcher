@@ -39,7 +39,7 @@ build_appimage() {
     fi
 
     quick-sharun --make-appimage
-    #quick-sharun --test "$OUTPATH/$OUTNAME"
+    quick-sharun --test "$OUTPATH/$OUTNAME"
 
     rm -rf ./AppDir
 }
