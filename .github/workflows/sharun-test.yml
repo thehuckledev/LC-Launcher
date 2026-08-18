@@ -51,7 +51,7 @@ jobs:
       - name: Get release details
         id: release_details
         run: |
-          VERSION="$(tr -d '\r\n' < BUMP)"
+          VERSION="$(tr -d '\r\n' < ./BUMP)"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           
           {
