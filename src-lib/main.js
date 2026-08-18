@@ -13,6 +13,9 @@ const publicClasses = {
     childProcess: require("./src/childProcess"),
     keyRemapper: require("./src/keyRemapper"),
     universalControllerSupport: require("./src/universalControllerSupport"),
+    relayConfig: require("./src/relay/relayConfig"),
+    vlanRelay: require("./src/relay/vlanRelay"),
+    relayAPI: require("./src/relay/relayAPI"),
 };
 
 console.log("lcLib publicClasses defined");
@@ -23,27 +26,27 @@ let isExiting = false;
 async function exit(exitCode = 0) {
     if (isExiting) return;
     isExiting = true;
- 
+
     console.log("lcLib exit start");
- 
+
     const watchdog = setTimeout(() => {
         console.error("lcLib shutdown timeout fired");
         process.exit(exitCode);
     }, 1500);
     watchdog.unref?.();
- 
+
     try {
         publicClasses.childProcess.killAll();
     } catch (err) {
         console.error("lcLib error killing child processes during exit:", err);
     };
- 
+
     try {
         await publicClasses.discordRPC.disable(null, null);
     } catch (err) {
         console.error("lcLib error disabling Discord RPC during exit:", err);
     };
- 
+
     clearTimeout(watchdog);
     console.log("lcLib exit done");
     process.exit(exitCode);
@@ -78,7 +81,7 @@ async function processAppEvent(d) {
         const { callID, class: className, function: funcName, args = [] } = d.data;
 
         try {
-            const targetClass = publicClasses[className]; 
+            const targetClass = publicClasses[className];
             if (targetClass && typeof targetClass[funcName] === 'function') {
                 const result = await targetClass[funcName](callID, ext, ...args);
                 ext.sendMessage('bunResponse', {
@@ -97,7 +100,7 @@ async function processAppEvent(d) {
             };
         } catch (err) {
             console.error(err);
-            ext.sendMessage('bunResponse', { 
+            ext.sendMessage('bunResponse', {
                 callID,
                 success: false,
                 error: err.message

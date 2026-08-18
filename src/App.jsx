@@ -12,6 +12,7 @@ import DiscordRPC from "./lib/discordRPC.js";
 import Net from "./lib/net.js";
 import KeyRemapper from "./lib/keyRemapper.js";
 import UniversalControllerSupport from "./lib/universalControllerSupport.js";
+import relayConfig from "./lib/relay/relayConfig.js";
 
 import Window from "./components/Window.jsx";
 import Toast, { showToast } from "./components/Toast.jsx";
@@ -49,7 +50,7 @@ export default function App() {
     const [logs, setLogs] = useState([]);
     const [dropHighlight, setDropHighlight] = useState(false);
     const dragCounter = useRef(0);
-    const lastSkinCDNLink = useRef(""); 
+    const lastSkinCDNLink = useRef("");
     const lastProfileID = useRef("");
     const [loadProgress, setLoadProgress] = useState({ label: '', percent: 0 });
     const { settings, loadSettings, updateSetting } = useSettings();
@@ -62,11 +63,11 @@ export default function App() {
         console.log("Loading instance list", instances);
         const instancesData = (await Promise.all(
             instances.map(async (id) => {
-                return await Manager.instances.get(id); 
+                return await Manager.instances.get(id);
             })
         )).filter(i => i !== undefined);
         console.log("Getting full instance list", instancesData);
-        
+
         setProfilesList(profiles);
         console.log("setProfilesList()", profiles);
         setInstancesList(instancesData);
@@ -123,7 +124,7 @@ export default function App() {
 
             if (hasChanges) {
                 await Manager.instances.update(existing.id, updateData);
-                await new Promise(resolve => setTimeout(resolve, 50)); 
+                await new Promise(resolve => setTimeout(resolve, 50));
             };
         };
     };
@@ -131,11 +132,11 @@ export default function App() {
     useEffect(() => {
         async function waitForExtension() {
             console.log("Waiting for lcLib ext...");
-            
+
             while (true) {
                 try {
                     const stats = await Neutralino.extensions.getStats("lcLib");
-                    
+
                     if (stats && Array.isArray(stats.loaded) && Array.isArray(stats.connected)) {
                         const isLoaded = stats.loaded.includes("lcLib");
                         const isConnected = stats.connected.includes("lcLib");
@@ -148,7 +149,7 @@ export default function App() {
                 } catch (e) {
                     console.error("Err fetching Neutralino ext stats:", e);
                 };
-                
+
                 await new Promise(resolve => setTimeout(resolve, 100));
             };
         };
@@ -162,6 +163,12 @@ export default function App() {
             setLoadProgress({ label: "Loading settings...", percent: 20 });
             const loadedSettings = await loadSettings();
             if (loadedSettings?.keyBindings) KeyRemapper.setBindings(loadedSettings.keyBindings);
+            await relayConfig.update({
+                relayPort: config.relayPort,
+                hostRelayPort: config.hostRelayPort,
+                serverBase: config.relayServerBase,
+                serverSecure: config.relayServerSecure
+            });
             console.log("Loaded settings", loadedSettings);
 
             setLoadProgress({ label: "Initialising manager...", percent: 40 });
@@ -173,10 +180,10 @@ export default function App() {
                 const startPercent = 70;
                 const endPercent = 80;
                 const currentProgress = startPercent + Math.round(((current / total) * (endPercent - startPercent)));
-                
-                setLoadProgress({ 
-                    label: `Syncing default instances: ${name}...`, 
-                    percent: currentProgress 
+
+                setLoadProgress({
+                    label: `Syncing default instances: ${name}...`,
+                    percent: currentProgress
                 });
             }).catch(e=>console.error(e));
             console.log("Synced default instances");
@@ -221,7 +228,7 @@ export default function App() {
         async function toggleRPC() {
             if (settings.discordRPC === true) {
                 console.log("Activating Discord RPC...");
-                await DiscordRPC.enable(config.rpcClientID); 
+                await DiscordRPC.enable(config.rpcClientID);
             } else {
                 await DiscordRPC.disable();
             }
@@ -232,7 +239,7 @@ export default function App() {
     useEffect(() => {
         async function updateRPC() {
             let details = "";
-            let state = profile?.username 
+            let state = profile?.username
                         ? `${profile.username} • ${profile.type.charAt(0) + profile.type.substring(1).toLowerCase()}`
                         : "No profile";
             //let largeImageText = profile?.uid ? `${NL_APPVERSION ? `v${NL_APPVERSION}` : ''} • Profile UID: ${profile.uid.substring(2)}` : `${NL_APPVERSION ? `v${NL_APPVERSION}` : ''}`;
@@ -305,15 +312,15 @@ export default function App() {
                     try {
                         const img = new Image();
                         img.src = profile.skinRender;
-                        
+
                         await new Promise((resolve) => {
                             img.onload = resolve;
                         });
 
                         const upscaleCanvas = document.createElement('canvas');
                         const upscaleContext = upscaleCanvas.getContext('2d');
-                        
-                        const targetSize = 128; 
+
+                        const targetSize = 128;
                         upscaleCanvas.width = targetSize;
                         upscaleCanvas.height = targetSize;
 
@@ -323,7 +330,7 @@ export default function App() {
                         upscaleContext.msImageSmoothingEnabled = false;
 
                         upscaleContext.drawImage(img, 0, 0, targetSize, targetSize);
-                        
+
                         const blob = await new Promise((resolve) => {
                             upscaleCanvas.toBlob(resolve, 'image/png');
                         });
@@ -344,9 +351,9 @@ export default function App() {
                                 if (response2.ok) {
                                     const responseHTML = response2?.data;
                                     const newSkinCDNLink = responseHTML?.split(`<img id="img_preview" src="`)?.[1]?.split(`"/>
-            
+
             <p><a class="download" `)?.[0];
-                                
+
                                     skinCDNLink = newSkinCDNLink;
                                     lastSkinCDNLink.current = newSkinCDNLink;
                                     lastProfileID.current = profile.id;
@@ -361,7 +368,7 @@ export default function App() {
                         };
                     } catch (e) {
                         console.error(e);
-                        
+
                         skinCDNLink = "steve_skin";
                         lastSkinCDNLink.current = "steve_skin";
                         lastProfileID.current = profile.id;
@@ -537,7 +544,7 @@ export default function App() {
         window.addEventListener("dragenter", highlight);
         window.addEventListener("dragleave", unhighlight);
         window.addEventListener("drop", handleDrop);
-        
+
         return () => {
             window.removeEventListener("dragover", preventDefault);
             window.removeEventListener("dragenter", highlight);
@@ -567,7 +574,7 @@ export default function App() {
                         />
                     </div>
                 </div>
-                
+
                 {loaded && <>
                     {menu === "setup" &&          <SetupMenu setMenu={setMenu} reloadData={loadData} />}
                     {menu === "setupoptions" &&   <SetupOptionsMenu setMenu={setMenu} />}

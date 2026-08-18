@@ -15,6 +15,13 @@
     user-select: none;
 	-webkit-user-select: none;
 	cursor: default;
+
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
+    font-smooth: never;
+    
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
 
 html {
