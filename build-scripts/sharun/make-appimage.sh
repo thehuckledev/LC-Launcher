@@ -13,7 +13,7 @@ case "$ARCH" in
 esac
 VERSION="$(tr -d '\r\n' < BUMP)"
 export ARCH VERSION
-export ADD_HOOKS="self-updater.hook"
+export ADD_HOOKS="self-updater.hook:wayland-is-broken.hook"
 
 build_appimage() {
     BINARY_PATH="$1"
@@ -26,11 +26,22 @@ build_appimage() {
     export UPINFO="gh-releases-zsync|${GITHUB_REPOSITORY%/*}|${GITHUB_REPOSITORY#*/}|latest|*LC-Launcher${VARIANT_SUFFIX}*${TARGET}.AppImage.zsync"
 
     quick-sharun "$BINARY_PATH"
-    quick-sharun --make-appimage
 
+    if [ -d "./AppDir" ]; then
+        BINARY_DIR="$(dirname "$BINARY_PATH")"
+
+        if [ -f "$BINARY_DIR/resources.neu" ]; then
+            cp "$BINARY_DIR/resources.neu" "$APPDIR/shared/bin/"
+        fi
+        if [ -d "$BINARY_DIR/libs" ]; then
+            cp -r "$BINARY_DIR/libs" "$APPDIR/shared/bin/"
+        fi
+    fi
+
+    quick-sharun --make-appimage
     quick-sharun --test "$OUTPATH/$OUTNAME"
 
-    rm -rf ./*.AppDir
+    rm -rf ./AppDir
 }
 
 build_appimage "./dist/linux_${TARGET}/LC-Launcher/LC-Launcher" ""
