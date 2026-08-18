@@ -48,5 +48,28 @@ jobs:
         with:
           pattern: AppImage-*
           merge-multiple: true
-      - name: Release AppImage
-        uses: pkgforge-dev/make-stable-appimage-release@4ed3d48ccb065352b6e6c0db6d39885b201c54a0 #v1.1
+      - name: Get release details
+        id: release_details
+        run: |
+          VERSION="$(tr -d '\r\n' < BUMP)"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          
+          {
+            echo "description<<EOF"
+            cat NOTES.md
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Publish release
+        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
+        with:
+          tag_name: v${{ steps.release_details.outputs.version }}
+          name: "v${{ steps.release_details.outputs.version }}"
+          body: ${{ steps.release_details.outputs.description }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: false
+          prerelease: false
+          make_latest: true
+          files: |
+            *.AppImage*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
