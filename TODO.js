@@ -43,3 +43,6 @@ macos:
 // fixed skin some issues with 64x64 and slim on neo
 // stopped update prompt when running in dev mode
 // stop runtime install prompt on linux when using custom-proton-ge
+// added support for fedora and arch linux
+// make the font less blurry
+// made the log print the command it
