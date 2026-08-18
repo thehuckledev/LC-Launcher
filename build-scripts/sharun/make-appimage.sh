@@ -31,10 +31,10 @@ build_appimage() {
         BINARY_DIR="$(dirname "$BINARY_PATH")"
 
         if [ -f "$BINARY_DIR/resources.neu" ]; then
-            cp "$BINARY_DIR/resources.neu" "$APPDIR/shared/bin/"
+            cp "$BINARY_DIR/resources.neu" "./AppDir/shared/bin/"
         fi
         if [ -d "$BINARY_DIR/libs" ]; then
-            cp -r "$BINARY_DIR/libs" "$APPDIR/shared/bin/"
+            cp -r "$BINARY_DIR/libs" "./AppDir/shared/bin/"
         fi
     fi
 
