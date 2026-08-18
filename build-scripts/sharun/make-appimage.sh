@@ -23,7 +23,7 @@ build_appimage() {
     export OUTNAME="LC-Launcher${VARIANT_SUFFIX}-linux-${TARGET}.AppImage"
     export ICON="./build-scripts/sharun/template/LC-Launcher.png"
     export DESKTOP="./build-scripts/sharun/template/LC-Launcher.desktop"
-    export UPINFO="gh-releases-zsync|${GITHUB_REPOSITORY%/*}|${GITHUB_REPOSITORY#*/}|latest|*${VARIANT_SUFFIX}-linux-${TARGET}.AppImage.zsync"
+    export UPINFO="gh-releases-zsync|${GITHUB_REPOSITORY%/*}|${GITHUB_REPOSITORY#*/}|latest|LC-Launcher${VARIANT_SUFFIX}-linux-${TARGET}.AppImage.zsync"
 
     quick-sharun "$BINARY_PATH"
 
