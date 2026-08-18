@@ -16,7 +16,7 @@ export class Exec {
         this.userStopped = false;
     };
 
-    async findProtonPath() {
+    async findProtonPath(sendLog = false) {
         const home = await Neutralino.os.getEnv('HOME');
         const possiblePaths = [
             // Steam
@@ -67,6 +67,11 @@ export class Exec {
 
             return b.name.localeCompare(a.name, undefined, { numeric: true, sensitivity: 'base' });
         });
+
+        if (sendLog === true)
+            window.dispatchEvent(new CustomEvent("gameLog", { detail: [
+                { timestamp: null, type: "text", from: "DIRECT", message: `[RAN] ${JSON.stringify(pathsFound, null, 2)}` }
+            ] }));
 
         return pathsFound[0].path;
     };
@@ -517,7 +522,7 @@ export class Exec {
         // do proton runtime check for steam os
         let hasProton = false;
         if (NL_OS === "Linux") {
-            const protonPath = await this.findProtonPath();
+            const protonPath = await this.findProtonPath(true);
             if (protonPath) hasProton = true;
         };
 
@@ -685,6 +690,10 @@ export class Exec {
 
         showToast("Launching instance...", 1000);
         console.log("Launching:", cmd);
+
+        window.dispatchEvent(new CustomEvent("gameLog", { detail: [
+            { timestamp: null, type: "text", from: "DIRECT", message: `[RAN] ${cmd}` }
+        ] }));
 
         const cmdParts = cmd.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
         const parsedArgs = [];
