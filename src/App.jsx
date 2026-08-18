@@ -10,6 +10,7 @@ import { useSettings } from "./utils/SettingsStore.jsx";
 import { useManager } from "./utils/ManagerProvider.jsx";
 import DiscordRPC from "./lib/discordRPC.js";
 import Net from "./lib/net.js";
+import relayConfig from "./lib/relay/relayConfig.js";
 
 import Window from "./components/Window.jsx";
 import Toast, { showToast } from "./components/Toast.jsx";
@@ -158,6 +159,12 @@ export default function App() {
 
             setLoadProgress({ label: "Loading settings...", percent: 20 });
             const loadedSettings = await loadSettings();
+            await relayConfig.update({
+                relayPort: config.relayPort,
+                hostRelayPort: config.hostRelayPort,
+                serverBase: config.relayServerBase,
+                serverSecure: config.relayServerSecure
+            });
             console.log("Loaded settings", loadedSettings);
 
             setLoadProgress({ label: "Initialising manager...", percent: 40 });

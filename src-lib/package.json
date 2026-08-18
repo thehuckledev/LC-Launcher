@@ -12,6 +12,7 @@
   "dependencies": {
     "discord-rpc-revamp": "^2.0.4",
     "fflate": "^0.8.3",
+    "socket.io-client": "^4.8.3",
     "tar-stream": "^3.2.0",
     "xz-decompress": "^0.2.3"
   }

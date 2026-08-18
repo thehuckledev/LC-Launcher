@@ -13,9 +13,6 @@ import { Skins } from "./skins.js";
 import { Capes } from "./capes.js";
 import { Exec } from "./exec.js";
 import { Utils } from "./utils.js";
-import { API } from "./api.js";
-
-import config from "../data/config.js";
 
 export class Manager {
     constructor() {
@@ -33,7 +30,6 @@ export class Manager {
         this.skins = new Skins(this);
         this.capes = new Capes(this);
         this.exec = new Exec(this);
-        this.api = new API(config.apiDomain);
     };
 
     async init() {

@@ -17,3 +17,4 @@ libs/lcLib-osx-arm64
 libs/lcLib-osx-x64
 libs/lcLib-windows-x64.exe
 libs/*.upx
+.lc-relay-session.json

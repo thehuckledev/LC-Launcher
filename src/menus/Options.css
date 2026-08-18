@@ -8,6 +8,24 @@
     overflow-x: hidden;
     scroll-behavior: smooth;
     overscroll-behavior: none;
+
+    padding-top: 6px;
+    padding-bottom: 40px;
+
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        black 3%,
+        black 90%,
+        transparent 100%
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        black 3%,
+        black 90%,
+        transparent 100%
+    );
 }
 
 #options::-webkit-scrollbar {

@@ -1,8 +1,13 @@
 export default {
+    //relayServerSecure: true,
+    //relayServerBase: "relay.lcelauncher.com",
+    relayServerSecure: false,
+    relayServerBase: "127.0.0.1:4252",
+    relayPort: 61000,
+    hostRelayPort: 25565,
+
     projectGithubUser: "thehuckledev",
     projectGithubRepo: "lc-launcher",
-    /*apiDomain: "https://api.lcelauncher.com",*/
-    apiDomain: "htts://localhost:8080",
     discordInvite: ["discord://-/invite/DBw6V5v8C9", "https://discord.gg/DBw6V5v8C9"],
     defaultInstance: "neo-legacy",
 

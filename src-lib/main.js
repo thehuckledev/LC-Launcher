@@ -11,6 +11,9 @@ const publicClasses = {
     filesystem: require("./src/filesystem"),
     discordRPC: require("./src/discordRPC"),
     childProcess: require("./src/childProcess"),
+    relayConfig: require("./src/relay/relayConfig"),
+    vlanRelay: require("./src/relay/vlanRelay"),
+    relayAPI: require("./src/relay/relayAPI"),
 };
 
 console.log("lcLib publicClasses defined");
