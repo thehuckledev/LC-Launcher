@@ -15,7 +15,6 @@ esac
 echo "Installing package dependencies..."
 echo "---------------------------------------------------------------"
 pacman -Syu --noconfirm \
-    webkit2gtk-4.1 \
     gstreamer \
     gst-plugins-base \
     gst-plugins-good \
