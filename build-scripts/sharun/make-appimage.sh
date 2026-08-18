@@ -20,10 +20,10 @@ build_appimage() {
     VARIANT_SUFFIX="$2"
 
     export OUTPATH="./dist"
-    export OUTNAME="LC-Launcher${VARIANT_SUFFIX}-${TARGET}.AppImage"
+    export OUTNAME="LC-Launcher${VARIANT_SUFFIX}-linux-${TARGET}.AppImage"
     export ICON="./build-scripts/sharun/template/LC-Launcher.png"
     export DESKTOP="./build-scripts/sharun/template/LC-Launcher.desktop"
-    export UPINFO="gh-releases-zsync|${GITHUB_REPOSITORY%/*}|${GITHUB_REPOSITORY#*/}|latest|*LC-Launcher${VARIANT_SUFFIX}*${TARGET}.AppImage.zsync"
+    export UPINFO="gh-releases-zsync|${GITHUB_REPOSITORY%/*}|${GITHUB_REPOSITORY#*/}|latest|*${VARIANT_SUFFIX}-linux-${TARGET}.AppImage.zsync"
 
     quick-sharun "$BINARY_PATH"
 
@@ -45,4 +45,4 @@ build_appimage() {
 }
 
 build_appimage "./dist/linux_${TARGET}/LC-Launcher/LC-Launcher" ""
-build_appimage "./dist/linux_${TARGET}_portable/LC-Launcher/LC-Launcher" "-Portable"
+build_appimage "./dist/linux_${TARGET}_portable/LC-Launcher/LC-Launcher" "-portable"
