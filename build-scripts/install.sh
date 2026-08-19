@@ -34,29 +34,24 @@ log() { printf "[%bINFO%b] %s\n" "${C_BLUE}" "${C_RESET}" "$*" >&2; }
 warn() { printf "[%bWARN%b] %s\n" "${C_YELLOW}" "${C_RESET}" "$*" >&2; }
 error() { printf "[%bERROR%b] %s\n" "${C_RED}" "${C_RESET}" "$*" >&2; exit 1; }
 
-check_fuse_dependency() {
-    log "Checking for libfuse2..."
-    if [ ! -f /usr/lib/x86_64-linux-gnu/libfuse.so.2 ] && \
-       [ ! -f /usr/lib/libfuse.so.2 ] && \
-       [ ! -f /usr/lib/x86_64-linux-gnu/libfuse.so.2t64 ] && \
-       ! command -v fusermount3 &> /dev/null; then
-        
-        warn "Missing libfuse2, attempting to install..."
+check_webkit_dependency() {
+    log "Checking for WebKitGTK..."
+    if ! ldconfig -p 2>/dev/null | grep -qE 'libwebkit2gtk-4\.1\.so\.0|libwebkit2gtk-4\.0\.so\.37'; then
+
+        warn "Missing libwebkit2gtk, attempting to install..."
         if command -v apt-get &> /dev/null; then
-            if apt-cache show libfuse2t64 &> /dev/null; then
-                sudo apt-get update && sudo apt-get install -y libfuse2t64
-            else
-                sudo apt-get update && sudo apt-get install -y libfuse2
-            fi
+            sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-0
         elif command -v dnf &> /dev/null; then
-            sudo dnf install -y fuse-libs
+            sudo dnf install -y webkit2gtk4.1
         elif command -v pacman &> /dev/null; then
-            sudo pacman -Sy --noconfirm fuse2
+            sudo pacman -Sy --noconfirm webkit2gtk-4.1
+        elif command -v zypper &> /dev/null; then
+            sudo zypper install -y webkit2gtk3-soup2
         else
-            error "Couldn't find package manager, install libfuse2 manually"
+            warn "Couldn't find package manager, install WebKitGTK 4.1 manually"
         fi
     else
-        log "Found libfuse2"
+        log "Found WebKitGTK"
     fi
 }
 
@@ -80,11 +75,23 @@ get_download_url() {
     local download_url=""
     
     while read -r line; do
-        if [[ $line =~ \"browser_download_url\":\ *\"([^\"]*${target_arch}[^\"]*\.([aA]pp[iI]mage))\" ]]; then
-            download_url="${BASH_REMATCH[1]}"
-            break
+        if [[ $line =~ \"browser_download_url\":\ *\"([^\"]*-linux-${target_arch}\.([aA]pp[iI]mage))\" ]]; then
+            local candidate="${BASH_REMATCH[1]}"
+            if [[ "$candidate" != *portable* ]]; then
+                download_url="$candidate"
+                break
+            fi
         fi
     done <<< "$release_json"
+
+    if [[ -z "$download_url" ]]; then
+        while read -r line; do
+            if [[ $line =~ \"browser_download_url\":\ *\"([^\"]*-linux-${target_arch}\.([aA]pp[iI]mage))\" ]]; then
+                download_url="${BASH_REMATCH[1]}"
+                break
+            fi
+        done <<< "$release_json"
+    fi
 
     if [[ -z "$download_url" ]]; then
         while read -r line; do
@@ -121,26 +128,30 @@ extract_desktop_assets() {
         cd "$INSTALL_DIR"
         
         "$APPIMAGE_PATH" --appimage-extract &> /dev/null
-        
-        if [ ! -d "squashfs-root" ]; then
+
+        if [ -L "squashfs-root" ] || [ -e "squashfs-root" ]; then
+            rm -rf "squashfs-root"
+        fi
+
+        if [ ! -d "AppDir" ]; then
             error "AppImage extraction failed"
         fi
 
-        if [ -f "squashfs-root/.DirIcon" ]; then
-            cp "squashfs-root/.DirIcon" "$ICON_PATH"
+        if [ -f "AppDir/.DirIcon" ]; then
+            cp "AppDir/.DirIcon" "$ICON_PATH"
         else
             local found_icon
-            found_icon=$(find squashfs-root -name "*.png" -print -quit 2>/dev/null)
+            found_icon=$(find AppDir -name "*.png" -print -quit 2>/dev/null)
             if [ -n "$found_icon" ]; then
                 cp "$found_icon" "$ICON_PATH"
             fi
         fi
 
         local found_desktop
-        found_desktop=$(find squashfs-root -maxdepth 2 -name "*.desktop" -print -quit 2>/dev/null)
+        found_desktop=$(find AppDir -maxdepth 2 -name "*.desktop" -print -quit 2>/dev/null)
 
         if [ -z "$found_desktop" ]; then
-            rm -rf squashfs-root
+            rm -rf AppDir
             exit 1
         fi
 
@@ -151,7 +162,7 @@ extract_desktop_assets() {
             sed -i "s|^Icon=.*|Icon=$ICON_PATH|" "$DESKTOP_PATH"
         fi
         
-        rm -rf squashfs-root
+        rm -rf AppDir
     ) || error "Failed to extract .desktop file from the AppImage"
 
     chmod +x "$DESKTOP_PATH"
@@ -164,7 +175,7 @@ main() {
     printf "%b=================================================================%b\n" "${C_CYAN}" "${C_RESET}\n"
 
     mkdir -p "$INSTALL_DIR" "$BIN_DIR" "$DESKTOP_DIR"
-    check_fuse_dependency
+    check_webkit_dependency
     
     local download_url
     download_url=$(get_download_url)
