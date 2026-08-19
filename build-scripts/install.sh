@@ -34,6 +34,29 @@ log() { printf "[%bINFO%b] %s\n" "${C_BLUE}" "${C_RESET}" "$*" >&2; }
 warn() { printf "[%bWARN%b] %s\n" "${C_YELLOW}" "${C_RESET}" "$*" >&2; }
 error() { printf "[%bERROR%b] %s\n" "${C_RED}" "${C_RESET}" "$*" >&2; exit 1; }
 
+fetch_text() {
+    local url="$1"
+    if command -v curl &> /dev/null; then
+        curl -fsSL "$url" && return 0
+    fi
+    if command -v wget &> /dev/null; then
+        wget -qO- "$url" && return 0
+    fi
+    return 1
+}
+
+download_file() {
+    local url="$1"
+    local output_path="$2"
+    if command -v curl &> /dev/null; then
+        curl -fL --progress-bar "$url" -o "$output_path" && return 0
+    fi
+    if command -v wget &> /dev/null; then
+        wget -q --show-progress "$url" -O "$output_path" && return 0
+    fi
+    return 1
+}
+
 check_webkit_dependency() {
     log "Checking for WebKitGTK..."
     if ! ldconfig -p 2>/dev/null | grep -qE 'libwebkit2gtk-4\.1\.so\.0|libwebkit2gtk-4\.0\.so\.37'; then
@@ -60,7 +83,7 @@ get_download_url() {
     local api_url="https://api.github.com/repos/$GITHUB_USER/$GITHUB_REPO/releases/latest"
     local release_json
     
-    if ! release_json=$(wget -qO- "$api_url"); then
+    if ! release_json=$(fetch_text "$api_url"); then
         error "Failed to fetch GitHub release"
     fi
 
@@ -113,7 +136,11 @@ download_appimage() {
     local download_url="$1"
     log "Downloading latest release..."
     mkdir -p "$(dirname "$APPIMAGE_PATH")"
-    wget -q --show-progress "$download_url" -O "$APPIMAGE_PATH"
+    
+    if ! download_file "$download_url" "$APPIMAGE_PATH"; then
+        error "Failed to download .AppImage"
+    fi
+
     chmod +x "$APPIMAGE_PATH"
 }
 
