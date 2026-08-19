@@ -46,3 +46,4 @@ macos:
 // added support for fedora and arch linux
 // make the font less blurry
 // made the log print the command it
+// moved linux to sharun appimages, LC Launcher now works with Debian, Red Hat and Arch based Linux distros
