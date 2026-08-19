@@ -3,7 +3,7 @@ Neutralino.events.on('hostReady', (event) => {
     vlanRelay.emit("hostReady", state);
 });
 
-export default class vlanRelay {
+export default class VlanRelay {
     static listeners = {};
 
     static on(event, callback) {

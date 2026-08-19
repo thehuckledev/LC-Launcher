@@ -1,4 +1,4 @@
-class Config {
+class RelayConfig {
     static _serverSecure = false;
     static _serverBase = "127.0.0.1:4252";
     static _relayPort = 61000;
@@ -69,4 +69,4 @@ class Config {
     };
 };
 
-module.exports = Config;
+module.exports = RelayConfig;

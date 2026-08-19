@@ -5,7 +5,7 @@ Neutralino.events.on('relayAPISocket', (event) => {
     relayAPI.emit(detail?.event, detail?.data);
 });
 
-export default class relayAPI {
+export default class RelayAPI {
     static listeners = {};
 
     static on(event, callback) {
