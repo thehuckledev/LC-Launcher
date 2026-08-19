@@ -76,6 +76,7 @@ wget -qO- https://uninstall.lce-launcher.com | bash
 ```
 
 #### Manual Install
+- Install `Webkit2GTK-4.1` or `Webkit2GTK-4.0` through your package manager (Debian based distros will already have this)
 - Download the `.AppImage` from the [latest release](https://git.huckle.dev/TheHuckle/LegacyCommunityLauncher/releases/latest/)
 - You might need to run `chmod a+x ./[filename].AppImage` to make it executeable
 - You can then just double click or run `./[filename].AppImage` to open LC Launcher
