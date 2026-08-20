@@ -20,6 +20,7 @@ pacman -Syu --noconfirm \
     gst-plugins-good \
     gst-plugins-bad \
     gst-plugins-ugly \
+    gst-plugin-va \
     gst-libav \
     zenity \
     nodejs \
@@ -37,7 +38,7 @@ fi
 
 echo "Installing debloated packages..."
 echo "---------------------------------------------------------------"
-get-debloated-pkgs --add-common --prefer-nano
+get-debloated-pkgs --add-common --prefer-nano ffmpeg-mini webkit2gtk-4.1-mini
 
 # Comment this out if you need an AUR package
 #make-aur-package PACKAGENAME
