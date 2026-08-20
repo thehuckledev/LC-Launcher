@@ -4,12 +4,7 @@ concurrency:
   cancel-in-progress: true
 on:
     workflow_dispatch: {}
-    push:
-        branches:
-            - main
-        paths:
-            - "BUMP"
-
+    
 jobs:
   build:
     name: "${{ matrix.name }} (${{ matrix.arch }})"
