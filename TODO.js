@@ -29,13 +29,7 @@ macos:
 */
 
 // WHAT IVE DONE
-// fixed issue where you can change and edit instances while installing one
-// optimised downloading/unzipping progress message by adding an interval check
-// fixed websocket streaming game logs isnt fast enough as it is always behind
-// fixed custom cape upload issue
-// fixed snail cape not rendering/applying
 // made stop/start instance spam proof
-
 // make macos x64 builds work
 // fixed scrollbar rendering ontop of content
 // made stop/launch spam proof
