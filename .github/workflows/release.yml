@@ -1,5 +1,7 @@
 name: Release LC Launcher
-
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 on:
     workflow_dispatch:
     push:
@@ -91,6 +93,34 @@ jobs:
                   dist/
                   !dist/__*
 
+    build-appimage:
+      name: "${{ matrix.name }} (${{ matrix.arch }})"
+      runs-on: ${{ matrix.runs-on }}
+      strategy:
+        matrix:
+          include:
+            - runs-on: ubuntu-latest
+              name: Build AppImage
+              arch: x86_64
+            - runs-on: ubuntu-24.04-arm
+              name: Build AppImage
+              arch: aarch64
+      container: ghcr.io/pkgforge-dev/archlinux:latest
+      steps:
+        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        - name: Preparing Container
+          uses: pkgforge-dev/anylinux-setup-action@0964f2258d6c93d1391359978dde081fd8b3c6af # v2
+        - name: Install Dependencies
+          run: /bin/sh ./build-scripts/sharun/get-dependencies.sh
+        - name: Make AppImage
+          run: /bin/sh ./build-scripts/sharun/make-appimage.sh
+        - name: Upload artifact
+          uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+          with:
+            name: AppImage-${{ matrix.arch }}
+            path: |
+              dist/*.AppImage*
+
     publish:
         needs: build
         runs-on: ubuntu-latest
@@ -111,20 +141,21 @@ jobs:
                 } >> "$GITHUB_OUTPUT"
 
             - name: Download artifacts
-              uses: actions/download-artifact@v4
+              uses: actions/download-artifact@v8
               with:
                 path: artifacts
                 merge-multiple: true
 
             - name: Publish release
-              uses: softprops/action-gh-release@v1
+              uses: softprops/action-gh-release@v3
               with:
                 tag_name: v${{ steps.release_details.outputs.version }}
                 name: "v${{ steps.release_details.outputs.version }}"
                 body: ${{ steps.release_details.outputs.description }}
                 target_commitish: ${{ github.sha }}
-                generate_release_notes: true
+                generate_release_notes: false
                 prerelease: false
+                make_latest: true
                 files: artifacts/*
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
