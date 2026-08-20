@@ -90,7 +90,7 @@ jobs:
               dist/*.AppImage*
 
     publish:
-        needs: build
+        needs: [build, build-appimage]
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
