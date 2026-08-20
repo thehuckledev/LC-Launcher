@@ -24,6 +24,7 @@ windows:
 
 linux:
 - please install libwebkit2gtk-4.0-37 or libwebkit2gtk-4.1-0 library to run this application. cachy os / gentoo
+- panorama rendering issue
 
 macos:
 */
