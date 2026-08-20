@@ -36,6 +36,19 @@ build_appimage() {
         if [ -d "$BINARY_DIR/libs" ]; then
             cp -r "$BINARY_DIR/libs" "./AppDir/bin/"
         fi
+
+        cat << 'EOF' > ./AppDir/bin/nvidia-webkit-composite-graphics-rendering.hook
+#!/bin/sh
+set -e
+
+if [ "$I_WANT_BROKEN_COMPOSITE_GRAPHICS" != 1 ]; then
+	if lsmod 2>/dev/null | grep -q '^nvidia' || [ -e /proc/driver/nvidia/version ]; then
+        >&2 echo "Webkit composite rendering is disabled due to known issues"
+		>&2 echo "set I_WANT_BROKEN_COMPOSITE_GRAPHICS=1 if you still want to use it"
+        export WEBKIT_DISABLE_COMPOSITING_MODE=1
+    fi
+fi
+EOF
     fi
 
     quick-sharun --make-appimage
