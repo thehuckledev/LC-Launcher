@@ -42,3 +42,15 @@
 
 ## v1.2.6-beta Bug Fixes
 - Fixed Snail cape not rendering/applying.
+
+## v1.2.7-beta Bug Fixes
+- Play/Stop instance is now spam proof.
+- Intel based macs now download a intel supported compatibility layer.
+- Fixed scrollbars rendering ontop of content.
+- Fixed lcLib staying open again.
+- Fixed 64x32 skin issues on neoLegacy.
+- Skip update prompt when running in dev mode.
+- Stop runtime install prompt on linux when using custom-proton-ge.
+- Sharpened font rendering to replicate Minecraft UI.
+- Game log now prints the run command.
+- Moved Linux to Sharun AppImages. LC Launcher now works with Debian, Red Hat and Arch based Linux distros. CachyOS sometimes has issues.
