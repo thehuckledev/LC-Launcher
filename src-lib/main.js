@@ -11,6 +11,8 @@ const publicClasses = {
     filesystem: require("./src/filesystem"),
     discordRPC: require("./src/discordRPC"),
     childProcess: require("./src/childProcess"),
+    keyRemapper: require("./src/keyRemapper"),
+    universalControllerSupport: require("./src/universalControllerSupport"),
 };
 
 console.log("lcLib publicClasses defined");

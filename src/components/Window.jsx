@@ -337,7 +337,8 @@ export default function Window({ title, loaded = false, showClose = true, showMi
                     if (
                         currentMenu !== "main" &&
                         currentMenu !== "setup" &&
-                        currentMenu !== "setupoptions"
+                        currentMenu !== "setupoptions" &&
+                        window.mappingKey !== true
                     ) {
                         e.preventDefault();
 
@@ -349,6 +350,7 @@ export default function Window({ title, loaded = false, showClose = true, showMi
                         };
                         
                         if (currentMenu === "addserver" || currentMenu === "editserver") setMenu("servers");
+                        else if (currentMenu === "about" || currentMenu === "remapkeys") setMenu("options");
                         else setMenu("main");
                     };
                 };

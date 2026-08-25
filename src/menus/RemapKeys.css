@@ -1,0 +1,105 @@
+#remap-keys {
+    padding: 0 15px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    overflow: hidden;
+    align-items: center;
+}
+
+#remap-keys-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+}
+
+#remap-keys-actions > .mc-button {
+    width: 270px;
+}
+
+#remap-keys-list {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 620px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    overscroll-behavior: none;
+
+    padding-top: 8px;
+    padding-bottom: 60px;
+
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        black 3%,
+        black 90%,
+        transparent 100%
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        black 3%,
+        black 90%,
+        transparent 100%
+    );
+}
+
+#remap-keys-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+#remap-keys-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+
+#remap-keys-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.remap-keys-category {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.remap-keys-category-header {
+    font-weight: normal;
+    font-size: 16px;
+    color: #ffffff;
+    font-family: 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+    text-align: center;
+    padding-top: 15px;
+    padding-bottom: 10px;
+}
+
+.remap-keys-row {
+    display: grid;
+    grid-template-columns: 1fr 180px 100px;
+    gap: 25px;
+    align-items: center;
+    padding: 0px 12px;
+}
+
+.remap-keys-row > .mc-button, #keybind-reset-btn {
+    width: 100%;
+}
+
+.remap-keys-label {
+    font-size: 16px;
+    color: #ffffff;
+    font-family: 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px #000A;
+    padding-right: 30px;
+    width: 100%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+}

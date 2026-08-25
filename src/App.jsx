@@ -10,6 +10,8 @@ import { useSettings } from "./utils/SettingsStore.jsx";
 import { useManager } from "./utils/ManagerProvider.jsx";
 import DiscordRPC from "./lib/discordRPC.js";
 import Net from "./lib/net.js";
+import KeyRemapper from "./lib/keyRemapper.js";
+import UniversalControllerSupport from "./lib/universalControllerSupport.js";
 
 import Window from "./components/Window.jsx";
 import Toast, { showToast } from "./components/Toast.jsx";
@@ -31,6 +33,7 @@ import ScreenshotMenu from "./menus/Screenshots.jsx";
 import ServersMenu from "./menus/Servers.jsx";
 import AddServerMenu from "./menus/AddServer.jsx";
 import EditServerMenu from "./menus/EditServer.jsx";
+import RemapKeysMenu from "./menus/RemapKeys.jsx";
 
 export default function App() {
     const [processing, setProcessing] = useState(false);
@@ -158,6 +161,7 @@ export default function App() {
 
             setLoadProgress({ label: "Loading settings...", percent: 20 });
             const loadedSettings = await loadSettings();
+            if (loadedSettings?.keyBindings) KeyRemapper.setBindings(loadedSettings.keyBindings);
             console.log("Loaded settings", loadedSettings);
 
             setLoadProgress({ label: "Initialising manager...", percent: 40 });
@@ -284,6 +288,9 @@ export default function App() {
                 case menu === "editserver":
                     details = "Editing a Server";
                     break;
+                case menu === "remapkeys":
+                    details = "Remapping keys";
+                    break;
             };
 
             let skinCDNLink = undefined;
@@ -406,6 +413,16 @@ export default function App() {
         if (!Number.isInteger(value)) return;
         setVolume(value / 100);
     }, [settings.volume]);
+
+    useEffect(() => {
+        if (settings?.remapKeys === true && runningProc !== null) KeyRemapper.start();
+        else KeyRemapper.stop();
+    }, [settings.remapKeys, runningProc]);
+
+    useEffect(() => {
+        if (settings?.universalControllerSupport === true && runningProc !== null) UniversalControllerSupport.toggle(true);
+        else UniversalControllerSupport.toggle(false);
+    }, [settings.universalControllerSupport, runningProc]);
 
     useEffect(() => {
         const handler = (e) => {
@@ -568,6 +585,7 @@ export default function App() {
                     {menu === "servers" &&        <ServersMenu setMenu={setMenu} instance={instance} profile={profile} setServer={setServer} />}
                     {menu === "addserver" &&      <AddServerMenu setMenu={setMenu} instance={instance} />}
                     {menu === "editserver" &&     <EditServerMenu setMenu={setMenu} instance={instance} server={server} />}
+                    {menu === "remapkeys" &&      <RemapKeysMenu setMenu={setMenu} />}
                 </>}
             </Window>
 

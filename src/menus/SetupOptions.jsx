@@ -29,6 +29,9 @@ export default function SetupOptionsMenu({ setMenu }) {
                     <Button onclick={() => updateSetting('showFeaturedServers', !settings.showFeaturedServers)}>
                         {settings.showFeaturedServers == false ? 'Show Featured Servers: Disabled' : 'Show Featured Servers: Enabled'}
                     </Button>
+                    <Button onclick={() => updateSetting('universalControllerSupport', !settings.universalControllerSupport)}>
+                        {settings.universalControllerSupport == false ? 'Universal Controller Support: Disabled' : 'Universal Controller Support: Enabled'}
+                    </Button>
                     <Button onclick={() => updateSetting('renderPanorama', !settings.renderPanorama)}>
                         {settings.renderPanorama == false ? 'Render Panoramas: Disabled' : 'Render Panoramas: Enabled'}
                     </Button>

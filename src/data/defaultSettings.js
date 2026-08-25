@@ -4,6 +4,8 @@ export const defaultSettings = {
     hasSetup: false,
     keepLauncherOpen: false,
     showFeaturedServers: true,
+    universalControllerSupport: true,
+    remapKeys: false,
     renderPanorama: true,
     renderBGFade: true,
     volume: 80,
@@ -13,6 +15,7 @@ export const defaultSettings = {
     discordRPC: true,
     lastProfileID: null,
     lastInstanceID: null,
+    keyBindings: {},
     dataDirectory: async () => {
         if(NL_PORTABLE === true) return await Neutralino.filesystem.getJoinedPath(NL_PATH, "data");
 
