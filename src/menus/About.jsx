@@ -14,7 +14,7 @@ export default function AboutMenu({ setMenu }) {
             <div id="top-bar">
                 <div></div>
                 <div id="main-actions">
-                    <Button id="back-button" onclick={() => setMenu('main')}>
+                    <Button id="back-button" onclick={() => setMenu('options')}>
                         <img id="back-icon" src={closeIcon} draggable={false} />
                     </Button>
                 </div>

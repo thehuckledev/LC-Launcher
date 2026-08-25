@@ -135,11 +135,31 @@ export class Instances {
 
     async delete(id) {
         try {
+            window.dispatchEvent(new CustomEvent("execProcessing", { detail: true }));
+            const instance = await this.get(id);
+            if (!instance) return;
+
+            let keepInList = "NO";
+            if (instance.serviceType !== "LOCAL") {
+                keepInList = await showAlert('Delete Instance', `Do you want to remove the "${instance.name}" instance from your instances list once deleted?`, 'YES_NO');
+            };
+            
+            // delete bit
             await this.manager.profiles.removeInstanceFiles(id);
-            await Neutralino.filesystem.remove(await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, id));
-        } catch (e) {
-            console.error(`Failed to delete instance ${id}:`, e);
+
+            const instancePath = await Neutralino.filesystem.getJoinedPath(this.manager.instancesDir, instance.id);
+            const contentDir = `${instancePath}/content`;
+
+            if (keepInList === "YES" || instance.serviceType === "LOCAL") {
+                await Neutralino.filesystem.remove(instancePath);
+            } else {
+                await this.update(id, { installed: false });
+                await Neutralino.filesystem.remove(contentDir);
+            };
+        } catch(e) {
+            console.error("Delete failed:", e);
         } finally {
+            window.dispatchEvent(new CustomEvent("execProcessing", { detail: false }));
             this.invalidateCache(id);
         };
     };

@@ -7,6 +7,7 @@
 !endif
 !define EXENAME "LC Launcher.exe"
 !define HELPEREXENAME "lcLib-windows-x64.exe"
+!define VIGEM_INSTALLER "ViGEmBus_1.22.0_x64_x86_arm64.exe"
 !define AUTHOR "TheHuckle"
 
 Name "${APPNAME}"
@@ -89,6 +90,27 @@ Section "${APPNAME} (Required)" SEC_MAIN
     nsExec::ExecToLog 'powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -Command "Add-MpPreference -ExclusionPath $\'$INSTDIR$\'"'
 SectionEnd
 
+Section "ViGEmBus Driver" SEC_VIGEM
+    SetRegView 64
+    
+    ReadRegStr $0 HKLM "SYSTEM\CurrentControlSet\Services\ViGEmBus" "ImagePath"
+    
+    ${If} $0 == ""
+        DetailPrint "Installing ViGEmBus Driver..."
+        InitPluginsDir
+        File /oname=$PLUGINSDIR\${VIGEM_INSTALLER} ".\redist\${VIGEM_INSTALLER}"
+        
+        ; /exenoui - hides wrapper ui
+        ; /passive - simplifies msi ui
+        ; /norestart - stops system restarts
+        ExecWait '"$PLUGINSDIR\${VIGEM_INSTALLER}" /exenoui /passive /norestart' $1
+        
+        DetailPrint "ViGEmBus exit code: $1"
+    ${Else}
+        DetailPrint "ViGEmBus Driver is already installed, skipping."
+    ${EndIf}
+SectionEnd
+
 Section "Desktop Shortcut" SEC_DESKTOP
     CreateShortCut "$DESKTOP\${APPNAME}.lnk" "$INSTDIR\${EXENAME}" "" "$INSTDIR\icon.ico"
 SectionEnd
@@ -101,6 +123,7 @@ SectionEnd
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SEC_MAIN} "Core application files (Required)"
+    !insertmacro MUI_DESCRIPTION_TEXT ${SEC_VIGEM} "Virtual Gamepad Emulation Bus Driver (Required for UCS)"
     !insertmacro MUI_DESCRIPTION_TEXT ${SEC_DESKTOP} "Add a shortcut on your Desktop"
     !insertmacro MUI_DESCRIPTION_TEXT ${SEC_STARTMENU} "Add a shortcut in the Start Menu"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END

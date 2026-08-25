@@ -54,7 +54,7 @@ export default function OptionsMenu({ setMenu }) {
     return (
         <>
             <div id="top-bar">
-                <div></div>
+                <h1>Options</h1>
                 <div id="main-actions">
                     <Button id="back-button" onclick={() => setMenu('main')}>
                         <img id="back-icon" src={closeIcon} draggable={false} />
@@ -62,6 +62,15 @@ export default function OptionsMenu({ setMenu }) {
                 </div>
             </div>
             <div id="options">
+                <Button onclick={() => setMenu("about")}>
+                    About
+                </Button>
+                <Button onclick={() => setMenu("remapkeys")}>
+                    Key Mappings
+                </Button>
+
+                <div id="options-spacer"></div>
+
                 <Button onclick={() => updateSetting('discordRPC', !settings.discordRPC)}>
                     {settings.discordRPC == false ? 'Discord RPC: Disabled' : 'Discord RPC: Enabled'}
                 </Button>
@@ -70,6 +79,9 @@ export default function OptionsMenu({ setMenu }) {
                 </Button>
                 <Button onclick={() => updateSetting('showFeaturedServers', !settings.showFeaturedServers)}>
                     {settings.showFeaturedServers == false ? 'Show Featured Servers: Disabled' : 'Show Featured Servers: Enabled'}
+                </Button>
+                <Button onclick={() => updateSetting('universalControllerSupport', !settings.universalControllerSupport)}>
+                    {settings.universalControllerSupport == false ? 'Universal Controller Support: Disabled' : 'Universal Controller Support: Enabled'}
                 </Button>
                 <Button onclick={() => updateSetting('renderPanorama', !settings.renderPanorama)}>
                     {settings.renderPanorama == false ? 'Render Panoramas: Disabled' : 'Render Panoramas: Enabled'}
@@ -215,9 +227,6 @@ export default function OptionsMenu({ setMenu }) {
                         Uninstall
                     </Button>
                 }
-                <Button onclick={async () => setMenu("about")}>
-                    About
-                </Button>
             </div>
         </>
     );
