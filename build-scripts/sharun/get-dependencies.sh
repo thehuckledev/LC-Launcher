@@ -15,11 +15,12 @@ esac
 echo "Installing package dependencies..."
 echo "---------------------------------------------------------------"
 pacman -Syu --noconfirm \
-    webkit2gtk-4.1 \
     gstreamer \
     gst-plugins-base \
     gst-plugins-good \
     gst-plugins-bad \
+    gst-plugins-ugly \
+    gst-plugin-va \
     gst-libav \
     zenity \
     nodejs \
@@ -37,6 +38,7 @@ fi
 
 echo "Installing debloated packages..."
 echo "---------------------------------------------------------------"
+#get-debloated-pkgs --add-common --prefer-nano ffmpeg-mini webkit2gtk-4.1-mini
 get-debloated-pkgs --add-common --prefer-nano
 
 # Comment this out if you need an AUR package

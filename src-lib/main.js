@@ -13,6 +13,9 @@ const publicClasses = {
     childProcess: require("./src/childProcess"),
     keyRemapper: require("./src/keyRemapper"),
     universalControllerSupport: require("./src/universalControllerSupport"),
+    relayConfig: require("./src/relay/relayConfig"),
+    vlanRelay: require("./src/relay/vlanRelay"),
+    relayAPI: require("./src/relay/relayAPI"),
 };
 
 console.log("lcLib publicClasses defined");
