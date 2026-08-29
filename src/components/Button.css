@@ -23,6 +23,18 @@
 .mc-button[type="destructive"] {
 	background: #AB3C3C url('/assets/ui/button_destructive.png') center / cover;
 }
+.mc-button[type="donate"] {
+	background: #72A4F1 url('/assets/ui/button_donate.png') center / cover;
+}
+.mc-button[type="discord"] {
+	background: #7480FF url('/assets/ui/button_discord.png') center / cover;
+}
+.mc-button[type="github"] {
+	background: #72A4F1 url('/assets/ui/button_github.png') center / cover;
+}
+.mc-button[type="website"] {
+	background: #656565 url('/assets/ui/button_website.png') center / cover;
+}
 
 .mc-button[disabled="true"] {
 	background: #1D1D1D url('/assets/ui/button_disabled.png') center / cover;
@@ -42,6 +54,26 @@
 	text-shadow: 2px 2px #202013CC;
 	color: #FFFFA0;
 }
+.mc-button[type="donate"]:not([disabled="true"]):hover .title {
+	background-color: #12376e7f !important;
+	text-shadow: 2px 2px #202013CC;
+	color: #FFFFA0;
+}
+.mc-button[type="discord"]:not([disabled="true"]):hover .title {
+	background-color: rgba(18, 54, 107, 0.486) !important;
+	text-shadow: 2px 2px #202013CC;
+	color: #FFFFA0;
+}
+.mc-button[type="github"]:not([disabled="true"]):hover .title {
+	background-color: #9595957f !important;
+	text-shadow: 2px 2px #202013CC;
+	color: #FFFFA0;
+}
+.mc-button[type="website"]:not([disabled="true"]):hover .title {
+	background-color: #1b1b1b68 !important;
+	text-shadow: 2px 2px #202013CC;
+	color: #FFFFA0;
+}
 .mc-button.borderless:not([disabled="true"]):hover .title {
 	background-color: unset;
 	color: unset;
@@ -58,7 +90,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	
+
 	color: #DDD;
 	text-shadow: 2px 2px #000A;
 	box-shadow: inset -2px -4px #0006, inset 2px 2px #FFF7;
@@ -73,6 +105,10 @@
 }
 .mc-button[disabled="true"] img {
 	filter: brightness(70%);
+}
+.mc-button[type="github"] .title {
+	color: #000000;
+	text-shadow: 2px 2px rgba(153, 153, 153, 0.667)
 }
 .mc-button.borderless img {
 	transform: scale(1.2);

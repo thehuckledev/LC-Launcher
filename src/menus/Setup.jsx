@@ -9,7 +9,6 @@ import Net from "../lib/net.js";
 import config from "../data/config.js";
 
 import { showToast } from "../components/Toast.jsx";
-import { showAlert } from "../components/Alert.jsx";
 import Button from "../components/Button.jsx";
 import Textbox from "../components/Textbox.jsx";
 import Checkbox from "../components/Checkbox.jsx";
@@ -86,20 +85,6 @@ export default function SetupMenu({ setMenu, reloadData }) {
         };
     };
 
-    const joinDiscordPrompt = async () => {
-        try {
-            let shouldDo = await showAlert('LC Launcher Discord', 'Do you want to join our Discord server?', 'YES_NO');
-            if(shouldDo == 'YES') {
-                console.log("Opening discord...");
-                for await (const inv of config.discordInvite) {
-                    await Neutralino.os.open(inv);
-                };
-            };
-        } catch(e) {
-            console.error("Error joining discord: ")
-        };
-    };
-
     const fetchDataURI = async (imageUrl) => {
         const skinRes = await fetch(imageUrl);
         if (!skinRes.ok) throw new Error("Failed to download skin image");
@@ -116,7 +101,6 @@ export default function SetupMenu({ setMenu, reloadData }) {
     const handleNext = async () => {
         if (!ready) return showToast("You need to enter a valid username");
 
-        await joinDiscordPrompt();
         setProcessing(true);
         try {
             let skinDataURI = null;
@@ -161,7 +145,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
                     skinDataURI = undefined;
                 };
             } else if (skin) skinDataURI = skin;
-            
+
             console.log("cape",cape)
             const newProfile = await Manager.profiles.create({
                 username,
@@ -197,7 +181,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
             return false;
         };
     };
-    
+
     return (
         <>
             <img id="setup-logo" src={minecraftLogo} draggable={false} />
@@ -348,9 +332,9 @@ export default function SetupMenu({ setMenu, reloadData }) {
                                                 if (!src.endsWith(".png"))
                                                     return showToast("Please select a valid skin file"); // extra check as sometimes a file explorer bypasses filter
 
-                                                if (!(await testPath(src))) 
+                                                if (!(await testPath(src)))
                                                     return showToast("Couldn't find skin from path");
-                                                
+
                                                 //check if its a skin
                                                 const buff = await Neutralino.filesystem.readBinaryFile(src);
                                                 if (!(await Manager.skins.isSkin(buff)))

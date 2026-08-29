@@ -20,6 +20,7 @@ import Alert from "./components/Alert.jsx";
 
 import SetupMenu from "./menus/Setup.jsx";
 import SetupOptionsMenu from "./menus/SetupOptions.jsx";
+import SetupLinksMenu from "./menus/SetupLinks.jsx";
 import MainMenu from "./menus/Main.jsx";
 import OptionsMenu from "./menus/Options.jsx";
 import AboutMenu from "./menus/About.jsx";
@@ -260,6 +261,7 @@ export default function App() {
                     break;
                 case menu === "setup":
                 case menu === "setupoptions":
+                case menu === "setuplinks":
                     details = "Setting up launcher";
                     break;
                 case menu === "patchnotes":
@@ -578,6 +580,7 @@ export default function App() {
                 {loaded && <>
                     {menu === "setup" &&          <SetupMenu setMenu={setMenu} reloadData={loadData} />}
                     {menu === "setupoptions" &&   <SetupOptionsMenu setMenu={setMenu} />}
+                    {menu === "setuplinks" &&     <SetupLinksMenu setMenu={setMenu} />}
                     {menu === "main" &&           <MainMenu setMenu={setMenu} instance={instance} setInstance={setInstance} profile={profile} setProfile={setProfile} instancesList={instancesList} profilesList={profilesList} processing={processing} reloadData={loadData} runningProc={runningProc} />}
                     {menu === "options" &&        <OptionsMenu setMenu={setMenu} />}
                     {menu === "about" &&          <AboutMenu setMenu={setMenu} />}

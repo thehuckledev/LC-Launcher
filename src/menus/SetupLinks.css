@@ -1,4 +1,4 @@
-#setupOptions {
+#setupLinks {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -9,7 +9,7 @@
     overflow: hidden;
 }
 
-#setupOptionsContainer {
+#setupLinksContainer {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -37,20 +37,20 @@
     );
 }
 
-#setupOptionsContainer::-webkit-scrollbar {
+#setupLinksContainer::-webkit-scrollbar {
     width: 8px;
 }
 
-#setupOptionsContainer::-webkit-scrollbar-thumb {
+#setupLinksContainer::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.12);
     border-radius: 4px;
 }
 
-#setupOptionsContainer::-webkit-scrollbar-thumb:hover {
+#setupLinksContainer::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
 }
 
-#setupOptions-action-bar {
+#setupLinks-action-bar {
     display: flex;
     flex-direction: row;
     gap: 5px;
@@ -58,11 +58,11 @@
     width: 100%;
 }
 
-#setupOptions-action-bar>.mc-button {
+#setupLinks-action-bar>.mc-button {
     width: 130px;
 }
 
-#setupOptions > h2 {
+#setupLinks > h2 {
     font: 14px 'Minecraftia', sans-serif;
     text-shadow: 2px 2px #000A;
 

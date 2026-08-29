@@ -7,16 +7,17 @@
 }
 
 .mc-checkbox label {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
     color: #e0e0e0;
-    font: 10pt 'Minecraftia', sans-serif;
+    font-family: 'Minecraftia', sans-serif;
+    text-shadow: 2px 2px rgba(20, 20, 20, 0.667);
 }
 
 .mc-checkbox input {
     appearance: none;
-    height: calc(var(--textbox-size) / 1.5);
-    width: calc(var(--textbox-size) / 1.5);
+    height: var(--checkbox-size);
+    width: var(--checkbox-size);
     overflow: visible;
     scroll-behavior: smooth;
     overscroll-behavior: none;

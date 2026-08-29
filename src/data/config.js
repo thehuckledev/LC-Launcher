@@ -9,6 +9,8 @@ export default {
     projectGithubUser: "thehuckledev",
     projectGithubRepo: "lc-launcher",
     discordInvite: ["discord://-/invite/DBw6V5v8C9", "https://discord.gg/DBw6V5v8C9"],
+    donationLink: "https://ko-fi.com/thehuckle",
+    website: "https://lce-launcher.com",
     defaultInstance: "neo-legacy",
 
     rpcClientID: "1493892302312050789",

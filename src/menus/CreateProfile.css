@@ -58,3 +58,14 @@
 #create-profile-action-bar>.mc-button {
     width: 130px;
 }
+
+#skin-box {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+#skin-box > *:nth-child(2) {
+    margin-top: 23px;
+    width: 160px;
+}

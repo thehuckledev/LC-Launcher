@@ -30,3 +30,8 @@ macos:
 */
 
 // WHAT IVE DONE
+// Redesigned Options Menu
+// Add Custom Keybinds
+// Added Universal Controller Support
+// Added Project Links to setup/options
+// Checkboxes are now more accurate to Java

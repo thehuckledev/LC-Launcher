@@ -28,7 +28,7 @@
 #edit-profile h2 {
     font: 14px 'Minecraftia', sans-serif;
     text-shadow: 2px 2px #000A;
-    
+
     color: #b6b6b6;
 }
 
@@ -63,4 +63,15 @@
     display: flex;
     flex-direction: row;
     gap: 5px;
+}
+
+#skin-box {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+#skin-box > *:nth-child(2) {
+    margin-top: 23px;
+    width: 160px;
 }

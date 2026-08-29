@@ -1,9 +1,32 @@
 #options {
     padding: 0 15px;
     margin-top: 20px;
+    overflow: hidden;
+}
+
+#options-spacer {
+    width: 100%;
+    margin: 15px 0;
+    margin-top: 22px;
+}
+
+.options-columns {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    width: 100%;
+    height: 100%;
+}
+
+.options-columns .column-left,
+.options-columns .column-right {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    flex: 1;
+}
+
+.options-columns .column-left {
     overflow-y: auto;
     overflow-x: hidden;
     scroll-behavior: smooth;
@@ -11,6 +34,7 @@
 
     padding-top: 6px;
     padding-bottom: 40px;
+    padding-right: 15px;
 
     -webkit-mask-image: linear-gradient(
         to bottom,
@@ -28,21 +52,24 @@
     );
 }
 
-#options::-webkit-scrollbar {
+.options-columns .column-left::-webkit-scrollbar {
     width: 8px;
 }
 
-#options::-webkit-scrollbar-thumb {
+.options-columns .column-left::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.12);
     border-radius: 4px;
 }
 
-#options::-webkit-scrollbar-thumb:hover {
+.options-columns .column-left::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
 }
 
-#options-spacer {
-    width: 100%;
-    margin: 15px 0;
-    margin-top: 22px;
+.options-columns .column-left > h2,
+.options-columns .column-right > h2 {
+    font-family: 'Minecraftia', sans-serif;
+    font-size: 16px;
+    text-shadow: 2px 2px #202013CC;
+    font-weight: normal;
+    color: #c1c1c1;
 }

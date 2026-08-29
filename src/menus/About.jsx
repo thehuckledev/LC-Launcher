@@ -3,6 +3,7 @@ import "./About.css";
 import { useEffect } from "preact/hooks";
 import Neutralino from "@neutralinojs/lib";
 
+import config from "../data/config.js";
 import Button from "../components/Button.jsx";
 
 import closeIcon from "../assets/buttons/close.svg";
@@ -23,9 +24,9 @@ export default function AboutMenu({ setMenu }) {
                 <img id="logo" src={logo} draggable="false" />
 
                 <div id="infobar">
-                    <a class="link" onclick={() => Neutralino.os.open("https://lce-launcher.com/")} tabindex="-1">Website</a>
+                    <a class="link" onclick={() => Neutralino.os.open(config.website)} tabindex="-1">Website</a>
                     <a id="version">Version {NL_APPVERSION || "Unknown"}</a>
-                    <a class="link" onclick={() => Neutralino.os.open("https://github.com/thehuckledev/LC-Launcher/")} tabindex="-1">Git Repo</a>
+                    <a class="link" onclick={() => Neutralino.os.open(`https://github.com/${config.projectGithubUser}/${config.projectGithubRepo}`)} tabindex="-1">Git Repo</a>
                 </div>
 
                 <p id="description">
