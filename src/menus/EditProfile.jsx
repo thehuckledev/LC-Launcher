@@ -24,6 +24,7 @@ export default function EditProfileMenu({ setMenu, profile, setProfile, reloadDa
     const [skin, setSkin] = useState(undefined);
     const [skinMode, setSkinMode] = useState("file");
     const [cape, setCape] = useState(undefined);
+    const [capeHistory, setCapeHistory] = useState([]);
     const [showCapeMenu, setShowCapeMenu] = useState(false);
 
     useEffect(() => {
@@ -31,11 +32,12 @@ export default function EditProfileMenu({ setMenu, profile, setProfile, reloadDa
             setUsername(profile.username);
             setUID(profile.uid);
             if (profile.cape) setCape(profile.cape);
+            if (profile.capeHistory) setCapeHistory(profile.capeHistory);
         };
     }, [profile]);
 
     const handleNewUID = () => {
-        const newUid = Manager.utils.generateUID(); 
+        const newUid = Manager.utils.generateUID();
         setUID(newUid);
         showToast("Generated new UID");
     };
@@ -134,7 +136,8 @@ export default function EditProfileMenu({ setMenu, profile, setProfile, reloadDa
                 username,
                 uid: UID !== "" ? UID : undefined,
                 ...(skinDataURI && { skin: skinDataURI }),
-                cape: cape !== undefined ? cape : null
+                cape: cape !== undefined ? cape : null,
+                capeHistory: capeHistory !== undefined ? capeHistory : []
             });
 
             await reloadData();
@@ -161,7 +164,7 @@ export default function EditProfileMenu({ setMenu, profile, setProfile, reloadDa
             return false;
         };
     };
-    
+
     return (
         <>
             <div id="top-bar">
@@ -176,7 +179,7 @@ export default function EditProfileMenu({ setMenu, profile, setProfile, reloadDa
                 {processing ? (
                     <h2>Saving profile changes...</h2>
                 ) : showCapeMenu ? (
-                    <Capes setShowCapeMenu={setShowCapeMenu} cape={cape} setCape={setCape} profile={profile} />
+                    <Capes setShowCapeMenu={setShowCapeMenu} cape={cape} setCape={setCape} capeHistory={capeHistory} setCapeHistory={setCapeHistory} profile={profile} />
                 ) : (
                     <div className="edit-profile-columns">
                         <div className="column-left">
@@ -276,9 +279,9 @@ export default function EditProfileMenu({ setMenu, profile, setProfile, reloadDa
                                                 if (!src.endsWith(".png"))
                                                     return showToast("Please select a valid skin file"); // extra check as sometimes a file explorer bypasses filter
 
-                                                if (!(await testPath(src))) 
+                                                if (!(await testPath(src)))
                                                     return showToast("Couldn't find skin from path");
-                                                
+
                                                 //check if its a skin
                                                 const buff = await Neutralino.filesystem.readBinaryFile(src);
                                                 if (!(await Manager.skins.isSkin(buff)))

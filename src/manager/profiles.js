@@ -76,7 +76,8 @@ export class Profiles {
             skin64x64: skin64x64DataURI || null,
             skinRender: skinRenderDataURI,
             isSlim: isSlim || false,
-            cape: cape
+            cape: cape,
+            capeHistory: []
         };
 
         profiles.push(profile);
@@ -110,6 +111,8 @@ export class Profiles {
             diff.type = updates.type;
         if (updates.cape !== undefined && updates.cape !== currentProfile.cape)
             diff.cape = updates.cape;
+        if (updates.capeHistory !== undefined && JSON.stringify(updates.capeHistory) !== JSON.stringify(currentProfile.capeHistory))
+            diff.capeHistory = updates.capeHistory;
 
         if (updates.skin && updates.skin !== currentProfile.skin) {
             const [skinDataURI, skin64x64DataURI, isSlim, skinRenderDataURI] = await this.manager.skins.process(updates.skin);
@@ -141,7 +144,8 @@ export class Profiles {
 
         const sterilisedData = {
             ...data,
-            id: undefined
+            id: undefined,
+            capeHistory: undefined
         };
 
         const savePath = await Neutralino.os.showSaveDialog("Export Profile (Must use .lceprofile.json)", {
@@ -341,66 +345,6 @@ export class Profiles {
             return await res.arrayBuffer();
         };
 
-        /*const convert32To64 = (srcUri) => {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.crossOrigin = "anonymous";
-                img.onload = async () => {
-                    const canvas = document.createElement("canvas");
-                    canvas.width = 64;
-                    canvas.height = 64;
-
-                    const ctx = canvas.getContext("2d");
-                    if (!ctx) return reject(new Error("Failed to get 2D context"));
-
-                    ctx.drawImage(img, 0, 0, 64, 32);
-
-                    const copyFlipped = (sx, sy, sw, sh, dx, dy) => {
-                        ctx.save();
-                        ctx.translate(dx + sw, dy);
-                        ctx.scale(-1, 1);
-                        ctx.drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
-                        ctx.restore();
-                    };
-
-                    // right leg -> left leg
-                    // top/bottom faces
-                    copyFlipped(4, 16, 4, 4, 20, 48);
-                    copyFlipped(8, 16, 4, 4, 24, 48);
-                    // side faces
-                    copyFlipped(0, 20, 4, 12, 24, 52);
-                    copyFlipped(4, 20, 4, 12, 20, 52);
-                    copyFlipped(8, 20, 4, 12, 16, 52);
-                    copyFlipped(12, 20, 4, 12, 28, 52);
-
-                    // right arm -> left arm
-                    // top/bottom faces
-                    copyFlipped(44, 16, 4, 4, 36, 48);
-                    copyFlipped(48, 16, 4, 4, 40, 48);
-                    // side faces
-                    copyFlipped(40, 20, 4, 12, 40, 52);
-                    copyFlipped(44, 20, 4, 12, 36, 52);
-                    copyFlipped(48, 20, 4, 12, 32, 52);
-                    copyFlipped(52, 20, 4, 12, 44, 52);
-
-                    const dataUrl = canvas.toDataURL("image/png");
-                    const res = await fetch(dataUrl);
-                    const buffer = await res.arrayBuffer();
-                    resolve(buffer);
-                };
-                img.onerror = (err) => reject(new Error(`Failed to load skin image: ${err}`));
-                img.src = srcUri;
-            });
-        };
-
-        let skinBuffer;
-        if (supports64x64) {
-            if (profile.skin64x64) skinBuffer = await DataURI_Buff(profile.skin64x64);
-            else skinBuffer = await convert32To64(profile.skin);
-        } else {
-            skinBuffer = await DataURI_Buff(profile.skin);
-        };*/
-
         const skinBuffer = await DataURI_Buff(
             supports64x64 && profile?.skin64x64
                 ? profile.skin64x64
@@ -498,7 +442,7 @@ export class Profiles {
         if (!res || res.length === 0) return;
         const src = res[0].trim();
         if (!src.endsWith(".pck")) return showToast("Please select a valid pck file"); // extra check as sometimes a file explorer bypasses filter
-        
+
         const file = await Neutralino.filesystem.readBinaryFile(src);
         const parsedPckBuffer = await pckFormat.readPCK(file);
         console.log(JSON.stringify(parsedPckBuffer, null, 2));

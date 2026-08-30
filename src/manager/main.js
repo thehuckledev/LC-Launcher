@@ -1,6 +1,3 @@
-// thanks to https://git.huckle.dev/Huckles-Minecraft-Archive/LegacyLauncher/src/branch/main/renderer.js
-// reading through it helped me understand how to change skins etc.
-
 import Neutralino from "@neutralinojs/lib";
 import { getSetting } from "../utils/settingsManager.js";
 

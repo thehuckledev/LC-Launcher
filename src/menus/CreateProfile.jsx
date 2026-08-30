@@ -23,6 +23,7 @@ export default function CreateProfileMenu({ setMenu, setProfile, reloadData }) {
     const [skin, setSkin] = useState(undefined);
     const [skinMode, setSkinMode] = useState("file");
     const [cape, setCape] = useState(undefined);
+    const [capeHistory, setCapeHistory] = useState([]);
     const [showCapeMenu, setShowCapeMenu] = useState(false);
 
     const fetchDataURI = async (imageUrl) => {
@@ -85,12 +86,13 @@ export default function CreateProfileMenu({ setMenu, setProfile, reloadData }) {
                     skinDataURI = undefined;
                 };
             } else if (skin) skinDataURI = skin;
-            
+
             const newProfile = await Manager.profiles.create({
                 username,
                 skin: skinDataURI || undefined,
                 uid: UID !== "" ? UID : undefined,
-                cape: cape !== undefined ? cape : null
+                cape: cape !== undefined ? cape : null,
+                capeHistory: capeHistory !== undefined ? capeHistory : []
             });
 
             await reloadData();
@@ -117,7 +119,7 @@ export default function CreateProfileMenu({ setMenu, setProfile, reloadData }) {
             return false;
         };
     };
-    
+
     return (
         <>
             <div id="top-bar">
@@ -132,7 +134,7 @@ export default function CreateProfileMenu({ setMenu, setProfile, reloadData }) {
                 {processing ? (
                     <h2>Creating your profile...</h2>
                 ) : showCapeMenu ? (
-                    <Capes setShowCapeMenu={setShowCapeMenu} cape={cape} setCape={setCape} />
+                    <Capes setShowCapeMenu={setShowCapeMenu} cape={cape} setCape={setCape} capeHistory={capeHistory} setCapeHistory={setCapeHistory} />
                 ) : (
                     <div className="create-profile-columns">
                         <div className="column-left">
@@ -232,9 +234,9 @@ export default function CreateProfileMenu({ setMenu, setProfile, reloadData }) {
                                                 if (!src.endsWith(".png"))
                                                     return showToast("Please select a valid skin file"); // extra check as sometimes a file explorer bypasses filter
 
-                                                if (!(await testPath(src))) 
+                                                if (!(await testPath(src)))
                                                     return showToast("Couldn't find skin from path");
-                                                
+
                                                 //check if its a skin
                                                 const buff = await Neutralino.filesystem.readBinaryFile(src);
                                                 if (!(await Manager.skins.isSkin(buff)))

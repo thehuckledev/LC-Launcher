@@ -14,7 +14,6 @@
 // TODO add a way to view achivements inside the launcher
 // TODO make a full auto update where it downloads inside the launcher, checksum and then launches, quits current (do check on load progress bar and then use that progress bar as download progress)
 // TODO make logs from last game still visible so the button stays pressable
-// TODO add a custom cape history section
 // TODO have another dlc inside the game called Profile History wheree its the last 5 skins selected
 
 // BUGS PEOPLE HAVE
@@ -35,3 +34,4 @@ macos:
 // Added Universal Controller Support
 // Added Project Links to setup/options
 // Checkboxes are now more accurate to Java
+// added a cape history section

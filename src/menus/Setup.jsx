@@ -35,6 +35,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
     const [skin, setSkin] = useState(undefined);
     const [skinMode, setSkinMode] = useState("file");
     const [cape, setCape] = useState(undefined);
+    const [capeHistory, setCapeHistory] = useState([]);
     const [showCapeMenu, setShowCapeMenu] = useState(false);
     const [progress, setProgress] = useState({ active: false, label: '', percent: 0 });
     const [openAnim, setOpenAnim] = useState(true);
@@ -146,12 +147,12 @@ export default function SetupMenu({ setMenu, reloadData }) {
                 };
             } else if (skin) skinDataURI = skin;
 
-            console.log("cape",cape)
             const newProfile = await Manager.profiles.create({
                 username,
                 skin: skinDataURI || undefined,
                 uid: UID !== "" ? UID : undefined,
-                cape: cape !== undefined ? cape : null
+                cape: cape !== undefined ? cape : null,
+                capeHistory: capeHistory !== undefined ? capeHistory : []
             });
 
             // make insts
@@ -219,7 +220,7 @@ export default function SetupMenu({ setMenu, reloadData }) {
                         ) : ""}
                     </div>
                 ) : showCapeMenu ? (
-                    <Capes setShowCapeMenu={setShowCapeMenu} cape={cape} setCape={setCape} />
+                    <Capes setShowCapeMenu={setShowCapeMenu} cape={cape} setCape={setCape} capeHistory={capeHistory} setCapeHistory={setCapeHistory} />
                 ) : (
                     <div className="setup-columns">
                         <div className="column-left">
