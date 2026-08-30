@@ -122,7 +122,7 @@ wget -qO- https://uninstall.lce-launcher.com | bash
   - [ ] View achievements inside the launcher
 
 <h2>Contributors</h2>
-<p>All contributions are welcome but please make sure you arn't vibe coding large parts of your code. This will just require a rewrite later and ends up taking more time.</p>
+<p>All contributions are welcome but please make sure you aren't vibe coding large parts of your code. This will just require a rewrite later and ends up taking more time.</p>
 
 <h2>License</h2>
 
@@ -147,6 +147,7 @@ See `LICENSE` for full terms.
 <h2>Credits</h2>
 
 - TheHuckle
+- Neoapps - PckService.ts for PCK --> Object and Object --> PCK converter.
 - LC Launcher contributors
 
 <p align="right"><a href="#readme-top">(Back To Top)</a></p>
